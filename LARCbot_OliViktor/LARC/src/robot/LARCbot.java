@@ -1,11 +1,16 @@
 package robot;
 import robocode.AdvancedRobot;
 import robocode.ScannedRobotEvent;
-import environment.Environment;
+import environment.EnvironmentBuilder;
 
 public class LARCbot extends AdvancedRobot{
 	private boolean scanFinished = false;
-	private Environment env = new Environment();
+	private EnvironmentBuilder envBuilder;
+	
+	
+	public LARCbot() {
+		this.envBuilder = new EnvironmentBuilder(this);
+	}
 	
 	@Override
 	public void run() {
@@ -14,7 +19,7 @@ public class LARCbot extends AdvancedRobot{
 		setAdjustRadarForRobotTurn(true);
 		
 		while (true) {
-			scanEnvironment();
+			doScan();
 			createReducedEnvironments();
 			
 			
@@ -35,7 +40,7 @@ public class LARCbot extends AdvancedRobot{
 		scanFinished = false;
 	}
 
-	private void scanEnvironment() {
+	private void doScan() {
 		// überspringe Aufruf, falls letzter Scan noch läuft oder noch nicht verarbeitet wurde
 		if (getRadarTurnRemaining() > 0 || scanFinished)
 			return;
@@ -47,7 +52,7 @@ public class LARCbot extends AdvancedRobot{
 	@Override
 	public void onScannedRobot(ScannedRobotEvent event) {
 		System.out.printf("Gegner %s in Richtung %s, Abstand %s\n", event.getName(), Double.toString(event.getBearing()), Double.toString(event.getHeading()));
-		env.computeScannedRobotEvent(event);
+		envBuilder.computeScannedRobotEvent(event);
 	}
 	
 	
