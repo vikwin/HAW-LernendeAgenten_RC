@@ -18,6 +18,10 @@ public class Vector2D {
 		this.x = x;
 		this.y = y;
 	}
+	
+	public Vector2D() {
+		this(0,0);
+	}
 
 	/**
 	 * Liefert den X-Koordinaten Anteil.
@@ -76,7 +80,7 @@ public class Vector2D {
 	 * @return Vektorlänge
 	 */
 	public double length(){
-		return Math.sqrt(x*x +y*y);
+		return Math.sqrt(x*x + y*y);
 	}
 	
 	/**
@@ -89,14 +93,44 @@ public class Vector2D {
 	}
 	
 	/**
+	 * Liefert die Richtung eines Vektors im Bereich von 0 bis 360 Grad.
+	 * 0 = Norden, 90 = Osten, 180 = Süden, 270 = Westen
+	 * @return Richtung in Grad
+	 */
+	public double getHeading() {
+		double mathAngle = Utils.radToDeg(Math.acos(x / length()));
+		
+		if (y >= 0) {
+			if (x < 0) {
+				return 450 - mathAngle; 
+			} else {
+				return 90 - mathAngle;
+			} 
+		} else {
+			return mathAngle + 90; 
+		}
+	}
+	
+	/**
+	 * Liefert die normalisierte Richtung eines Vektors im Bereich von -180 bis 180 Grad.
+	 * -180 = Westen, -90 = Norden, 0 = Osten, 90 = Süden
+	 * @return Normalisierte Richtung in Grad
+	 */
+	public double getNormalHeading() {
+		double mathAngle = Utils.radToDeg(Math.acos(x / length()));
+		
+		return (y >= 0) ? -1 * mathAngle : mathAngle; 
+	}
+	
+	/**
 	 * Dreht den Vektor um einen Winkel in Grad.
 	 * Die Drehung erfolgt um den Vektorursprung im mathematisch
-	 * positiver Richtung (gegen den Uhrzeigesinn).
+	 * negativer Richtung (im Uhrzeigesinn).
 	 * @param angleDegrees Winkel in Grad
 	 * @return Neuer Vektor
 	 */
 	public Vector2D rotate(double angleDegrees) {
-		return rotateRad(angleDegrees * Math.PI / 180);
+		return rotateRad(Utils.degToRad(angleDegrees));
 	}
 
 	/**
