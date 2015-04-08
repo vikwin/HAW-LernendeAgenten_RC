@@ -1,62 +1,68 @@
 package robot;
+
+import java.awt.Graphics2D;
+
 import robocode.AdvancedRobot;
 import robocode.ScannedRobotEvent;
 import environment.EnvironmentBuilder;
 
-public class LARCbot extends AdvancedRobot{
-	private boolean scanFinished = false;
+public class LARCbot extends AdvancedRobot {
+	private boolean waitBeforeRescan = false;
 	private EnvironmentBuilder envBuilder;
-	
-	
+
 	public LARCbot() {
-		this.envBuilder = new EnvironmentBuilder(this);
 	}
-	
+
 	@Override
 	public void run() {
+		// Der Environmentbuilder muss aus der run Methode heraus initialisiert
+		// werden, weil sonst der Zugriff auf die Eigenschaften des Spielfelds
+		// verwehrt wird
+		this.envBuilder = new EnvironmentBuilder(this);
+
 		setAdjustGunForRobotTurn(true);
 		setAdjustRadarForGunTurn(true);
 		setAdjustRadarForRobotTurn(true);
-		
+
 		while (true) {
 			doScan();
 			createReducedEnvironments();
 			
-			
-			execute();
+			execute();	
 		}
-			
-		
+
 	}
 
 	private void createReducedEnvironments() {
-		// überspringe Aufruf, falls fertiger Scan wartet
-		if (!scanFinished)
+		// Ã¼berspringe Aufruf, falls Scan noch lÃ¤uft
+		if (getRadarTurnRemaining() > 0)
 			return;
 		
-		//TODO 
-		
-		
-		scanFinished = false;
+		envBuilder.create();
+		waitBeforeRescan = false;
 	}
 
 	private void doScan() {
-		// überspringe Aufruf, falls letzter Scan noch läuft oder noch nicht verarbeitet wurde
-		if (getRadarTurnRemaining() > 0 || scanFinished)
+		// Ã¼berspringe Aufruf, falls letzter Scan noch lÃ¤uft oder noch nicht
+		// verarbeitet wurde
+		if (getRadarTurnRemaining() > 0 || waitBeforeRescan)
 			return;
-		
+
 		setTurnRadarRight(360);
+		waitBeforeRescan = true;
 	}
-	
-	
+
 	@Override
 	public void onScannedRobot(ScannedRobotEvent event) {
-		System.out.printf("Gegner %s in Richtung %s, Abstand %s\n", event.getName(), Double.toString(event.getBearing()), Double.toString(event.getHeading()));
+//		System.out.printf("Gegner %s in Richtung %s, Abstand %s\n",
+//				event.getName(), Double.toString(event.getBearing()),
+//				Double.toString(event.getHeading()));
 		envBuilder.computeScannedRobotEvent(event);
 	}
-	
-	
-	
-	
-	
+
+	@Override
+	public void onPaint(Graphics2D g) {
+		envBuilder.doPaint(g);
+	}
+
 }

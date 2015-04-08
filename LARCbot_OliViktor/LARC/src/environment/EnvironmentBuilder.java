@@ -1,41 +1,69 @@
 package environment;
+
+import java.awt.Graphics2D;
 import java.util.HashMap;
 
 import robocode.AdvancedRobot;
 import robocode.ScannedRobotEvent;
 import utils.Utils;
 
-
 public class EnvironmentBuilder {
-	
+
+	private static final int ROBOT_SIZE = 40; // Die Seitenlänge der Bots in
+												// Pixeln
+	private static final int GRID_SIZE = ROBOT_SIZE; // Die Seitenlänge eines
+														// einzelnen Feldes (für
+														// MoveEnvironment)
+
 	private static final boolean DEBUG = true;
-	
+
 	private HashMap<String, Enemy> enemies = new HashMap<String, Enemy>();
 	private AdvancedRobot selfBot;
-	
+
+	private MoveEnvironment moveEnv;
+
 	public EnvironmentBuilder(AdvancedRobot bot) {
 		selfBot = bot;
+		moveEnv = new MoveEnvironment(ROBOT_SIZE, GRID_SIZE,
+				(int) selfBot.getBattleFieldWidth(),
+				(int) selfBot.getBattleFieldHeight());
 	}
-	
+
 	public void computeScannedRobotEvent(ScannedRobotEvent event) {
 		if (!enemies.containsKey(event.getName())) {
 			newEnemyHook(event);
-		} 
-		
-		Enemy enemy = enemies.get(event.getName()); 
+		}
+
+		Enemy enemy = enemies.get(event.getName());
 		enemy.updateAllAttributes(event);
-		
+
 		if (DEBUG) {
-		System.out.printf("Eigene Koordinaten: %s\n", Utils.getBotCoordinates(selfBot).toString());
-		System.out.printf("Eigene Richtung: %s\n", Double.toString(selfBot.getHeading()));
-		System.out.printf("Gegner Koordinaten: %s\n", enemy.getPosition().toString());
+			System.out.printf("Eigene Koordinaten: %s\n", Utils
+					.getBotCoordinates(selfBot).toString());
+			System.out.printf("Eigene Richtung: %s\n",
+					Double.toString(selfBot.getHeading()));
+			System.out.printf("Gegner Koordinaten: %s\n", enemy.getPosition()
+					.toString());
 		}
 	}
-	
-	private void newEnemyHook(ScannedRobotEvent event){
-		enemies.put(event.getName(), new Enemy(event.getName(), selfBot));
-		}
-	
-	
 
+	private void newEnemyHook(ScannedRobotEvent event) {
+		enemies.put(event.getName(), new Enemy(event.getName(), selfBot));
+	}
+
+	public void doPaint(Graphics2D g) {
+		moveEnv.doPaint(g, (int)selfBot.getBattleFieldWidth(), (int)selfBot.getBattleFieldHeight());
+		// Draw a line from our robot to the scanned robot
+		// g.drawLine(sel, scannedY, (int) getX(), (int) getY());
+
+		// Draw a filled square on top of the scanned robot that covers it
+//		g.setColor(new Color(0x00, 0x00, 0xff, 0x80));
+//		g.fillRect((int) selfBot.getX() - 20, (int) selfBot.getY() - 20, 40, 40);
+	}
+
+	
+	public void create() {
+		moveEnv.update(enemies.values(), Utils.getBotCoordinates(selfBot));
+		
+	}
 }

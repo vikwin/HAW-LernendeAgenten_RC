@@ -97,4 +97,25 @@ public abstract class Utils {
 	public static double degToRad(double degrees) {
 		return degrees * Math.PI / 180;
 	}
+	
+	
+	/**
+	 * Prüft ob zwei Rechtecke sich überlappen.
+	 * @param r1UL Obere linke Ecke erstes Rechteck
+	 * @param r1LR Untere rechte Ecke erstes Rechteck
+	 * @param r2UL Obere linke Ecke zweites Rechteck
+	 * @param r2LR Untere rechte Ecke zweites Rechteck
+	 * @return
+	 */
+	public static boolean checkRectOverlap(Vector2D r1UL, Vector2D r1LR, Vector2D r2UL, Vector2D r2LR) {
+		// Prüfe ob ein rechteck links vom anderen liegt
+	    if (r1LR.getX() < r2UL.getX() || r2LR.getX() < r1UL.getX())
+	        return false;
+	 
+	    // Prüfe ob ein Rechteck unter dem anderen liegt
+	    if (r1UL.getY() < r2LR.getY() || r2UL.getY() < r1LR.getY()) 
+	        return false;
+	 
+	    return true;
+	}
 }
