@@ -1,19 +1,14 @@
 package agents;
 
-import java.io.Serializable;
-
 import robot.Action;
-import environment.State;
 
-public class LearnedAction implements Serializable {
-	private int value;		// Insgesamte Bewertung der Action-State-Kombination
-	private int noc;		// NumberOfCalls - Anzahl der Ausführungen der 
+public class LearnedAction {
+	private double value;		// Insgesamte Bewertung der Action-State-Kombination
+	private int noc;		// NumberOfCalls - Anzahl der Ausführungen der Action-State-Kombination
 	
 	private Action action;
-	private State state;
 
-	public LearnedAction(State state, Action action, int stateID) {
-		this.state = state;
+	public LearnedAction(Action action, int stateID) {
 		this.action = action;
 		this.value = 0;
 		this.noc = 0;
@@ -23,8 +18,12 @@ public class LearnedAction implements Serializable {
 		return action;
 	}
 	
-	public void addReinforcement(int value) {
+	public double getValue() {
+		return value;
+	}
+	
+	public void addReinforcement(double value, boolean incNoc) {
 		this.value += value;
-		this.noc++;
+		this.noc += incNoc ? 1 : 0;
 	}
 }

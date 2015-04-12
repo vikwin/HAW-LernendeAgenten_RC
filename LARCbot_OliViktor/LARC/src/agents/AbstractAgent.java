@@ -9,10 +9,15 @@ import environment.State;
 
 public abstract class AbstractAgent {
 	protected Map<Integer, List<LearnedAction>> actionList;
+	protected ActionQueue lastActions;
 	protected AgentMode mode;
+	
+	private static double DISCOUNT_RATE = 0.9;
+	private static int QUEUE_SIZE = 10;
 	
 	protected AbstractAgent() {
 		actionList = new HashMap<Integer, List<LearnedAction>>();
+		lastActions = new ActionQueue(QUEUE_SIZE, DISCOUNT_RATE);
 		mode = AgentMode.RNDLEARN;
 	}
 	
@@ -21,4 +26,6 @@ public abstract class AbstractAgent {
 	}
 	
 	public abstract Action getNextAction(State state);
+	
+	public abstract void addReinforcement(int reinforcement);
 }
