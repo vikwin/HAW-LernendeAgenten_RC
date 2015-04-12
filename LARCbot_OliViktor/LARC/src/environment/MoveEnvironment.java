@@ -4,18 +4,21 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.Collection;
 
+import robocode.AdvancedRobot;
 import utils.Utils;
 import utils.Vector2D;
 
-public class MoveEnvironment {
+public class MoveEnvironment implements Environment {
 
 	private MoveEnvElement[][] field;
-	private int robotSize, gridSize;
+	private int robotSize, gridSize, fieldWidth, fieldHeight;
 
 	public MoveEnvironment(int robotSize, int gridSize, int fieldWidth,
 			int fieldHeight) {
 		this.robotSize = robotSize;
 		this.gridSize = gridSize;
+		this.fieldWidth = fieldWidth;
+		this.fieldHeight = fieldHeight;
 
 		field = new MoveEnvElement[fieldWidth / gridSize][fieldHeight
 				/ gridSize];
@@ -46,18 +49,20 @@ public class MoveEnvironment {
 					
 	}
 
-	public void update(Collection<Enemy> enemies, Vector2D selfPosition) {
+	@Override
+	public void update(Collection<Enemy> enemies, AdvancedRobot selfBot) {
 		clearField();
 
 		for (Enemy enemy : enemies) {
-			setElement(enemy.getPosition(), robotSize, robotSize,
+			setElement(enemy.getPosition(), 1, 1,
 					MoveEnvElement.ENEMY);
 		}
 
-		setElement(selfPosition, 1, 1, MoveEnvElement.SELF);
+		setElement(Utils.getBotCoordinates(selfBot), 1, 1, MoveEnvElement.SELF);
 	}
 
-	public void doPaint(Graphics2D g, int fieldWidth, int fieldHeight) {
+	@Override
+	public void doPaint(Graphics2D g) {
 		// Zeichne die Gitterlinien in grün ein
 		g.setColor(new Color(0x00, 0xff, 0x00, 0x80));
 		for (int x = 0; x <= fieldWidth; x += gridSize) 
@@ -68,15 +73,17 @@ public class MoveEnvironment {
 		
 		// Zeichne Felder ein
 		for (int x = 0; x < field.length; x++)
-			for (int y = 0; y < field[x].length; y++) {
+			for (int y = 0; y < field[x].length; y++)
 				if (field[x][y] != MoveEnvElement.EMPTY) {
 					g.setColor(field[x][y].getColor());
 					g.fillRect(x * gridSize, y * gridSize, gridSize, gridSize);
-				}
-					
-				
-			}
-	
+				}				
+	}
+
+	@Override
+	public int getId() {
+		// TODO Auto-generated method stub
+		return 0;
 	}
 
 }

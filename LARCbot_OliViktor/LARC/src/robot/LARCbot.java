@@ -26,6 +26,7 @@ public class LARCbot extends AdvancedRobot {
 
 		while (true) {
 			doScan();
+			setTurnGunRight(1);
 			createReducedEnvironments();
 			
 			execute();	

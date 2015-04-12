@@ -118,4 +118,13 @@ public abstract class Utils {
 	 
 	    return true;
 	}
+	
+	/**
+	 * Liefert den Umfang eines Kreises.
+	 * @param radius Durchmesser des Kreises
+	 * @return Umfang
+	 */
+	public static double circlePerimeter(double radius) {
+		return 2 * Math.PI * radius;
+	}
 }

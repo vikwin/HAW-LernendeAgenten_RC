@@ -7,6 +7,13 @@ import robocode.AdvancedRobot;
 import robocode.ScannedRobotEvent;
 import utils.Utils;
 
+/**
+ * Diese Klasse sammelt Informationen über Gegner und nutzt diese um daraus die
+ * Umwelt für die Agenten zu konstruieren.
+ * 
+ * @author Viktor Winkelmann
+ *
+ */
 public class EnvironmentBuilder {
 
 	private static final int ROBOT_SIZE = 40; // Die Seitenlänge der Bots in
@@ -16,19 +23,32 @@ public class EnvironmentBuilder {
 														// MoveEnvironment)
 
 	private static final boolean DEBUG = true;
+	private static final boolean PAINT_ATTACK_ENV = false;
+	private static final boolean PAINT_MOVE_ENV = true;
 
 	private HashMap<String, Enemy> enemies = new HashMap<String, Enemy>();
 	private AdvancedRobot selfBot;
 
-	private MoveEnvironment moveEnv;
+	private Environment moveEnv, attackEnv;
 
 	public EnvironmentBuilder(AdvancedRobot bot) {
 		selfBot = bot;
 		moveEnv = new MoveEnvironment(ROBOT_SIZE, GRID_SIZE,
 				(int) selfBot.getBattleFieldWidth(),
 				(int) selfBot.getBattleFieldHeight());
+
+		attackEnv = new AttackEnvironment(ROBOT_SIZE * 2, ROBOT_SIZE,
+				Utils.getBotCoordinates(bot), bot.getGunHeading(),
+				(int) selfBot.getBattleFieldWidth(),
+				(int) selfBot.getBattleFieldHeight());
 	}
 
+	/**
+	 * Extrahiert die gewonnenen Informationen über einen Gegner aus einem
+	 * ScannedRobotEvent und speichert diese im Objekt.
+	 * 
+	 * @param event
+	 */
 	public void computeScannedRobotEvent(ScannedRobotEvent event) {
 		if (!enemies.containsKey(event.getName())) {
 			newEnemyHook(event);
@@ -51,19 +71,25 @@ public class EnvironmentBuilder {
 		enemies.put(event.getName(), new Enemy(event.getName(), selfBot));
 	}
 
+	/**
+	 * Veranlässt das Einzeichnen der Agent Umwelten in abhängigkeit der
+	 * Konstanten PAINT_MOVE_ENV und PAINT_ATTACK_ENV.
+	 * 
+	 * @param g
+	 */
 	public void doPaint(Graphics2D g) {
-		moveEnv.doPaint(g, (int)selfBot.getBattleFieldWidth(), (int)selfBot.getBattleFieldHeight());
-		// Draw a line from our robot to the scanned robot
-		// g.drawLine(sel, scannedY, (int) getX(), (int) getY());
-
-		// Draw a filled square on top of the scanned robot that covers it
-//		g.setColor(new Color(0x00, 0x00, 0xff, 0x80));
-//		g.fillRect((int) selfBot.getX() - 20, (int) selfBot.getY() - 20, 40, 40);
+		if (PAINT_MOVE_ENV)
+			moveEnv.doPaint(g);
+		if (PAINT_ATTACK_ENV)
+			attackEnv.doPaint(g);
 	}
 
-	
+	/**
+	 * Erstellt bzw. aktualiert die Umweltobjekte
+	 */
 	public void create() {
-		moveEnv.update(enemies.values(), Utils.getBotCoordinates(selfBot));
-		
+		moveEnv.update(enemies.values(), selfBot);
+		attackEnv.update(enemies.values(), selfBot);
+
 	}
 }
