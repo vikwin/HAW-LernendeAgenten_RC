@@ -1,0 +1,48 @@
+Auflösung 800 x 600, Feldseitenlänge 40 px
+	-> ergibt 20 Felder horizontal, 15 Felder Vertikal = 20 * 15 = 300 Felder insgesamt
+
+	
+Ein Feld beschreibt die Position unseres Bots -> 300 Möglichkeiten
+
+Volle Variante (derzeitige Umsetzung):
+Ein Gegner kann ein Feld, zwei Felder übereinander, zwei Felder nebeneinander oder vier Felder belegen
+	-> ein Feld = 300 Möglichkeiten
+	-> zwei Felder übereinander = 19 * 15 = 285 Möglichkeiten
+	-> zwei Felder nebeneinander = 20 * 14 = 280 Möglichkeiten
+	-> vier Felder = 19 * 14 = 266 Möglichkeiten
+
+Einfache Variante: 
+Ein Gegner belegt nie mehr als ein Feld
+	-> 300 Möglichkeiten
+	
+
+Insgesamt ergeben sich hieraus also:
+	Volle Variante: 300 * (300 + 285 + 280 + 266) = 300 * 1131 = 339300 Umweltzustände
+	Einfache Variante: 300 * 300 = 90000 Umweltzustände
+
+In jedem Umweltzustand können 8 Aktionen durchgeführt werden. Für jede muss ein double Wert (Gewichtung) gespeichert werden.
+
+Der Speicherbedarf ist also: 
+Volle Variante:
+	339300 * 8 * 64 Bit = 173721600 Bit = 21715200 Byte
+	-> etwa 22 Megabyte (bei Speicherung als Array Struktur)
+
+Einfache Variante:
+	90000 * 8 * 64 Bit = 46080000 Bit = 5760000 Byte
+	-> etwa 6 Megabyte (bei Speicherung als Array Struktur)
+	
+Da eine HashTree Struktur hier wohl besser wäre wird es wohl etwas mehr werden, liegt jedoch immernoch im Rahmen.
+
+
+
+Problem bei dieser Umsetzung:
+Jeder weitere gegnerische Bot erhöht die Anzahl der Zustände exponentiell.
+Die Formel lautet daher:
+	300 * 1131 ^ Anzahl der gegnerischen Bots
+	bzw. 300 * 300 ^ Anzahl der gegnerischen Bots
+	
+	Bei z. B. vier Gegnern ergibt sich somit selbst in der einfachen Variante ein nicht mehr zu handhabener Speicherbedarf von etwa 156 Terabyte.
+	
+Für unsere Konkrete Umsetzung ist das jedoch kein Problem, da wir lediglich von einem One-on-One Bot ausgehen, also nie mehr als einen Gegner haben.
+
+
