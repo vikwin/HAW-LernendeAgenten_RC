@@ -4,7 +4,6 @@ import java.util.List;
 import java.util.Random;
 
 import robot.Action;
-import environment.State;
 
 public class MoveAgent extends AbstractAgent {
 	private Random rnd;
@@ -15,11 +14,11 @@ public class MoveAgent extends AbstractAgent {
 	}
 	
 	@Override
-	public Action getNextAction(State state) {
+	public Action getNextAction(int stateID) {
 		LearnedAction nextAction = null;
 		switch (mode) {
 		case RNDLEARN:
-			List<LearnedAction> choosableActions = actionList.get(state.getID());
+			List<LearnedAction> choosableActions = actionList.get(stateID);
 			nextAction = choosableActions.get(rnd.nextInt(choosableActions.size()));
 			lastActions.put(nextAction);
 			break;

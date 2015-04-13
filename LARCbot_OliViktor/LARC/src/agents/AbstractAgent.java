@@ -5,7 +5,6 @@ import java.util.List;
 import java.util.Map;
 
 import robot.Action;
-import environment.State;
 
 public abstract class AbstractAgent {
 	protected Map<Integer, List<LearnedAction>> actionList;
@@ -25,7 +24,7 @@ public abstract class AbstractAgent {
 		mode = newMode;
 	}
 	
-	public abstract Action getNextAction(State state);
+	public abstract Action getNextAction(int stateID);
 	
 	public abstract void addReward(int reinforcement);
 }
