@@ -6,8 +6,10 @@ import java.util.Random;
 import robot.MoveAction;
 
 public class MoveAgent extends AbstractAgent {
+	private static int SUCCESS_CHANCE = 70;		// Erfolgswahrscheinlich, dass die bevorzugte Action ausgeführt wird, in Prozent
+	
 	private Random rnd;
-	private int actionEnumSize;
+	private int actionEnumSize, normalizedSuccessChance;
 	
 	/**
 	 * 
@@ -18,6 +20,7 @@ public class MoveAgent extends AbstractAgent {
 		rnd = new Random();
 		
 		actionEnumSize = MoveAction.values().length;
+		normalizedSuccessChance = SUCCESS_CHANCE - (Math.floorDiv(100 - SUCCESS_CHANCE, actionEnumSize));
 		
 		actionList = new Double[gridFields * actionEnumSize];
 		Arrays.fill(actionList, 0.5);
@@ -27,26 +30,48 @@ public class MoveAgent extends AbstractAgent {
 		this(300);
 	}
 	
+	private int getActionWithMaxValue(int startID) {
+		// Action mit dem höchsten Wert suchen
+		double max = -1000000;
+		int maxID = -1;
+		
+		for (int i = 0; i < actionEnumSize; i++) {
+			if (actionList[startID + i] > max) {
+				max = actionList[startID + i];
+				maxID = i;
+			}
+		}
+		
+		return maxID;
+	}
+	
 	@Override
 	public MoveAction getNextAction(int stateID) {
-		MoveAction nextAction = MoveAction.NOTHING;
+		int actionID = -1;
 		
 		switch (mode) {
 		case RNDLEARN:
-			int actionID = rnd.nextInt(actionEnumSize);
-			nextAction = MoveAction.values()[actionID];
-			
-			addToLastActionQueue(stateID * actionEnumSize + actionID);
+			actionID = rnd.nextInt(actionEnumSize);
 			break;
 			
 		case LEARNING:
+			int chance = rnd.nextInt(100);
+			
+			if (chance < normalizedSuccessChance) {
+				actionID = getActionWithMaxValue(stateID * actionEnumSize);
+			} else {
+				actionID = rnd.nextInt(actionEnumSize);
+			}
 			break;
 			
 		case FIGHTING:
+			actionID = getActionWithMaxValue(stateID * actionEnumSize);
 			break;
 		}
 		
-		return nextAction;
+		addToLastActionQueue(stateID * actionEnumSize + actionID);
+		
+		return MoveAction.values()[actionID];
 	}
 	
 	@Override
