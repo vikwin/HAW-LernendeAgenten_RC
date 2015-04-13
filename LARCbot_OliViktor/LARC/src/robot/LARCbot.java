@@ -40,6 +40,8 @@ public class LARCbot extends AdvancedRobot {
 
 	}
 
+	// TODO: CustomEvents für Radar, Turn und Move einbauen 
+	
 	private void act() {
 		// überspringe Aufruf, falls Scan noch läuft
 		if (getRadarTurnRemaining() > 0)
@@ -47,18 +49,29 @@ public class LARCbot extends AdvancedRobot {
 		
 		envBuilder.create();
 		
-		//computeAction(moveAgent.getNextAction(envBuilder.getMoveEnvId()));
+		if (!isMoving())
+			//moveTo(new Vector2D(50,50));
+			computeAction(moveAgent.getNextAction(envBuilder.getMoveEnvId()));
+		//computeAction(attackAgent.getNextAction(envBuilder.getAttackEnvId())); //TODO
 		
 		waitBeforeRescan = false;
 	}
 	
-	private void computeAction(Action action) {
-		
+	private boolean isMoving() {
+		return getTurnRemaining() != 0 || getDistanceRemaining() != 0;
+	}
+	
+	private void computeAction(MoveAction action) {
+		moveTo(getPosition().add(action.getMoveVector()));
+	}
+	
+	private void computeAction(AttackAction action) {
+		//TODO
 		
 	}
 	
 	private void moveTo(Vector2D destination) {
-		double rotationAngle = getPosition().angleTo(destination);
+		double rotationAngle = destination.subtract(getPosition()).getNormalHeading();
 		double distance = getPosition().distanceTo(destination);
 		
 		if (rotationAngle >= 0 && rotationAngle <= 90) { 

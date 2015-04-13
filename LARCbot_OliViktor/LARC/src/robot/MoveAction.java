@@ -5,7 +5,7 @@ import utils.Vector2D;
 public enum MoveAction implements Action {
 	UP, UPRIGHT, RIGHT, DOWNRIGHT, DOWN, DOWNLEFT, LEFT, UPLEFT, NOTHING;
 	
-	private static double MOVE_RADIUS = 10.0;
+	private static double MOVE_RADIUS = 40.0;
 	private static double MOVE_LEG_SIZE = Math.sqrt(2 * MOVE_RADIUS * MOVE_RADIUS);
 	
 	@Override

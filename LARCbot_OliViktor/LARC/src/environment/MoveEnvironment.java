@@ -114,7 +114,7 @@ public class MoveEnvironment implements Environment {
 	 */
 	@Override
 	public int getId() {
-		return selfFieldNum + 300 * enemyFieldNum;
+		return selfFieldNum + field.length * field[0].length * enemyFieldNum;
 	}
 
 }
