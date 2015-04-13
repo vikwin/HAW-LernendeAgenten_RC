@@ -1,9 +1,9 @@
 package agents;
 
-import java.util.List;
+import java.util.Arrays;
 import java.util.Random;
 
-import robot.Action;
+import robot.MoveAction;
 
 public class MoveAgent extends AbstractAgent {
 	private Random rnd;
@@ -14,13 +14,23 @@ public class MoveAgent extends AbstractAgent {
 	}
 	
 	@Override
-	public Action getNextAction(int stateID) {
-		LearnedAction nextAction = null;
+	public MoveAction getNextAction(int stateID) {
+		MoveAction nextAction = MoveAction.NOTHING;
+		
+		if (!actionList.containsKey(stateID)) {
+			double[] defaultReward = new double[MoveAction.values().length];
+			Arrays.fill(defaultReward, 0.5);
+			
+			actionList.put(stateID, defaultReward);
+		}
+		
 		switch (mode) {
 		case RNDLEARN:
-			List<LearnedAction> choosableActions = actionList.get(stateID);
-			nextAction = choosableActions.get(rnd.nextInt(choosableActions.size()));
-			lastActions.put(nextAction);
+			double[] actions = actionList.get(stateID);
+			int actionID = rnd.nextInt(actions.length);
+			nextAction = MoveAction.values()[actionID];
+			
+			addToLastActionQueue(stateID, actionID);
 			break;
 			
 		case LEARNING:
@@ -30,11 +40,11 @@ public class MoveAgent extends AbstractAgent {
 			break;
 		}
 		
-		return nextAction == null ? null : nextAction.getAction();
+		return nextAction;
 	}
 	
 	@Override
-	public void addReward(int reinforcement) {
-		lastActions.addReinforcement(reinforcement);
+	public void addReward(int reward) {
+		addRewardToLastActions(reward);
 	}
 }
