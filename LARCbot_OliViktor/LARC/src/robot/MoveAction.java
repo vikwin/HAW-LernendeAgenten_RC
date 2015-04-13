@@ -10,28 +10,7 @@ public enum MoveAction implements Action {
 	
 	@Override
 	public int getID() {
-		switch (this) {
-		case UP:
-			return 0;
-		case UPRIGHT:
-			return 1;
-		case DOWN:
-			return 2;
-		case DOWNLEFT:
-			return 3;
-		case DOWNRIGHT:
-			return 4;
-		case LEFT:
-			return 5;
-		case RIGHT:
-			return 6;
-		case UPLEFT:
-			return 7;
-		case NOTHING:
-			return 8;
-		default:
-			return -1;
-		}
+		return this.ordinal();
 	}
 	
 	public Vector2D getMoveVector() {
