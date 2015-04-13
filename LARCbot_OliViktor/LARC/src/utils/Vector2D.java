@@ -93,6 +93,18 @@ public class Vector2D {
 	}
 	
 	/**
+	 * Berechnet den Winkel zu einem anderen Vektor im Bereich
+	 * von -180 bis 180 Grad. Ist der andere Vektor im Uhrzeigesinn
+	 * gedreht, ist der Winkel postiv, sonst negativ. 
+	 * 
+	 * @param other Anderer Vektor
+	 * @return Winkel
+	 */
+	public double angleTo(Vector2D other) {
+		return other.getNormalHeading() - getNormalHeading();
+	}
+	
+	/**
 	 * Liefert die Richtung eines Vektors im Bereich von 0 bis 360 Grad.
 	 * 0 = Norden, 90 = Osten, 180 = Süden, 270 = Westen
 	 * @return Richtung in Grad

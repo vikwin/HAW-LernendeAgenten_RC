@@ -126,5 +126,13 @@ public class Vector2DTest {
 		assertEquals(-135.0, e.getNormalHeading(), MAX_DEVIATION);
 		assertEquals(135.0, f.getNormalHeading(), MAX_DEVIATION);
 	}
+	
+	@Test
+	public void testAngleTo() {
+		assertEquals(0.0, a.angleTo(b), MAX_DEVIATION);
+		assertEquals(180.0, b.angleTo(f), MAX_DEVIATION);
+		assertEquals(90.0, g.angleTo(c), MAX_DEVIATION);
+		assertEquals(-90.0, c.angleTo(g), MAX_DEVIATION);
+	}
 
 }

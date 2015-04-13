@@ -23,8 +23,8 @@ public class EnvironmentBuilder {
 														// MoveEnvironment)
 
 	private static final boolean DEBUG = true;
-	private static final boolean PAINT_ATTACK_ENV = false;
-	private static final boolean PAINT_MOVE_ENV = true;
+	private static final boolean PAINT_ATTACK_ENV = true;
+	private static final boolean PAINT_MOVE_ENV = false;
 
 	private HashMap<String, Enemy> enemies = new HashMap<String, Enemy>();
 	private AdvancedRobot selfBot;
@@ -90,6 +90,21 @@ public class EnvironmentBuilder {
 	public void create() {
 		moveEnv.update(enemies.values(), selfBot);
 		attackEnv.update(enemies.values(), selfBot);
-
+	}
+	
+	/**
+	 * Liefert eine eindeutige ID für die aktuelle MoveAgent Umwelt.
+	 * @return Die ID
+	 */
+	public int getMoveEnvId() {
+		return moveEnv.getId();
+	}
+	
+	/**
+	 * Liefert eine eindeutige ID für die aktuelle AttackAgent Umwelt.
+	 * @return Die ID
+	 */
+	public int getAttackEnvId() {
+		return attackEnv.getId();
 	}
 }

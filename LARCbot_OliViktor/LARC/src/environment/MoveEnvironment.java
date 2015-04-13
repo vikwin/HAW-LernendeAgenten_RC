@@ -8,17 +8,27 @@ import robocode.AdvancedRobot;
 import utils.Utils;
 import utils.Vector2D;
 
+/**
+ * Konkrete Klasse zur Abbildung der Umwelt für den MoveAgent.
+ * 
+ * @author Viktor Winkelmann
+ *
+ */
 public class MoveEnvironment implements Environment {
 
 	private MoveEnvElement[][] field;
 	private int robotSize, gridSize, fieldWidth, fieldHeight;
 
+	// Diese Variablen werden für getId benötigt, bitte Hinweis zu getId beachten
+	private int selfFieldNum, enemyFieldNum;
+	
 	public MoveEnvironment(int robotSize, int gridSize, int fieldWidth,
 			int fieldHeight) {
 		this.robotSize = robotSize;
 		this.gridSize = gridSize;
 		this.fieldWidth = fieldWidth;
 		this.fieldHeight = fieldHeight;
+		
 
 		field = new MoveEnvElement[fieldWidth / gridSize][fieldHeight
 				/ gridSize];
@@ -26,6 +36,9 @@ public class MoveEnvironment implements Environment {
 		clearField();
 	}
 
+	/**
+	 * Alle Felder leeren.
+	 */
 	private void clearField() {
 		for (int x = 0; x < field.length; x++)
 			for (int y = 0; y < field[x].length; y++) {
@@ -33,6 +46,14 @@ public class MoveEnvironment implements Environment {
 			}
 	}
 
+	/**
+	 * Setzt Elemente in Abhängigkeit der übergebenen Größe und ihres Typs.
+	 * 
+	 * @param position Ortsvektor des Elements
+	 * @param width Breite des Elements
+	 * @param height Höhe des Elements
+	 * @param elementType Typ des Elements
+	 */
 	private void setElement(Vector2D position, int width, int height,
 			MoveEnvElement elementType) {
 		Vector2D rect2UL = new Vector2D(position.getX() - width/2, position.getY() + width/2);
@@ -43,8 +64,15 @@ public class MoveEnvironment implements Environment {
 					Vector2D rect1UL = new Vector2D(x * gridSize, y * gridSize + gridSize);
 					Vector2D rect1LR = new Vector2D(x * gridSize + gridSize, y * gridSize);
 					
-					if (Utils.checkRectOverlap(rect1UL, rect1LR, rect2UL, rect2LR))
+					if (Utils.checkRectOverlap(rect1UL, rect1LR, rect2UL, rect2LR)) {
 						field[x][y] = elementType;
+						
+						// Dies wird für getID benötigt
+						if (elementType == MoveEnvElement.SELF)
+							selfFieldNum = (x+1)*(y+1);
+						else if (elementType == MoveEnvElement.ENEMY)
+							enemyFieldNum = (x+1)*(y+1); 
+					}
 				}
 					
 	}
@@ -68,8 +96,7 @@ public class MoveEnvironment implements Environment {
 		for (int x = 0; x <= fieldWidth; x += gridSize) 
 			g.drawLine(x, 0, x, fieldHeight);
 		for (int y = 0; y <= fieldHeight; y += gridSize) 
-			g.drawLine(0, y, fieldWidth, y);
-		
+			g.drawLine(0, y, fieldWidth, y);	
 		
 		// Zeichne Felder ein
 		for (int x = 0; x < field.length; x++)
@@ -80,10 +107,14 @@ public class MoveEnvironment implements Environment {
 				}				
 	}
 
+	/**
+	 * Diese Methode geht davon aus, dass wir nur einen einzigen Gegner haben!
+	 * Sollte es notwendig sein mehrere Gegner zu berücksichtigen MUSS diese Methode
+	 * für ein korrektes Verhalten angepasst werden.
+	 */
 	@Override
 	public int getId() {
-		// TODO Auto-generated method stub
-		return 0;
+		return selfFieldNum + 1000 * enemyFieldNum;
 	}
 
 }
