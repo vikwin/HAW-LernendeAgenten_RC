@@ -35,7 +35,7 @@ public class MoveAgent extends AbstractAgent {
 	}
 	
 	@Override
-	public void addReinforcement(int reinforcement) {
+	public void addReward(int reinforcement) {
 		lastActions.addReinforcement(reinforcement);
 	}
 }

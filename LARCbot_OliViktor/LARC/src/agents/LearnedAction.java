@@ -11,7 +11,7 @@ public class LearnedAction {
 	public LearnedAction(Action action, int stateID) {
 		this.action = action;
 		this.value = 0;
-		this.noc = 0;
+		this.noc = 0; 
 	}
 	
 	public Action getAction() {
@@ -22,7 +22,7 @@ public class LearnedAction {
 		return value;
 	}
 	
-	public void addReinforcement(double value, boolean incNoc) {
+	public void addReward(double value, boolean incNoc) {
 		this.value += value;
 		this.noc += incNoc ? 1 : 0;
 	}

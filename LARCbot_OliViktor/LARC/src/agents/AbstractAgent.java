@@ -27,5 +27,5 @@ public abstract class AbstractAgent {
 	
 	public abstract Action getNextAction(State state);
 	
-	public abstract void addReinforcement(int reinforcement);
+	public abstract void addReward(int reinforcement);
 }

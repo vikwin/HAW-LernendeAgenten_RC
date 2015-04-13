@@ -52,7 +52,7 @@ public class ActionQueue {
 				break;
 			}
 			
-			queue[i].addReinforcement(reinforcement * d, incNoc);
+			queue[i].addReward(reinforcement * d, incNoc);
 			
 			incNoc = false;
 			d *= d;
