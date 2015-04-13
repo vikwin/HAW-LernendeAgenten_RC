@@ -19,7 +19,7 @@ public class MoveAgent extends AbstractAgent {
 		
 		actionEnumSize = MoveAction.values().length;
 		
-		actionList = new double[gridFields * actionEnumSize];
+		actionList = new Double[gridFields * actionEnumSize];
 		Arrays.fill(actionList, 0.5);
 	}
 	

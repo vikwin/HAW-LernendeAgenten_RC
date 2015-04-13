@@ -4,8 +4,9 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.Arrays;
+import java.util.List;
 
-import org.json.simple.JSONValue;
+import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
@@ -15,7 +16,7 @@ public abstract class AbstractAgent {
 	private static double DISCOUNT_RATE = 0.9;
 	private static int QUEUE_SIZE = 10;
 
-	protected double[] actionList;
+	protected Double[] actionList;
 	protected AgentMode mode;
 	
 	private int[] lastActionQueue;
@@ -41,7 +42,12 @@ public abstract class AbstractAgent {
 	public void save(String filename) throws IOException {
 		FileWriter fw = new FileWriter(filename + ".json");
 		
-		String actionListString = JSONValue.toJSONString(actionList);
+		String actionListString = "["; //JSONValue.toJSONString(actionList);
+		for (double d : actionList) {
+			actionListString += d + ",";
+		}
+		actionListString += "]";
+		
 		fw.write(actionListString);
 		
 		fw.close();
@@ -52,9 +58,8 @@ public abstract class AbstractAgent {
 		FileReader reader = new FileReader(filename + ".json");
 		JSONParser parser = new JSONParser();
 		
-//		TODO
-//		JSONArray obj = (JSONArray) parser.parse(reader);
-//		actionList = (ArrayList<Double>) obj;
+		List<Double> obj = (List<Double>) ((JSONArray) parser.parse(reader));
+		actionList = obj.toArray(new Double[0]);
 		
 		reader.close();
 	}
