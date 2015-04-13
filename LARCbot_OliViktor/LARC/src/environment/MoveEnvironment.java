@@ -69,9 +69,9 @@ public class MoveEnvironment implements Environment {
 						
 						// Dies wird für getID benötigt
 						if (elementType == MoveEnvElement.SELF)
-							selfFieldNum = (x+1)*(y+1);
+							selfFieldNum = (x+1)*(y+1)-1;
 						else if (elementType == MoveEnvElement.ENEMY)
-							enemyFieldNum = (x+1)*(y+1); 
+							enemyFieldNum = (x+1)*(y+1)-1; 
 					}
 				}
 					
@@ -114,7 +114,7 @@ public class MoveEnvironment implements Environment {
 	 */
 	@Override
 	public int getId() {
-		return selfFieldNum + 1000 * enemyFieldNum;
+		return selfFieldNum + 300 * enemyFieldNum;
 	}
 
 }
