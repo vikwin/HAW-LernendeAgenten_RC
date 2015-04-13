@@ -3,10 +3,8 @@ package agents;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
-import java.util.HashMap;
-import java.util.Map;
+import java.util.Arrays;
 
-import org.json.simple.JSONObject;
 import org.json.simple.JSONValue;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
@@ -17,17 +15,17 @@ public abstract class AbstractAgent {
 	private static double DISCOUNT_RATE = 0.9;
 	private static int QUEUE_SIZE = 10;
 
-	protected Map<Integer, double[]> actionList;
+	protected double[] actionList;
 	protected AgentMode mode;
 	
-	private int[][] lastActionQueue;
+	private int[] lastActionQueue;
 	private int queueEndIndex;
 	
 	protected AbstractAgent() {
-		actionList = new HashMap<Integer, double[]>();
 		mode = AgentMode.RNDLEARN;
 		
-		lastActionQueue = new int[QUEUE_SIZE][2];
+		lastActionQueue = new int[QUEUE_SIZE];
+		Arrays.fill(lastActionQueue, -1);
 		queueEndIndex = 0;
 	}
 	
@@ -54,14 +52,15 @@ public abstract class AbstractAgent {
 		FileReader reader = new FileReader(filename + ".json");
 		JSONParser parser = new JSONParser();
 		
-		JSONObject obj = (JSONObject) parser.parse(reader);
-		actionList = (Map<Integer, double[]>) obj;
+//		TODO
+//		JSONArray obj = (JSONArray) parser.parse(reader);
+//		actionList = (ArrayList<Double>) obj;
 		
 		reader.close();
 	}
 	
-	protected void addToLastActionQueue(int stateID, int actionID) {
-		lastActionQueue[queueEndIndex] = new int[] {stateID, actionID};
+	protected void addToLastActionQueue(int id) {
+		lastActionQueue[queueEndIndex] = id;
 		queueEndIndex = (queueEndIndex + 1) % QUEUE_SIZE;
 	}
 	
@@ -72,11 +71,11 @@ public abstract class AbstractAgent {
 		do {
 			i = (i + 1) % QUEUE_SIZE;
 			
-			if (lastActionQueue[i] == null) {
+			if (lastActionQueue[i] < 0) {
 				break;
 			}
 			
-			actionList.get(lastActionQueue[i][0])[lastActionQueue[i][1]] += reward * d;
+			actionList[lastActionQueue[i]] += reward * d;
 			
 			d *= DISCOUNT_RATE;
 		} while (i != queueEndIndex);
