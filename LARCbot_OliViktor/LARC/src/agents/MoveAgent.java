@@ -7,30 +7,36 @@ import robot.MoveAction;
 
 public class MoveAgent extends AbstractAgent {
 	private Random rnd;
+	private int actionEnumSize;
 	
-	public MoveAgent() {
+	/**
+	 * 
+	 * @param gridFields Die Anzahl der Felder, die das Spielfeld als Grid hat.
+	 */
+	public MoveAgent(int gridFields) {
 		super();
 		rnd = new Random();
+		
+		actionEnumSize = MoveAction.values().length;
+		
+		actionList = new double[gridFields * actionEnumSize];
+		Arrays.fill(actionList, 0.5);
+	}
+	
+	public MoveAgent() {
+		this(300);
 	}
 	
 	@Override
 	public MoveAction getNextAction(int stateID) {
 		MoveAction nextAction = MoveAction.NOTHING;
 		
-		if (!actionList.containsKey(stateID)) {
-			double[] defaultReward = new double[MoveAction.values().length];
-			Arrays.fill(defaultReward, 0.5);
-			
-			actionList.put(stateID, defaultReward);
-		}
-		
 		switch (mode) {
 		case RNDLEARN:
-			double[] actions = actionList.get(stateID);
-			int actionID = rnd.nextInt(actions.length);
+			int actionID = rnd.nextInt(actionEnumSize);
 			nextAction = MoveAction.values()[actionID];
 			
-			addToLastActionQueue(stateID, actionID);
+			addToLastActionQueue(stateID * actionEnumSize + actionID);
 			break;
 			
 		case LEARNING:
