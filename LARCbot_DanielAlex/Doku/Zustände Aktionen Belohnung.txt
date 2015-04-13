@@ -1,10 +1,12 @@
-Zustände: Rasterfeld hat 800/40*600/40 = 20*15 = 300 Felder.
-	  Hinzu kommt ob der Gegner im Visier ist -> 300*2 = 600.
+ZustÃ¤nde: Eigene Position im Rasterfeld -> 800/40*600/40 = 20*15 = 300 ZustÃ¤nde.
+	  Hinzu kommt Gegnerposition -> 300*300 = 90000.
+	  Und Delta Energyratio EnemyEnergy/OwnEnergy -> 3 ZustÃ¤nde
+	  -> 300*300*3=270000 ZustÃ¤nde
+	  
+Aktionen: feuern/nicht feuern -> 2 Aktionen
+	  In 8 Himmelsrichtungen fahren -> 8 Aktionen.
+	  -> 2*8 = 16 Aktionen
+	  
+Belohnung: delta enemy-life-energy / own-life-energy
 
-Aktionen: Vorwärts- und Rückwärtsfahren, Schießen, Nach links oder rechts drehen,
-	  Kanone Nach links oder rechts drehen, wobei Aktionen auch zur gleichen Zeit ausgeführt werden können
-	  2*3*3*3 = 54.
-
-Belohnung: ?
-
-Negative Belohnung: Bei stehen bleiben,Gegen Wand/Gegner fahren.
+Negative Belohnung: delta enemy-life-energy / own-life-energy
