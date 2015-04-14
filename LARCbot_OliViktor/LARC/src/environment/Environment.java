@@ -30,7 +30,8 @@ public interface Environment {
 	
 	
 	/**
-	 * Liefert eine für jede Umweltkonstellation eindeutige ID.
+	 * Liefert eine für jede Umweltkonstellation eindeutige ID. Alle möglichen IDs
+	 * stellen eine aufsteigende vollständige Ordnung beginnend bei 0 dar. 
 	 * @return Die ID
 	 */
 	public int getId();
