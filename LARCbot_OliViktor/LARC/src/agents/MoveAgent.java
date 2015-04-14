@@ -6,7 +6,7 @@ import java.util.Random;
 import robot.MoveAction;
 
 public class MoveAgent extends AbstractAgent {
-	private static int SUCCESS_CHANCE = 70;		// Erfolgswahrscheinlich, dass die bevorzugte Action ausgeführt wird, in Prozent
+	private static int SUCCESS_CHANCE = 80;		// Erfolgswahrscheinlich, dass die bevorzugte Action ausgeführt wird, in Prozent
 	
 	private Random rnd;
 	private int actionEnumSize, normalizedSuccessChance;
@@ -20,7 +20,7 @@ public class MoveAgent extends AbstractAgent {
 		rnd = new Random();
 		
 		actionEnumSize = MoveAction.values().length;
-		normalizedSuccessChance = SUCCESS_CHANCE - (Math.floorDiv(100 - SUCCESS_CHANCE, actionEnumSize));
+		normalizedSuccessChance = SUCCESS_CHANCE - (Math.floorDiv(100 - SUCCESS_CHANCE, actionEnumSize - 1));
 		
 		actionList = new Double[gridFields * actionEnumSize];
 		Arrays.fill(actionList, 0.5);
@@ -36,9 +36,11 @@ public class MoveAgent extends AbstractAgent {
 		int maxID = -1;
 		
 		for (int i = 0; i < actionEnumSize; i++) {
-			if (actionList[startID + i] > max) {
-				max = actionList[startID + i];
-				maxID = i;
+			if (actionList[startID + i] >= max) {
+				if (actionList[startID + i] != max || rnd.nextBoolean()) {
+					max = actionList[startID + i];
+					maxID = i;
+				}
 			}
 		}
 		
@@ -76,6 +78,8 @@ public class MoveAgent extends AbstractAgent {
 	
 	@Override
 	public void addReward(int reward) {
-		addRewardToLastActions(reward);
+		if (mode != AgentMode.FIGHTING) {
+			addRewardToLastActions(reward);
+		}
 	}
 }
