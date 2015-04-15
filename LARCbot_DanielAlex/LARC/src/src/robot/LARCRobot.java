@@ -15,14 +15,12 @@ import src.utility.Position;
 
 public class LARCRobot extends AdvancedRobot {
 
-	public final double NIENTY = 90.0;
-
 	private LARCEnvironment environment;
 	private LARCAgent agent;
 
-	private double EnemyX;
-	private double EnemyY;
-	private double enemyHeading;
+	private double enemyX;
+	private double enemyY;
+	private double angleToEnemy;
 	private double distanceToEnemy;
 	private boolean gameOver;
 
@@ -31,8 +29,8 @@ public class LARCRobot extends AdvancedRobot {
 
 	public LARCRobot() {
 
-		EnemyX = 0;
-		EnemyY = 0;
+		enemyX = 0;
+		enemyY = 0;
 		this.gameOver = false;
 		this.environment = new LARCEnvironment(this);
 		this.agent = new LARCAgent();
@@ -63,39 +61,21 @@ public class LARCRobot extends AdvancedRobot {
 
 	@Override
 	public void onScannedRobot(ScannedRobotEvent event) {
-		setTurnGunRight(getHeading() - getGunHeading() + event.getBearing()); // auf den Gegener zielen
+		// point gun towards enemy:
+		setTurnGunRight(getHeading() - getGunHeading() + event.getBearing());
 
-		this.enemyHeading = this.getHeading();
+		this.angleToEnemy = event.getBearing();
 		this.distanceToEnemy = event.getDistance();
 		this.triangulateEnemyPosition();
-
 	}
 
 	private void triangulateEnemyPosition() {
-		double alpha = Math.abs(this.NIENTY - this.enemyHeading);
-		double gegenkathete = Math.sin(alpha) * this.distanceToEnemy;
-		double ankathete = Math.cos(alpha) * this.distanceToEnemy;
-		if (enemyHeading < 90 && enemyHeading >= 0) {
-			// rechts hoch
-			this.EnemyX = this.getX() + ankathete;
-			this.EnemyY = this.getY() + gegenkathete;
-			this.getEnemyGridPosition();
-		} else if (enemyHeading < 180 && enemyHeading >= 90) {
-			// rechts runter
-			this.EnemyX = this.getX() + ankathete;
-			this.EnemyY = this.getY() - gegenkathete;
-			this.getEnemyGridPosition();
-		} else if (enemyHeading < 270 && enemyHeading >= 180) {
-			// links runter
-			this.EnemyX = this.getX() - ankathete;
-			this.EnemyY = this.getY() - gegenkathete;
-			this.getEnemyGridPosition();
-		} else {
-			// links hoch
-			this.EnemyX = this.getX() - ankathete;
-			this.EnemyY = this.getY() + gegenkathete;
-			this.getEnemyGridPosition();
-		}
+		// Normalisierter Winkel zwischen uns und Gegner (Radiant)
+		double angle = Math.toRadians(((this.getHeading() + angleToEnemy) % 360));
+
+		// Dreiecks Winkelformeln lösen nach:
+		this.enemyX = (this.getX() + Math.sin(angle) * this.distanceToEnemy); // Gegenkathete
+		this.enemyY = (this.getY() + Math.cos(angle) * this.distanceToEnemy); // Ankathete
 	}
 
 	public void getSelfGridPosition() {
@@ -123,11 +103,11 @@ public class LARCRobot extends AdvancedRobot {
 	}
 
 	public double getEnemyX() {
-		return EnemyX;
+		return enemyX;
 	}
 
 	public double getEnemyY() {
-		return EnemyY;
+		return enemyY;
 	}
 
 	@Override
