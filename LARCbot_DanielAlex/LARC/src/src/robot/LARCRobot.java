@@ -2,8 +2,8 @@ package src.robot;
 
 import java.awt.Graphics2D;
 
-import org.rlcommunity.rlglue.codec.util.AgentLoader;
-import org.rlcommunity.rlglue.codec.util.EnvironmentLoader;
+import org.rlcommunity.rlglue.codec.LocalGlue;
+import org.rlcommunity.rlglue.codec.RLGlue;
 
 import robocode.AdvancedRobot;
 import robocode.DeathEvent;
@@ -17,7 +17,7 @@ public class LARCRobot extends AdvancedRobot {
 
 	private LARCEnvironment environment;
 	private LARCAgent agent;
-
+	private LARCExperiment experiment;
 	private double enemyX;
 	private double enemyY;
 	private double angleToEnemy;
@@ -28,30 +28,37 @@ public class LARCRobot extends AdvancedRobot {
 	private Position enemyGridPos;
 
 	public LARCRobot() {
-
 		enemyX = 0;
 		enemyY = 0;
+		this.selfGridPos = new Position(1, 1);
+		this.enemyGridPos = new Position(2, 2);
 		this.gameOver = false;
 		this.environment = new LARCEnvironment(this);
-		this.agent = new LARCAgent();
-		AgentLoader theAgentLoader = new AgentLoader(agent);
-		// Create an environmentloader that will start the environment when its
-		// run method is called
-		EnvironmentLoader theEnvironmentLoader = new EnvironmentLoader(environment);
+		this.agent = new LARCAgent(this);
+		this.experiment = new LARCExperiment(this);
 
-		// Create threads so that the agent and environment can run
-		// asynchronously
-		Thread agentThread = new Thread(theAgentLoader);
-		Thread environmentThread = new Thread(theEnvironmentLoader);
+		// AgentLoader theAgentLoader = new AgentLoader(agent);
+		// // Create an environmentloader that will start the environment when its
+		// // run method is called
+		// EnvironmentLoader theEnvironmentLoader = new EnvironmentLoader(environment);
+		//
+		// // Create threads so that the agent and environment can run
+		// // asynchronously
+		// Thread agentThread = new Thread(theAgentLoader);
+		// Thread environmentThread = new Thread(theEnvironmentLoader);
+		//
+		// // Start the threads
+		// agentThread.start();
+		// environmentThread.start();
 
-		// Start the threads
-		agentThread.start();
-		environmentThread.start();
-
+		LocalGlue localGlueImplementation = new LocalGlue(environment, agent);
+		RLGlue.setGlue(localGlueImplementation);
+		experiment.start();
 	}
 
 	@Override
 	public void run() {
+
 		this.setAdjustRadarForGunTurn(true);
 		while (true) {
 			setTurnRadarLeft(360);
@@ -76,6 +83,17 @@ public class LARCRobot extends AdvancedRobot {
 		// Dreiecks Winkelformeln lösen nach:
 		this.enemyX = (this.getX() + Math.sin(angle) * this.distanceToEnemy); // Gegenkathete
 		this.enemyY = (this.getY() + Math.cos(angle) * this.distanceToEnemy); // Ankathete
+	}
+
+	public void move(double[] instructions) {
+		if (instructions[2] == 1.0) {
+			setFire(this.getEnergy() * 0.2);
+		}
+		setAhead(instructions[0]);
+		if (instructions[1] > 180.0) {
+			setTurnLeft(360 - instructions[1]);
+		}
+		setTurnRight(instructions[1]);
 	}
 
 	public void getSelfGridPosition() {

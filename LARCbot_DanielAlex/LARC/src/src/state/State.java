@@ -15,7 +15,7 @@ public class State {
 	private double energyRatio;
 	private ratioState health;
 
-	State(){
+	public State(){
 		this.stateID = ID_COUNTER;
 		ID_COUNTER++;
 	}
