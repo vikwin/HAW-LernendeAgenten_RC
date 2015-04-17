@@ -79,9 +79,11 @@ public class LARCbot extends AdvancedRobot {
 		switch (radarState) {
 			case SCANFINISHED:
 				envBuilder.create();
+				moveAgent.addReward(envBuilder.getReward());
 			case STOPPED:
 				doScan();
 				radarState = RadarState.SCANNING;
+				break;
 		}
 		
 		// MoveAgent updaten
@@ -90,7 +92,7 @@ public class LARCbot extends AdvancedRobot {
 				if (moveState.tickWaiting) {
 					computeAction(moveAgent.getNextAction(envBuilder.getMoveEnvId()));
 					moveState.tickWaiting = false;
-					movestate = MoveState.MOVING;
+					moveState = MoveState.MOVING;
 				}
 					
 		}
@@ -100,9 +102,6 @@ public class LARCbot extends AdvancedRobot {
 			// moveTo(new Vector2D(50,50));
 			computeAction(moveAgent.getNextAction(envBuilder.getMoveEnvId()));
 		// computeAction(attackAgent.getNextAction(envBuilder.getAttackEnvId()));
-		// //TODO
-
-		waitBeforeRescan = false;
 	}
 
 
@@ -153,6 +152,7 @@ public class LARCbot extends AdvancedRobot {
 		case "aa_gunfire_completed":
 			break;
 		case "radarturn_completed":
+			radarState = RadarState.SCANFINISHED;
 			break;
 		default:
 			System.out.println("Unbekannte CostomEvent Condition: " + name);
@@ -205,11 +205,11 @@ public class LARCbot extends AdvancedRobot {
 	private void doScan() {
 		// überspringe Aufruf, falls letzter Scan noch läuft oder noch nicht
 		// verarbeitet wurde
-		if (getRadarTurnRemaining() > 0 || waitBeforeRescan)
+		if (getRadarTurnRemaining() > 0)
 			return;
 
 		setTurnRadarRight(360);
-		waitBeforeRescan = true;
+		radarState = RadarState.SCANNING;
 	}
 
 	/**
