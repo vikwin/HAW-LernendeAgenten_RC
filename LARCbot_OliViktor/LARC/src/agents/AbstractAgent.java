@@ -69,7 +69,7 @@ public abstract class AbstractAgent {
 		queueEndIndex = (queueEndIndex + 1) % QUEUE_SIZE;
 	}
 	
-	protected void addRewardToLastActions(int reward) {
+	protected void addRewardToLastActions(double reward) {
 		int i = queueEndIndex;
 		double d = 1;
 		

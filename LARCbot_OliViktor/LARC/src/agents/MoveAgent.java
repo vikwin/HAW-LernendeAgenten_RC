@@ -23,7 +23,7 @@ public class MoveAgent extends AbstractAgent {
 		normalizedSuccessChance = SUCCESS_CHANCE - (Math.floorDiv(100 - SUCCESS_CHANCE, actionEnumSize - 1));
 		
 		actionList = new Double[gridFields * actionEnumSize];
-		Arrays.fill(actionList, 0.5);
+		Arrays.fill(actionList, 0);
 	}
 	
 	public MoveAgent() {
@@ -77,7 +77,7 @@ public class MoveAgent extends AbstractAgent {
 	}
 	
 	@Override
-	public void addReward(int reward) {
+	public void addReward(double reward) {
 		if (mode != AgentMode.FIGHTING) {
 			addRewardToLastActions(reward);
 		}

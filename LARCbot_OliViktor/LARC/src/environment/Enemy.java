@@ -10,7 +10,7 @@ public class Enemy {
 	private AdvancedRobot selfBot;
 	private String name;
 	private Vector2D position;
-	private double energy, heading, velocity, distance, bearing;
+	private double energy, energyDelta, heading, velocity, distance, bearing;
 	private long lastSeen;
 	
 	public Enemy(ScannedRobotEvent scannedBot, AdvancedRobot selfBot) {
@@ -31,6 +31,7 @@ public class Enemy {
 	 * @param scannedBot Der gescannte Bot
 	 */
 	public void updateAllAttributes(ScannedRobotEvent scannedBot) {
+		energyDelta = scannedBot.getEnergy() - energy;
 		energy = scannedBot.getEnergy();
 		heading = scannedBot.getHeading();
 		distance = scannedBot.getDistance();
@@ -70,6 +71,14 @@ public class Enemy {
 
 	public void setEnergy(double energy) {
 		this.energy = energy;
+	}
+
+	public double getEnergyDelta() {
+		return energyDelta;
+	}
+
+	public void setEnergyDelta(double energyDelta) {
+		this.energyDelta = energyDelta;
 	}
 
 	public double getHeading() {

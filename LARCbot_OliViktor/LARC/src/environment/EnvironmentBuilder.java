@@ -28,11 +28,14 @@ public class EnvironmentBuilder {
 
 	private HashMap<String, Enemy> enemies = new HashMap<String, Enemy>();
 	private AdvancedRobot selfBot;
+	private double selfBotLastEnergy;
 
 	private Environment moveEnv, attackEnv;
 
 	public EnvironmentBuilder(AdvancedRobot bot) {
 		selfBot = bot;
+		selfBotLastEnergy = selfBot.getEnergy();
+		
 		moveEnv = new MoveEnvironment(ROBOT_SIZE, GRID_SIZE,
 				(int) selfBot.getBattleFieldWidth(),
 				(int) selfBot.getBattleFieldHeight());
@@ -106,5 +109,20 @@ public class EnvironmentBuilder {
 	 */
 	public int getAttackEnvId() {
 		return attackEnv.getId();
+	}
+	
+	/**
+	 * Liefert eine Zahl für die Belohnung der Aktionen des Bots.
+	 * @return Die Belohnung
+	 */
+	public double getReward() {
+		double reward = selfBot.getEnergy() - selfBotLastEnergy;
+		selfBotLastEnergy = selfBot.getEnergy();
+		
+		for (Enemy e : enemies.values()) {
+			reward -= e.getEnergyDelta();
+		}
+		
+		return reward;
 	}
 }
