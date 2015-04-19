@@ -10,7 +10,7 @@ import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import robot.Action;
+import robot.actionsystem.Action;
 
 public abstract class AbstractAgent {
 	private static double DISCOUNT_RATE = 0.9;
@@ -86,7 +86,5 @@ public abstract class AbstractAgent {
 		} while (i != queueEndIndex);
 	}
 	
-	public abstract Action getNextAction(int stateID);
-	
-	public abstract void addReward(int reward);
+	public abstract void addReward(double reward);
 }

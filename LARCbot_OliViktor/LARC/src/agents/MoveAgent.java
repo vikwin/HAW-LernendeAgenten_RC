@@ -3,7 +3,7 @@ package agents;
 import java.util.Arrays;
 import java.util.Random;
 
-import robot.MoveAction;
+import robot.Movement;
 
 public class MoveAgent extends AbstractAgent {
 	private static int SUCCESS_CHANCE = 80;		// Erfolgswahrscheinlich, dass die bevorzugte Action ausgeführt wird, in Prozent
@@ -19,7 +19,7 @@ public class MoveAgent extends AbstractAgent {
 		super();
 		rnd = new Random();
 		
-		actionEnumSize = MoveAction.values().length;
+		actionEnumSize = Movement.values().length;
 		normalizedSuccessChance = SUCCESS_CHANCE - (Math.floorDiv(100 - SUCCESS_CHANCE, actionEnumSize - 1));
 		
 		actionList = new Double[gridFields * actionEnumSize];
@@ -47,8 +47,7 @@ public class MoveAgent extends AbstractAgent {
 		return maxID;
 	}
 	
-	@Override
-	public MoveAction getNextAction(int stateID) {
+	public Movement getNextAction(int stateID) {
 		int actionID = -1;
 		
 		switch (mode) {
@@ -73,7 +72,7 @@ public class MoveAgent extends AbstractAgent {
 		
 		addToLastActionQueue(stateID * actionEnumSize + actionID);
 		
-		return MoveAction.values()[actionID];
+		return Movement.values()[actionID];
 	}
 	
 	@Override

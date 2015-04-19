@@ -2,13 +2,12 @@ package robot;
 
 import utils.Vector2D;
 
-public enum MoveAction implements Action {
+public enum Movement {
 	UP, UPRIGHT, RIGHT, DOWNRIGHT, DOWN, DOWNLEFT, LEFT, UPLEFT, NOTHING;
 	
 	private static double MOVE_RADIUS = 40.0;
 	private static double MOVE_LEG_SIZE = Math.sqrt(2 * MOVE_RADIUS * MOVE_RADIUS);
 	
-	@Override
 	public int getID() {
 		return this.ordinal();
 	}
@@ -34,5 +33,5 @@ public enum MoveAction implements Action {
 		default:
 			return new Vector2D();
 		}
-	}	
+	}
 }
