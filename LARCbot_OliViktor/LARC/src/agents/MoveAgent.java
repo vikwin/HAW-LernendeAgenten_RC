@@ -47,7 +47,10 @@ public class MoveAgent extends AbstractAgent {
 		return maxID;
 	}
 	
+	@Override
 	public Movement getNextAction(int stateID) {
+		super.getNextAction(stateID);
+		
 		int actionID = -1;
 		
 		switch (mode) {
@@ -72,14 +75,14 @@ public class MoveAgent extends AbstractAgent {
 		
 		addToLastActionQueue(stateID * actionEnumSize + actionID);
 		
-		System.out.println("MoveAgent asked for next action and returns #" + actionID);
+//		System.out.println("MoveAgent asked for next action and returns #" + actionID);
 		
 		return Movement.values()[actionID];
 	}
 	
 	@Override
 	public void addReward(double reward) {
-		System.out.println("MoveAgent gets reward");
+//		System.out.println("MoveAgent gets reward");
 		if (mode != AgentMode.FIGHTING) {
 			addRewardToLastActions(reward);
 		}

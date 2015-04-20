@@ -48,7 +48,10 @@ public class AttackAgent extends AbstractAgent {
 		return maxID;
 	}
 
+	@Override
 	public Attack getNextAction(int stateID) {
+		super.getNextAction(stateID);
+		
 		int actionID = -1;
 
 		switch (mode) {
@@ -73,8 +76,8 @@ public class AttackAgent extends AbstractAgent {
 
 		addToLastActionQueue(stateID * numberOfActions + actionID);
 
-		System.out.println("AttackAgent asked for next action and returns #"
-				+ actionID);
+//		System.out.println("AttackAgent asked for next action and returns #"
+//				+ actionID);
 
 		if (actionID == numberOfActions - 1) {
 			// Nothing Action
@@ -86,7 +89,7 @@ public class AttackAgent extends AbstractAgent {
 
 	@Override
 	public void addReward(double reward) {
-		System.out.println("AttackAgent gets reward");
+//		System.out.println("AttackAgent gets reward");
 		if (mode != AgentMode.FIGHTING) {
 			addRewardToLastActions(reward);
 		}
