@@ -35,8 +35,10 @@ public class SerialAction implements Action {
 
 	@Override
 	public void update() {
-		if (actions.isEmpty())
+		if (actions.isEmpty()) {
+			finished = true;
 			return;
+		}
 
 		boolean changedCurrentAction = false;
 
