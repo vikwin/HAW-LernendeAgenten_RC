@@ -73,7 +73,7 @@ public class AttackAgent extends AbstractAgent {
 
 		addToLastActionQueue(stateID * numberOfActions + actionID);
 
-		System.out.println("MoveAgent asked for next action and returns #"
+		System.out.println("AttackAgent asked for next action and returns #"
 				+ actionID);
 
 		if (actionID == numberOfActions - 1) {
@@ -86,7 +86,7 @@ public class AttackAgent extends AbstractAgent {
 
 	@Override
 	public void addReward(double reward) {
-		System.out.println("MoveAgent gets reward");
+		System.out.println("AttackAgent gets reward");
 		if (mode != AgentMode.FIGHTING) {
 			addRewardToLastActions(reward);
 		}
