@@ -1,4 +1,4 @@
-package src.environment;
+package environment;
 
 import org.rlcommunity.rlglue.codec.EnvironmentInterface;
 import org.rlcommunity.rlglue.codec.taskspec.TaskSpec;
@@ -9,9 +9,9 @@ import org.rlcommunity.rlglue.codec.types.Action;
 import org.rlcommunity.rlglue.codec.types.Observation;
 import org.rlcommunity.rlglue.codec.types.Reward_observation_terminal;
 
-import src.robot.LARCRobot;
-import src.state.State;
-import src.utility.Position;
+import robot.LARCRobot;
+import state.State;
+import utility.Position;
 
 public class LARCEnvironment implements EnvironmentInterface {
 
@@ -22,11 +22,11 @@ public class LARCEnvironment implements EnvironmentInterface {
 	private static final int BATTLEFIELDHEIGHT = 600;
 
 	private GridStates[][] grid;
-	private int[] position;
 	private LARCRobot robot;
 	private double currentEnergyRatio;
 	private double previousEnergyRatio;
 	private State currentState;
+	private int lastReward;
 
 	private Position selfPos;
 	private Position enemyPos;
@@ -46,8 +46,7 @@ public class LARCEnvironment implements EnvironmentInterface {
 			}
 		}
 		this.currentEnergyRatio = 1;
-
-		position = new int[2];
+		this.lastReward = 0;
 
 		TaskSpecVRLGLUE3 theTaskSpecObject = new TaskSpecVRLGLUE3();
 		theTaskSpecObject.setEpisodic();
@@ -70,8 +69,10 @@ public class LARCEnvironment implements EnvironmentInterface {
 
 	@Override
 	public Observation env_start() {
-		// robot.getSelfGridPosition();
-		// robot.getEnemyGridPosition();
+
+		this.currentState.setSelfPos(this.robot.getSelfGridPos());
+		this.currentState.setEnemyPos(this.robot.getEnemyGridPos());
+		this.currentState.setHealthState(currentEnergyRatio);
 
 		Observation theObservation = new Observation(1, 0, 0);
 		theObservation.setInt(0, this.currentState.getStateID());
@@ -81,21 +82,21 @@ public class LARCEnvironment implements EnvironmentInterface {
 	@Override
 	public Reward_observation_terminal env_step(Action action) {
 		System.out.println("environmentstep");
-		robot.getEnemyGridPosition();
-		robot.getSelfGridPosition();
-		
-		this.currentState.setEnemyPos(enemyPos);
-		this.currentState.setSelfPos(selfPos);
-		this.currentState.setEnergyRatio(currentEnergyRatio);
-		
-		Observation theObservation = new Observation(1, 0, 0);
+
+		this.currentState.setSelfPos(this.robot.getSelfGridPos());
+		this.currentState.setEnemyPos(this.robot.getEnemyGridPos());
+		this.currentState.setHealthState(currentEnergyRatio);
+
+		Observation theObservation = new Observation(1, 0, 0); // warum 1,0,0 ???
 		theObservation.setInt(0, this.currentState.getStateID());
+
 		Reward_observation_terminal RewardObs = new Reward_observation_terminal();
 		RewardObs.setObservation(theObservation);
 		RewardObs.setTerminal(this.gameOver());
 		RewardObs.setReward(this.calculateReward());
 
 		this.previousEnergyRatio = this.currentEnergyRatio;
+		this.robot.setNextState(this.currentState);
 		return RewardObs;
 	}
 
@@ -112,12 +113,14 @@ public class LARCEnvironment implements EnvironmentInterface {
 
 	private double calculateReward() {
 		if (this.currentEnergyRatio > this.previousEnergyRatio) {
-			return 1;
+			this.lastReward = 1;
 		} else if (this.currentEnergyRatio < this.previousEnergyRatio) {
-			return -1;
+			this.lastReward = -1;
 		} else {
-			return 0;
+			this.lastReward = 0;
 		}
+		this.robot.setLastReward(lastReward);
+		return this.lastReward;
 	}
 
 	public boolean gameOver() {

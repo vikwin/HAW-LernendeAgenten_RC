@@ -1,4 +1,4 @@
-package src.robot;
+package robot;
 
 /*
  * Copyright 2008 Brian Tanner
