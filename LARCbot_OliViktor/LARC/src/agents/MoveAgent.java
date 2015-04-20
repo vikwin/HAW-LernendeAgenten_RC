@@ -23,7 +23,7 @@ public class MoveAgent extends AbstractAgent {
 		normalizedSuccessChance = SUCCESS_CHANCE - (Math.floorDiv(100 - SUCCESS_CHANCE, actionEnumSize - 1));
 		
 		actionList = new Double[gridFields * actionEnumSize];
-		Arrays.fill(actionList, 0);
+		Arrays.fill(actionList, new Double(0.0));
 	}
 	
 	public MoveAgent() {
@@ -49,6 +49,8 @@ public class MoveAgent extends AbstractAgent {
 	
 	public Movement getNextAction(int stateID) {
 		int actionID = -1;
+		
+		System.out.println("MoveAgent asked for next action");
 		
 		switch (mode) {
 		case RNDLEARN:
@@ -77,6 +79,7 @@ public class MoveAgent extends AbstractAgent {
 	
 	@Override
 	public void addReward(double reward) {
+		System.out.println("MoveAgent gets reward");
 		if (mode != AgentMode.FIGHTING) {
 			addRewardToLastActions(reward);
 		}
