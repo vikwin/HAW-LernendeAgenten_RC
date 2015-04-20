@@ -134,17 +134,17 @@ public class LARCbot extends ActorRobot {
 		double distance = getPosition().distanceTo(destination);
 
 		if (rotationAngle >= -90 && rotationAngle <= 90) {
-			// Nach rechts oder links drehen und vorwärts fahren
+			// Nach rechts oder links drehen und vorwärts fahren (Winkel zwischen -90 und 90)
 			turn = new TurnAction(rotationAngle);
 			move = new MoveAction(distance);
 
-		} else if (rotationAngle >= 0 && rotationAngle > 90) {
-			// Nach links drehen und rückwärts fahren
+		} else if (rotationAngle > 90) {
+			// Nach links drehen und rückwärts fahren (Winkel über 90)
 			turn = new TurnAction(rotationAngle - 180);
 			move = new MoveAction(-distance);
 
-		} else if (rotationAngle < 0 && rotationAngle < -90) {
-			// Nach rechts drehen und rückwärts fahren
+		} else {
+			// Nach rechts drehen und rückwärts fahren (Winkel unter -90)
 			turn = new TurnAction(180 + rotationAngle);
 			move = new MoveAction(distance);
 		}
@@ -187,39 +187,4 @@ public class LARCbot extends ActorRobot {
 		envBuilder.doPaint(g);
 
 	}
-
-	@Deprecated
-	private boolean isMoving() {
-		return getTurnRemaining() != 0 || getDistanceRemaining() != 0;
-	}
-
-	@Deprecated
-	private void moveTo(Vector2D destination) {
-		double rotationAngle = destination.subtract(getPosition())
-				.getNormalHeading();
-		double distance = getPosition().distanceTo(destination);
-
-		if (rotationAngle >= 0 && rotationAngle <= 90) {
-			// Nach rechts drehen und vorwärts fahren
-			setTurnRight(rotationAngle);
-			setAhead(distance);
-
-		} else if (rotationAngle >= 0 && rotationAngle > 90) {
-			// Nach links drehen und rückwärts fahren
-			setTurnLeft(rotationAngle - 90);
-			setBack(distance);
-
-		} else if (rotationAngle < 0 && rotationAngle >= -90) {
-			// Nach links drehen und vorwärts fahren
-			setTurnLeft(-rotationAngle);
-			setAhead(distance);
-
-		} else if (rotationAngle < 0 && rotationAngle < -90) {
-			// Nach rechts drehen und rückwärts fahren
-			setTurnRight(rotationAngle);
-			setAhead(distance);
-		}
-
-	}
-
 }
