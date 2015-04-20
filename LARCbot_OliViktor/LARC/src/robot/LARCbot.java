@@ -1,6 +1,8 @@
 package robot;
 
 import java.awt.Graphics2D;
+import java.io.FileWriter;
+import java.io.IOException;
 import java.util.Arrays;
 
 import robocode.CustomEvent;

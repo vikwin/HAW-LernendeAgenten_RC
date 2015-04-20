@@ -23,8 +23,8 @@ public class EnvironmentBuilder {
 														// MoveEnvironment)
 
 	private static final boolean DEBUG = false;
-	private static final boolean PAINT_ATTACK_ENV = false;
-	private static final boolean PAINT_MOVE_ENV = true;
+	private static final boolean PAINT_ATTACK_ENV = true;
+	private static final boolean PAINT_MOVE_ENV = false;
 
 	private HashMap<String, Enemy> enemies = new HashMap<String, Enemy>();
 	private AdvancedRobot selfBot;
