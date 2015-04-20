@@ -1,4 +1,4 @@
-package src.environment;
+package environment;
 
 public enum GridStates {
 	EMPTY, SELF, ENEMY;

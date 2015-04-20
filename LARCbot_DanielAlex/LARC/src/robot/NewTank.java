@@ -1,4 +1,4 @@
-package src.robot;
+package robot;
 
 import robocode.AdvancedRobot;
 import robocode.ScannedRobotEvent;
