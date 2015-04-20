@@ -1,8 +1,6 @@
 package robot;
 
 import java.awt.Graphics2D;
-import java.io.FileWriter;
-import java.io.IOException;
 import java.util.Arrays;
 
 import robocode.CustomEvent;
@@ -38,19 +36,23 @@ public class LARCbot extends ActorRobot {
 
 	public LARCbot() {
 		this.moveAgent = new MoveAgent();
-		this.attackAgent = new AttackAgent(100);
+		this.attackAgent = new AttackAgent(624);
 		this.radarState = RadarState.STOPPED;
 	}
 
 	@Override
 	public void run() {
 		super.run();
+	
 		createEvents();
 		// Der Environmentbuilder muss aus der run Methode heraus initialisiert
 		// werden, weil sonst der Zugriff auf die Eigenschaften des Spielfelds
 		// verwehrt wird
-		this.envBuilder = new EnvironmentBuilder(this);
-
+		envBuilder = new EnvironmentBuilder(this);
+		moveAgent = new MoveAgent();
+		attackAgent = new AttackAgent(envBuilder.getAttackEnvStateCount());
+	
+		
 		setAdjustGunForRobotTurn(true);
 		setAdjustRadarForGunTurn(true);
 		setAdjustRadarForRobotTurn(true);
@@ -94,8 +96,9 @@ public class LARCbot extends ActorRobot {
 		switch (radarState) {
 		case SCANFINISHED:
 			envBuilder.create();
-			moveAgent.addReward(envBuilder.getReward());
-			attackAgent.addReward(envBuilder.getReward());
+			double reward = envBuilder.getReward();
+			moveAgent.addReward(reward);
+			attackAgent.addReward(reward);
 			doScan();
 			break;
 		case STOPPED:
@@ -132,7 +135,7 @@ public class LARCbot extends ActorRobot {
 		Vector2D destination = getPosition().add(movement.getMoveVector());
 
 		double rotationAngle = destination.subtract(getPosition())
-				.getNormalHeading();
+				.getNormalHeading() - Utils.normalizeHeading(getHeading());
 
 		double distance = getPosition().distanceTo(destination);
 

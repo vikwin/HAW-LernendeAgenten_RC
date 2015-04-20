@@ -16,8 +16,6 @@ public class AttackEnvironment implements Environment {
 
 	private AttackEnvElement[][] ringStructure;
 
-	
-	// Aktuell 623 Felder
 	public AttackEnvironment(int ringDiameter, int ringElementSize,
 			Vector2D selfPosition, double gunHeading, int fieldWidth,
 			int fieldHeight) {
@@ -36,30 +34,30 @@ public class AttackEnvironment implements Environment {
 		for (int i = 0; i < ringStructure.length; i++) {
 			double ringWidth = 2 * i * ringDiameter + ringDiameter;
 			int anzahlFelder = (int) Utils.circlePerimeter(ringWidth / 2)
-			/ ringElementSize;
-		
+					/ ringElementSize;
+
 			System.out.printf("AttackEnvironment Ring %d hat %d Felder.\n",
-					i+1, anzahlFelder);
+					i + 1, anzahlFelder);
 			ringStructure[i] = new AttackEnvElement[anzahlFelder];
 		}
-		
+
 		clearEnvironment();
 	}
 
 	@Override
 	public void update(Collection<Enemy> enemies, AdvancedRobot selfBot) {
 		clearEnvironment();
-			
+
 		for (Enemy enemy : enemies) {
-			//TODO
+			// TODO
 		}
-		
+
 		// TODO: Felder updaten
 	}
-	
-	
+
 	/**
 	 * Berechnet die Feldindizes, in dem sich ein absoluter Ortsvektor befindet.
+	 * 
 	 * @return [Ringindex, Feldindex]
 	 */
 	private int[] getFieldByVector(Vector2D vector) {
@@ -116,25 +114,38 @@ public class AttackEnvironment implements Environment {
 
 	}
 
-	
 	/**
 	 * Diese Methode geht davon aus, dass wir nur einen einzigen Gegner haben!
-	 * Sollte es notwendig sein mehrere Gegner zu berücksichtigen MUSS diese Methode
-	 * für ein korrektes Verhalten angepasst werden.
+	 * Sollte es notwendig sein mehrere Gegner zu berücksichtigen MUSS diese
+	 * Methode für ein korrektes Verhalten angepasst werden.
 	 */
 	@Override
 	public int getId() {
 		int id = 0, i = 0, j = 0;
-		
-		
+
 		for (i = 0; i < ringStructure.length; i++) {
-			id += i * ringStructure[i].length;
-			for (j = 0; j < ringStructure[i].length; j++)
-				if (ringStructure[i][j] == AttackEnvElement.ENEMY)
+			for (j = 0; j < ringStructure[i].length; j++) {
+				if (ringStructure[i][j] == AttackEnvElement.ENEMY) {
+					System.out.printf("AttackEnv ID %d bei i=%d und j=%d\n", id
+							+ j, i, j);
 					return id + j;
+				}
+			}
+			id += j;
 		}
-		
-		return id + j + 1;
+		System.out.printf("AttackEnv ID %d bei i=%d und j=%d\n", id, i,
+				j);
+		return id;
+	}
+
+	@Override
+	public int getStateCount() {
+		int count = 0;
+
+		for (int i = 0; i < ringStructure.length; i++)
+			count += ringStructure[i].length;
+
+		return count + 1;
 	}
 
 }

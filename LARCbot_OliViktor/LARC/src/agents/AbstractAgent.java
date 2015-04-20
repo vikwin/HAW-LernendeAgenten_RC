@@ -54,7 +54,7 @@ public abstract class AbstractAgent {
 	 *             Wenn die angebene Datei nicht vorhanden ist oder nicht
 	 *             zugreifbar
 	 */
-	public void save(String filename) {
+	public void save(final String filename) {
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {

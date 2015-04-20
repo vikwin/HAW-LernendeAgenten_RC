@@ -35,6 +35,13 @@ public interface Environment {
 	 * @return Die ID
 	 */
 	public int getId();
+
+
+	/**
+	 * Liefert die Gesamtzahl der möglichen Umweltzustände.
+	 * @return Anzahl
+	 */
+	public int getStateCount();
 	
 
 }

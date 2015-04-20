@@ -117,4 +117,9 @@ public class MoveEnvironment implements Environment {
 		return selfFieldNum + field.length * field[0].length * enemyFieldNum;
 	}
 
+	@Override
+	public int getStateCount() {
+		return field.length * field[0].length * field.length * field[0].length;
+	}
+
 }
