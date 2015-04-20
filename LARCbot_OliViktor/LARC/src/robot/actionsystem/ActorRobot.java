@@ -4,16 +4,11 @@ import java.util.LinkedList;
 import java.util.List;
 
 import robocode.AdvancedRobot;
-import robocode.Condition;
-import robocode.CustomEvent;
-import robocode.GunTurnCompleteCondition;
-import robocode.MoveCompleteCondition;
-import robocode.TurnCompleteCondition;
 
 /**
- * Der ActorRobot ist eine abstrakte Klasse, die einen Eventbasierten Robot
- * darstellt. Dieser kann mit Actions umgehen und aktualisiert diese ständig.
- * Damit das funktioniert, MUSS die implementierende Klasse in jedem Durchlauf
+ * Der ActorRobot ist eine abstrakte Robot Klasse. Dieser kann mit Actions 
+ * umgehen und aktualisiert diese ständig.Damit das funktioniert, MUSS die 
+ * implementierende Klasse in jedem Durchlauf, also in der Hauptschleife,
  * updateActions() aufrufen.
  * 
  * Die Actions werden alle nacheinander "abgearbeitet". Ist eine Action zuende,
@@ -34,9 +29,9 @@ public abstract class ActorRobot extends AdvancedRobot {
 
 	@Override
 	public void run() {
-		createEvents();
+		//createEvents();
 	}
-	
+
 	/**
 	 * Liefert eine Liste aller noch bestehenden Actions.
 	 * 
@@ -54,7 +49,7 @@ public abstract class ActorRobot extends AdvancedRobot {
 	public void addAction(Action action) {
 		action.setActor(this);
 		actions.add(action);
-		
+
 		if (actions.size() == 1)
 			action.start();
 	}
@@ -74,52 +69,15 @@ public abstract class ActorRobot extends AdvancedRobot {
 		if (actions.isEmpty())
 			return;
 
-		boolean changedCurrentAction = false;
+		System.out.println("Aktuelle Action: " + actions.peek().toString());
 		
-		actions.peek().update();
+		actions.peek().start();
+		actions.peek().update(); // implizites Update durch Events
 
-		while (!actions.isEmpty() && actions.peek().hasFinished()) {
+		if (actions.peek().hasFinished())
 			actions.removeFirst();
-			changedCurrentAction = true;
-			
-			if (!actions.isEmpty())
-				actions.peek().update();		
-		}
 
-		if (!actions.isEmpty() && changedCurrentAction)
+		if (!actions.isEmpty())
 			actions.peek().start();
-	}
-
-	private void createEvents() {
-
-		// Bewegungs Conditiopns
-		MoveCompleteCondition movCond = new MoveCompleteCondition(this);
-		movCond.setName("botmove_completed");
-		this.addCustomEvent(movCond);
-
-		TurnCompleteCondition turnCond = new TurnCompleteCondition(this);
-		turnCond.setName("botturn_completed");
-		this.addCustomEvent(turnCond);
-
-		// Angriffs Conditions
-		GunTurnCompleteCondition gunTurnCond = new GunTurnCompleteCondition(
-				this);
-		gunTurnCond.setName("gunturn_completed");
-		this.addCustomEvent(gunTurnCond);
-
-		this.addCustomEvent(new Condition("gunfire_completed") {
-
-			@Override
-			public boolean test() {
-				return firing && getGunHeat() == 0;
-			}
-		});
-
-	}
-
-	@Override
-	public void onCustomEvent(CustomEvent event) {
-		actions.peek().update(event);
-	}
-
+		}
 }

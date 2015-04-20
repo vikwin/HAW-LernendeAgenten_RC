@@ -1,28 +1,36 @@
 package robot.actionsystem;
 
-import robocode.CustomEvent;
-
 /**
- * Interface für Action Objekte. Eine Action ist eine atomare Handlung, die ein ActorRobot durchführen
- * kann. 
+ * Abstrakte Klasse für Action Objekte. Eine Action ist eine atomare Handlung,
+ * die ein ActorRobot durchführen kann.
+ * 
  * @author Viktor Winkelmann
  *
  */
 
-public interface Action {
-	
-	public boolean hasFinished();
-	
-	public void start();
-	
-	public void stop();
-	
-	public void update();
-	
-	public void update(CustomEvent event);
-	
-	public void setActor(ActorRobot robot);
-	
-	
-	
+public abstract class Action {
+
+	boolean started, finished;
+	ActorRobot bot;
+
+	public Action() {
+		started = false;
+		finished = false;
+		bot = null;
+	}
+
+	public boolean hasFinished() {
+		return finished;
+	}
+
+	public abstract void start();
+
+	public abstract void stop();
+
+	public abstract void update();
+
+	public abstract void setActor(ActorRobot robot);
+
+	public abstract String toString();
+
 }

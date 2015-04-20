@@ -1,51 +1,48 @@
 package robot.actionsystem;
 
-import robocode.CustomEvent;
-
-public class GunTurnAction implements Action {
+/**
+ * GunTurnAction stellt die Drehung der Kanone um einen variablen Winkel dar.
+ * @author Viktor Winkelmann
+ *
+ */
+public class GunTurnAction extends Action {
 
 	private double angle;
-	private ActorRobot bot = null;
-	private boolean finished;
 	
 	public GunTurnAction(double degrees) {
 		angle = degrees;
-		finished = false;
-	}
-	
-	@Override
-	public boolean hasFinished() {
-		return finished;
 	}
 
 	@Override
 	public void start() {
-		bot.setTurnGunRight(angle);
+		if (!started) {
+			bot.setTurnGunRight(angle);
+			started = true;
+		}
 		
 	}
 
 	@Override
 	public void stop() {
-		bot.setTurnGunLeft(0);
+		if (started)
+			bot.setTurnGunLeft(0);
 	}
 
 	@Override
 	public void update() {
-		if (bot.getGunTurnRemaining() == 0)
+		if (started && bot.getGunTurnRemaining() == 0)
 			finished = true;
 		
 	}
 	
 	@Override
-	public void update(CustomEvent event) {
-		if (event.getCondition().getName().equals("gunturn_completed")) {
-			finished = true;
-		}
-	}
-
-	@Override
 	public void setActor(ActorRobot robot) {
 		bot = robot;
+	}
+	
+	@Override
+	public String toString() {
+		return String.format("GunTurnAction um %f Grad", angle);
 	}
 
 }

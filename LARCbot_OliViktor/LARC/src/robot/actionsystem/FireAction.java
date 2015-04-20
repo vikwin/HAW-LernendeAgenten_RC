@@ -1,51 +1,45 @@
 package robot.actionsystem;
 
-import robocode.CustomEvent;
-
-public class FireAction implements Action {
-
-	private double angle;
-	private ActorRobot bot = null;
-	private boolean finished;
+/**
+ * FireAction stellt das Abfeuern eines Schusses mit variabler Power dar.
+ * @author Viktor Winkelmann
+ *
+ */
+public class FireAction extends Action {
 	
-	public FireAction(double degrees) {
-		angle = degrees;
-		finished = false;
+	double power;
+	
+	public FireAction(double power) {
+		this.power = power;
 	}
 	
-	@Override
-	public boolean hasFinished() {
-		return finished;
-	}
-
 	@Override
 	public void start() {
-		bot.setTurnRight(angle);
-		
+		if (!started) {
+			bot.setFire(power);
+			started = true;
+		}	
 	}
 
 	@Override
 	public void stop() {
-		bot.setTurnLeft(0);
 	}
 
 	@Override
 	public void update() {
-		if (bot.getTurnRemaining() == 0)
-			finished = true;
-		
-	}
-	
-	@Override
-	public void update(CustomEvent event) {
-		if (event.getCondition().getName().equals("botturn_completed")) {
+		if (started && bot.getGunHeat() == 0) {
 			finished = true;
 		}
 	}
-
+	
 	@Override
 	public void setActor(ActorRobot robot) {
 		bot = robot;
+	}
+	
+	@Override
+	public String toString() {
+		return String.format("FireAction mit Power %f", power);
 	}
 
 }

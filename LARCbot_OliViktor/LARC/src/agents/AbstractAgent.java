@@ -10,8 +10,6 @@ import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
-import robot.actionsystem.Action;
-
 public abstract class AbstractAgent {
 	private static double DISCOUNT_RATE = 0.9;
 	private static int QUEUE_SIZE = 10;
@@ -23,7 +21,7 @@ public abstract class AbstractAgent {
 	private int queueEndIndex;
 	
 	protected AbstractAgent() {
-		mode = AgentMode.RNDLEARN;
+		mode = AgentMode.LEARNING;
 		
 		lastActionQueue = new int[QUEUE_SIZE];
 		Arrays.fill(lastActionQueue, -1);

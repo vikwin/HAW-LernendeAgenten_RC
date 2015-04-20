@@ -26,9 +26,9 @@ public class LARCbot extends ActorRobot {
 	private EnvironmentBuilder envBuilder;
 
 	private MoveAgent moveAgent;
-	
+
 	private RadarState radarState;
-	
+
 	private Action lastMoveAgentAction = null, lastAttackAgentAction = null;
 
 	public LARCbot() {
@@ -47,19 +47,17 @@ public class LARCbot extends ActorRobot {
 
 		setAdjustGunForRobotTurn(true);
 		setAdjustRadarForGunTurn(true);
-		setAdjustRadarForRobotTurn(true);		
+		setAdjustRadarForRobotTurn(true);
 
 		doScan();
-		
+
 		while (true) {
-			updateActions();
-			
 			act();
+			updateActions();
 			execute();
 		}
 
 	}
-
 
 	private void createEvents() {
 
@@ -69,12 +67,14 @@ public class LARCbot extends ActorRobot {
 		radCond.setName("radarturn_completed");
 		this.addCustomEvent(radCond);
 
+		System.out.println("CreateEvents in LARCbot");
+
 	}
-	
+
 	@Override
 	public void onCustomEvent(CustomEvent event) {
-		super.onCustomEvent(event);
-		
+		// super.onCustomEvent(event);
+
 		String name = event.getCondition().getName();
 
 		switch (name) {
@@ -84,81 +84,80 @@ public class LARCbot extends ActorRobot {
 		}
 
 	}
-	
+
 	private void act() {
 		// Radar updaten
 		switch (radarState) {
-			case SCANFINISHED:
-				envBuilder.create();
-				moveAgent.addReward(envBuilder.getReward());
-				// TODO Attackagent
-				doScan();
-				break;
-			case STOPPED:
-				doScan();
-				break;
+		case SCANFINISHED:
+			envBuilder.create();
+			moveAgent.addReward(envBuilder.getReward());
+			// TODO Attackagent
+			doScan();
+			break;
+		case STOPPED:
+			doScan();
+			break;
+		default:
+			break;
 		}
-		
+
 		// MoveAgent updaten
 		if (lastMoveAgentAction == null || lastMoveAgentAction.hasFinished()) {
-			lastMoveAgentAction = getSerialActionByMovement(moveAgent.getNextAction(envBuilder.getMoveEnvId()));
+			lastMoveAgentAction = getSerialActionByMovement(moveAgent
+					.getNextAction(envBuilder.getMoveEnvId()));
 			this.addAction(lastMoveAgentAction);
 			updateActions();
 		}
-		
+
 		// TODO Attackagent updaten
 	}
-		
+
 	private SerialAction getSerialActionByMovement(Movement movement) {
 		TurnAction turn = null;
 		MoveAction move = null;
 
-		if (movement == Movement.NOTHING) {
-			turn = new TurnAction(0);
-			move = new MoveAction(0);
-		} else {
-			Vector2D destination = getPosition().add(movement.getMoveVector());
-			
-			double rotationAngle = destination.subtract(getPosition())
-					.getNormalHeading();
-			double distance = getPosition().distanceTo(destination);
-	
-			
-			if (rotationAngle >= -90 && rotationAngle <= 90) {
-				// Nach rechts oder links drehen und vorwärts fahren
-				turn = new TurnAction(rotationAngle);
-				move = new MoveAction(distance);
-	
-			} else if (rotationAngle >= 0 && rotationAngle > 90) {
-				// Nach links drehen und rückwärts fahren
-				turn = new TurnAction(rotationAngle - 180);
-				move = new MoveAction(-distance);
-				
-			} else if (rotationAngle < 0 && rotationAngle < -90) {
-				// Nach rechts drehen und rückwärts fahren
-				turn = new TurnAction(180 - rotationAngle);
-				move = new MoveAction(distance);
-			}
+		if (movement == Movement.NOTHING)
+			return new SerialAction(Arrays.asList(new Action[] {}));
+
+		Vector2D destination = getPosition().add(movement.getMoveVector());
+
+		double rotationAngle = destination.subtract(getPosition())
+				.getNormalHeading();
+
+		double distance = getPosition().distanceTo(destination);
+
+		if (rotationAngle >= -90 && rotationAngle <= 90) {
+			// Nach rechts oder links drehen und vorwärts fahren
+			turn = new TurnAction(rotationAngle);
+			move = new MoveAction(distance);
+
+		} else if (rotationAngle >= 0 && rotationAngle > 90) {
+			// Nach links drehen und rückwärts fahren
+			turn = new TurnAction(rotationAngle - 180);
+			move = new MoveAction(-distance);
+
+		} else if (rotationAngle < 0 && rotationAngle < -90) {
+			// Nach rechts drehen und rückwärts fahren
+			turn = new TurnAction(180 + rotationAngle);
+			move = new MoveAction(distance);
 		}
-		
-		return new SerialAction(Arrays.asList(new Action[]{turn, move}));
+
+		return new SerialAction(Arrays.asList(new Action[] { turn, move }));
 	}
-	
-		/**
+
+	/**
 	 * Liefert einen Ortsvektor des Bots.
 	 * 
 	 * @return Ortsvektor
 	 */
 	public Vector2D getPosition() {
 		return Utils.getBotCoordinates(this);
-	}	
-	
-	
+	}
+
 	private void doScan() {
 		setTurnRadarRight(360);
 		radarState = RadarState.SCANNING;
 	}
-
 
 	@Override
 	public void onScannedRobot(ScannedRobotEvent event) {
@@ -170,12 +169,12 @@ public class LARCbot extends ActorRobot {
 		envBuilder.doPaint(g);
 
 	}
-	
+
 	@Deprecated
 	private boolean isMoving() {
 		return getTurnRemaining() != 0 || getDistanceRemaining() != 0;
 	}
-	
+
 	@Deprecated
 	private void moveTo(Vector2D destination) {
 		double rotationAngle = destination.subtract(getPosition())

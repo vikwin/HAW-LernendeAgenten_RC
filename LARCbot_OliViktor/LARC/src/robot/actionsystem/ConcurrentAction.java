@@ -3,26 +3,22 @@ package robot.actionsystem;
 import java.util.LinkedList;
 import java.util.List;
 
-import robocode.CustomEvent;
-
-public class ConcurrentAction implements Action {
+/**
+ * Wrapper Klasse zur Realisierung mehrerer gleichzeitig auszuführender Actions.
+ * @author Viktor Winkelmann
+ *
+ */
+public class ConcurrentAction extends Action {
 
 	LinkedList<Action> actions;
-	private ActorRobot bot = null;
-	private boolean finished;
 
 	public ConcurrentAction(List<Action> actions) {
 		this.actions = new LinkedList<>(actions);
-		finished = false;
-	}
-
-	@Override
-	public boolean hasFinished() {
-		return finished;
 	}
 
 	@Override
 	public void start() {
+		started = true;
 		for (Action action : actions)
 			action.start();
 	}
@@ -35,19 +31,12 @@ public class ConcurrentAction implements Action {
 
 	@Override
 	public void update() {
+		if (!started || actions.isEmpty())
+			return;
+
 		finished = true;
 		for (Action action : actions) {
 			action.update();
-			if (!action.hasFinished())
-				finished = false;
-		}
-	}
-
-	@Override
-	public void update(CustomEvent event) {
-		finished = true;
-		for (Action action : actions) {
-			action.update(event);
 			if (!action.hasFinished())
 				finished = false;
 		}
@@ -58,5 +47,19 @@ public class ConcurrentAction implements Action {
 		bot = robot;
 		for (Action action : actions)
 			action.setActor(bot);
+	}
+
+	@Override
+	public String toString() {
+		StringBuilder string = new StringBuilder("[");
+
+		for (Action action : actions)
+			string.append(action.toString() + ", ");
+
+		if (string.length() > 1)
+			string.delete(string.length() - 2, string.length());
+		string.append("]");
+
+		return String.format("ConcurrentAction mit Inhalt: %s", string);
 	}
 }

@@ -3,64 +3,53 @@ package robot.actionsystem;
 import java.util.LinkedList;
 import java.util.List;
 
-import robocode.CustomEvent;
-
-public class SerialAction implements Action {
+/**
+ * SerialAction stellt einen Wrapper für nacheinander auszuführende Actions dar.
+ * @author Viktor Winkelmann
+ *
+ */
+public class SerialAction extends Action {
 
 	LinkedList<Action> actions;
-	private ActorRobot bot = null;
-	private boolean finished;
 
 	public SerialAction(List<Action> actions) {
 		this.actions = new LinkedList<>(actions);
-		finished = false;
-	}
-
-	@Override
-	public boolean hasFinished() {
-		return finished;
 	}
 
 	@Override
 	public void start() {
-		if (!actions.isEmpty())
+		started = true;
+		if (!started && !actions.isEmpty()) 
 			actions.peek().start();
 	}
 
 	@Override
 	public void stop() {
-		if (!actions.isEmpty())
+		if (started && !actions.isEmpty())
 			actions.peek().stop();
 	}
 
 	@Override
 	public void update() {
+		if (!started)
+			return;
+
 		if (actions.isEmpty()) {
 			finished = true;
 			return;
 		}
 
-		boolean changedCurrentAction = false;
-
+		actions.peek().start();
 		actions.peek().update();
-
-		while (!actions.isEmpty() && actions.peek().hasFinished()) {
-			actions.removeFirst();
-			changedCurrentAction = true;
-
-			if (!actions.isEmpty())
-				actions.peek().update();
-		}
-
-		if (!actions.isEmpty() && changedCurrentAction)
-			actions.peek().start();
-
+		updateQueue();
 	}
 
-	@Override
-	public void update(CustomEvent event) {
+	private void updateQueue() {
+		if (actions.peek().hasFinished())
+			actions.removeFirst();
+
 		if (!actions.isEmpty())
-			actions.peek().update(event);
+			actions.peek().start();
 	}
 
 	@Override
@@ -69,4 +58,19 @@ public class SerialAction implements Action {
 		for (Action action : actions)
 			action.setActor(bot);
 	}
+
+	@Override
+	public String toString() {
+		StringBuilder string = new StringBuilder("[");
+
+		for (Action action : actions)
+			string.append(action.toString() + ", ");
+
+		if (string.length() > 1)
+			string.delete(string.length() - 2, string.length());
+		string.append("]");
+
+		return String.format("SerialAction mit Inhalt: %s", string);
+	}
+
 }
