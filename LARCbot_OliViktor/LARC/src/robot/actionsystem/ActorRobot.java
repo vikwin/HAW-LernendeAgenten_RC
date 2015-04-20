@@ -2,6 +2,7 @@ package robot.actionsystem;
 
 import java.util.LinkedList;
 import java.util.List;
+import java.util.function.Predicate;
 
 import robocode.AdvancedRobot;
 
@@ -11,8 +12,9 @@ import robocode.AdvancedRobot;
  * implementierende Klasse in jedem Durchlauf, also in der Hauptschleife,
  * updateActions() aufrufen.
  * 
- * Die Actions werden alle nacheinander "abgearbeitet". Ist eine Action zuende,
- * wird diese vergessen.
+ * Die Actions werden zeitgleich "abgearbeitet". Ist eine Action zuende,
+ * wird diese vergessen. Sollen Actions nacheinander ausgeführt werden,
+ * müssen diese in einer SerialAction zusammengefasst werden.
  * 
  * @author Viktor Winkelmann
  *
@@ -20,16 +22,9 @@ import robocode.AdvancedRobot;
 public abstract class ActorRobot extends AdvancedRobot {
 
 	private LinkedList<Action> actions;
-	public boolean firing;
 
 	public ActorRobot() {
-		firing = false;
 		actions = new LinkedList<Action>();
-	}
-
-	@Override
-	public void run() {
-		//createEvents();
 	}
 
 	/**
@@ -68,16 +63,20 @@ public abstract class ActorRobot extends AdvancedRobot {
 	public void updateActions() {
 		if (actions.isEmpty())
 			return;
-
-		System.out.println("Aktuelle Action: " + actions.peek().toString());
 		
-		actions.peek().start();
-		actions.peek().update(); // implizites Update durch Events
+		
+		for (Action action : actions) {
+			action.start();
+			action.update();
+		}
+		
+		actions.removeIf(new Predicate<Action>() {
 
-		if (actions.peek().hasFinished())
-			actions.removeFirst();
-
-		if (!actions.isEmpty())
-			actions.peek().start();
+			@Override
+			public boolean test(Action action) {
+				return action.hasFinished();
+			}
+			
+		});
 		}
 }

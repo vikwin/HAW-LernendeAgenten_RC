@@ -8,11 +8,14 @@ import robocode.RadarTurnCompleteCondition;
 import robocode.ScannedRobotEvent;
 import robot.actionsystem.Action;
 import robot.actionsystem.ActorRobot;
+import robot.actionsystem.FireAction;
+import robot.actionsystem.GunTurnAction;
 import robot.actionsystem.MoveAction;
 import robot.actionsystem.SerialAction;
 import robot.actionsystem.TurnAction;
 import utils.Utils;
 import utils.Vector2D;
+import agents.AttackAgent;
 import agents.MoveAgent;
 import environment.EnvironmentBuilder;
 
@@ -22,10 +25,10 @@ public class LARCbot extends ActorRobot {
 		STOPPED, SCANNING, SCANFINISHED;
 	}
 
-	// private boolean waitBeforeRescan = false;
 	private EnvironmentBuilder envBuilder;
 
 	private MoveAgent moveAgent;
+	private AttackAgent attackAgent;
 
 	private RadarState radarState;
 
@@ -73,8 +76,6 @@ public class LARCbot extends ActorRobot {
 
 	@Override
 	public void onCustomEvent(CustomEvent event) {
-		// super.onCustomEvent(event);
-
 		String name = event.getCondition().getName();
 
 		switch (name) {
@@ -91,7 +92,7 @@ public class LARCbot extends ActorRobot {
 		case SCANFINISHED:
 			envBuilder.create();
 			moveAgent.addReward(envBuilder.getReward());
-			// TODO Attackagent
+			attackAgent.addReward(envBuilder.getReward());
 			doScan();
 			break;
 		case STOPPED:
@@ -100,16 +101,22 @@ public class LARCbot extends ActorRobot {
 		default:
 			break;
 		}
-
-		// MoveAgent updaten
+		
+		// MoveAgent updaten und neue Action holen
 		if (lastMoveAgentAction == null || lastMoveAgentAction.hasFinished()) {
 			lastMoveAgentAction = getSerialActionByMovement(moveAgent
 					.getNextAction(envBuilder.getMoveEnvId()));
 			this.addAction(lastMoveAgentAction);
 			updateActions();
 		}
-
-		// TODO Attackagent updaten
+		
+		// AttackAgent updaten und neue Action holen
+		if (lastAttackAgentAction == null || lastAttackAgentAction.hasFinished()) {
+			lastAttackAgentAction = getSerialActionByAttack(attackAgent
+					.getNextAction(envBuilder.getAttackEnvId()));
+			this.addAction(lastAttackAgentAction);
+			updateActions();
+		}
 	}
 
 	private SerialAction getSerialActionByMovement(Movement movement) {
@@ -145,6 +152,17 @@ public class LARCbot extends ActorRobot {
 		return new SerialAction(Arrays.asList(new Action[] { turn, move }));
 	}
 
+	private SerialAction getSerialActionByAttack(Attack attack) {
+		if (attack == Attack.NOTHING)
+			return new SerialAction(Arrays.asList(new Action[] {}));
+
+		GunTurnAction gunturn = new GunTurnAction(attack.getDirection());
+		FireAction fire = new FireAction(attack.getPower().toDouble());
+
+		return new SerialAction(Arrays.asList(new Action[] { gunturn, fire }));
+	}
+
+	
 	/**
 	 * Liefert einen Ortsvektor des Bots.
 	 * 
