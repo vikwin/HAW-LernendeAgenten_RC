@@ -36,6 +36,7 @@ public class LARCbot extends ActorRobot {
 
 	public LARCbot() {
 		this.moveAgent = new MoveAgent();
+		this.attackAgent = new AttackAgent(100);
 		this.radarState = RadarState.STOPPED;
 	}
 
