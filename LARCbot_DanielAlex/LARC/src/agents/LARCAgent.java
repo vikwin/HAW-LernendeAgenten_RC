@@ -1,5 +1,12 @@
 package agents;
 
+import java.io.DataInputStream;
+import java.io.DataOutputStream;
+import java.io.File;
+import java.io.FileInputStream;
+import java.io.FileNotFoundException;
+import java.io.FileOutputStream;
+import java.io.IOException;
 import java.util.Random;
 
 import org.rlcommunity.rlglue.codec.AgentInterface;
@@ -11,11 +18,13 @@ import robot.LARCRobot;
 
 public class LARCAgent implements AgentInterface {
 
+	public static final String PATH = "la.txt";
+
 	public static final int NO_OF_STATES = 270000;
 	public static final int NO_OF_ACTIONS = 16;
-	public static final int INITIAL_Q_VALUE = 0;
+	public static final double INITIAL_Q_VALUE = 0.5;
 	private Random randGenerator = new Random();
-	private double sarsa_stepsize = 0.1; // TBD
+	// private double sarsa_stepsize = 0.1; // TBD
 	private double sarsa_epsilon = 0.1; // Exploration rate
 	private double sarsa_gamma = 0.9; // Time Discount factor
 	private double sarsa_alpha = 0.5; // learning rate (importance of new information)
@@ -50,11 +59,15 @@ public class LARCAgent implements AgentInterface {
 		assert (!theTaskSpec.getDiscreteActionRange(0).hasSpecialMaxStatus());
 
 		valueFunction = new double[NO_OF_ACTIONS][NO_OF_STATES];
+		
 		for (int i = 0; i < NO_OF_ACTIONS; i++) {
 			for (int j = 0; j < NO_OF_STATES; j++) {
 				valueFunction[i][j] = INITIAL_Q_VALUE;
 			}
 		}
+		
+		loadValueFunction(PATH);
+
 	}
 
 	/**
@@ -86,8 +99,6 @@ public class LARCAgent implements AgentInterface {
 	// agent_step should implement the learning function!
 	@Override
 	public Action agent_step(double reward, Observation observation) {
-		System.out.println("agentstep");
-
 		// pick action
 		int newActionInt = egreedy(observation.getInt(0));
 
@@ -101,7 +112,6 @@ public class LARCAgent implements AgentInterface {
 		SpecificAction nextAction = SpecificAction.values()[newActionInt];
 
 		this.myRobot.move(this.myAction.getMoveVector(nextAction));
-		System.out.println(newActionInt);
 
 		// AGENT LEARNING:
 		this.oldQValue = this.valueFunction[lastGlueAction.getInt(0)][lastObservation.getInt(0)];
@@ -124,11 +134,11 @@ public class LARCAgent implements AgentInterface {
 
 		// sarsa-function:
 		this.newQValue = this.oldQValue + sarsa_alpha * (reward - this.oldQValue);
-		
+
 		if (!policyFrozen) {
 			this.valueFunction[lastGlueAction.getInt(0)][lastObservation.getInt(0)] = this.newQValue;
 		}
-		
+		saveValueFunction(PATH);
 		lastObservation = null;
 		lastGlueAction = null;
 	}
@@ -169,5 +179,45 @@ public class LARCAgent implements AgentInterface {
 			}
 		}
 		return maxIndex;
+	}
+
+	private void saveValueFunction(String theFileName) {
+		try {
+			DataOutputStream DO = new DataOutputStream(new FileOutputStream(new File(theFileName)));
+			for (int a = 0; a < NO_OF_ACTIONS; a++) {
+				for (int s = 0; s < NO_OF_STATES; s++) {
+					DO.writeDouble(valueFunction[a][s]);
+				}
+			}
+			DO.close();
+		} catch (FileNotFoundException ex) {
+			System.err.println("Problem saving value function to file: " + theFileName + " :: " + ex);
+		} catch (IOException ex) {
+			System.err.println("Problem writing value function to file:: " + ex);
+		}
+
+	}
+
+	/**
+	 * Loads the value function from a file named theFileName. Must be called after init but before cleanup.
+	 * 
+	 * @param theFileName
+	 */
+	private void loadValueFunction(String theFileName) {
+		try {
+			DataInputStream DI = new DataInputStream(new FileInputStream(new File(theFileName)));
+			for (int a = 0; a < NO_OF_ACTIONS; a++) {
+				for (int s = 0; s < NO_OF_STATES; s++) {
+					valueFunction[a][s] = DI.readDouble();
+				}
+			}
+			DI.close();
+		} catch (FileNotFoundException ex) {
+
+			System.err.println("Problem loading value function from file: " + theFileName + " :: " + ex);
+		} catch (IOException ex) {
+			System.err.println("Problem reading value function from file:: " + ex);
+
+		}
 	}
 }

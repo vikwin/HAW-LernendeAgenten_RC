@@ -181,6 +181,10 @@ public class LARCRobot extends AdvancedRobot {
 		this.nextState = nextState;
 	}
 
+	public double getEnergyRatio() {
+		return energyRatio;
+	}
+
 	@Override
 	public void onPaint(Graphics2D g) {
 		// Set the paint color to red

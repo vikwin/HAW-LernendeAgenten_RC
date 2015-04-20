@@ -11,7 +11,6 @@ import org.rlcommunity.rlglue.codec.types.Reward_observation_terminal;
 
 import robot.LARCRobot;
 import state.State;
-import utility.Position;
 
 public class LARCEnvironment implements EnvironmentInterface {
 
@@ -27,9 +26,6 @@ public class LARCEnvironment implements EnvironmentInterface {
 	private double previousEnergyRatio;
 	private State currentState;
 	private int lastReward;
-
-	private Position selfPos;
-	private Position enemyPos;
 
 	public LARCEnvironment(LARCRobot robot) {
 		this.robot = robot;
@@ -69,6 +65,10 @@ public class LARCEnvironment implements EnvironmentInterface {
 
 	@Override
 	public Observation env_start() {
+		this.currentEnergyRatio = this.robot.getEnergyRatio();
+
+		this.robot.getSelfGridPosition();
+		this.robot.getEnemyGridPosition();
 
 		this.currentState.setSelfPos(this.robot.getSelfGridPos());
 		this.currentState.setEnemyPos(this.robot.getEnemyGridPos());
@@ -81,7 +81,10 @@ public class LARCEnvironment implements EnvironmentInterface {
 
 	@Override
 	public Reward_observation_terminal env_step(Action action) {
-		System.out.println("environmentstep");
+		this.currentEnergyRatio = this.robot.getEnergyRatio();
+
+		this.robot.getSelfGridPosition();
+		this.robot.getEnemyGridPosition();
 
 		this.currentState.setSelfPos(this.robot.getSelfGridPos());
 		this.currentState.setEnemyPos(this.robot.getEnemyGridPos());

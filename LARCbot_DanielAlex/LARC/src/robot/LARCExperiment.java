@@ -169,9 +169,7 @@ public class LARCExperiment extends Thread {
 
 		RLGlue.RL_start();
 		while (!myRobot.getGameOver()) {
-			System.out.println("go into step");
 			RLGlue.RL_step();
-			System.out.println("out of step");
 		}
 		// RLGlue.RL_return();
 		// System.out.println("Telling the environment to print the current state to the screen.");
