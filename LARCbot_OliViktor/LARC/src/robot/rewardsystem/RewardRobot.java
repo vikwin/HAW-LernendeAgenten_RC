@@ -1,6 +1,5 @@
 package robot.rewardsystem;
 
-import robocode.AdvancedRobot;
 import robocode.BulletHitBulletEvent;
 import robocode.BulletHitEvent;
 import robocode.BulletMissedEvent;
@@ -9,6 +8,7 @@ import robocode.HitByBulletEvent;
 import robocode.HitRobotEvent;
 import robocode.HitWallEvent;
 import robocode.RobotDeathEvent;
+import robot.actionsystem.ActorRobot;
 
 /**
  * Der RewardRobot ist eine abstrakte Robot Klasse. Dieser wertet Events
@@ -21,7 +21,7 @@ import robocode.RobotDeathEvent;
  * @author Oliver Niebsch
  *
  */
-public abstract class RewardRobot extends AdvancedRobot {
+public abstract class RewardRobot extends ActorRobot {
 	private static final double BULLET_REWARD = 20;		// Belohnung / Bestrafung für eine Kugel, wird mit der Power der Kugel multipliziert
 	private static final double HIT_REWARD = 10;		// Belohnung / Bestrafung wenn der Roboter gegen etwas gegen fährt
 	private static final double VICTORY_REWARD = 100;	// Belohnung für dem Sieg, Bestrafung für die Niederlage  

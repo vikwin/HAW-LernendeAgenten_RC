@@ -4,7 +4,7 @@ import java.util.LinkedList;
 import java.util.List;
 import java.util.function.Predicate;
 
-import robot.rewardsystem.RewardRobot;
+import robocode.AdvancedRobot;
 
 /**
  * Der ActorRobot ist eine abstrakte Robot Klasse. Dieser kann mit Actions 
@@ -19,7 +19,7 @@ import robot.rewardsystem.RewardRobot;
  * @author Viktor Winkelmann
  *
  */
-public abstract class ActorRobot extends RewardRobot {
+public abstract class ActorRobot extends AdvancedRobot {
 
 	private LinkedList<Action> actions;
 

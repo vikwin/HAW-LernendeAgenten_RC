@@ -1,26 +1,31 @@
 package robot;
 
 import java.awt.Graphics2D;
+import java.io.File;
+import java.io.IOException;
 import java.util.Arrays;
 
+import org.json.simple.parser.ParseException;
+
+import robocode.BattleEndedEvent;
 import robocode.CustomEvent;
 import robocode.RadarTurnCompleteCondition;
 import robocode.ScannedRobotEvent;
 import robot.actionsystem.Action;
-import robot.actionsystem.ActorRobot;
 import robot.actionsystem.FireAction;
 import robot.actionsystem.GunTurnAction;
 import robot.actionsystem.MoveAction;
 import robot.actionsystem.SerialAction;
 import robot.actionsystem.TurnAction;
+import robot.rewardsystem.RewardRobot;
 import utils.Utils;
 import utils.Vector2D;
 import agents.AttackAgent;
 import agents.MoveAgent;
 import environment.EnvironmentBuilder;
 
-public class LARCbot extends ActorRobot {
-	// Gibt an, ob das einfach Belohnungssystem (per Energieäderungen) oder das Event basierte System verwendet werden soll
+public class LARCbot extends RewardRobot {
+	// Gibt an, ob das einfache Belohnungssystem (per Energieäderungen) oder das Event basierte System verwendet werden soll
 	private static final boolean USE_SIMPLE_REWARD_SYSTEM = false;
 
 	private enum RadarState {
@@ -51,6 +56,30 @@ public class LARCbot extends ActorRobot {
 		envBuilder = new EnvironmentBuilder(this);
 		moveAgent = new MoveAgent();
 		attackAgent = new AttackAgent(envBuilder.getAttackEnvStateCount());
+		
+		File ma_mem = new File("LARCAgents\\moveagent.json");
+		if (ma_mem.exists() && !ma_mem.isDirectory())
+			try {
+				moveAgent.load("LARCAgents\\moveagent");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
+	
+		File aa_mem = new File("LARCAgents\\attackagent.json");
+		if (aa_mem.exists() && !aa_mem.isDirectory())
+			try {
+				attackAgent.load("LARCAgents\\attackagent");
+			} catch (IOException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			} catch (ParseException e) {
+				// TODO Auto-generated catch block
+				e.printStackTrace();
+			}
 	
 		
 		setAdjustGunForRobotTurn(true);
@@ -195,5 +224,13 @@ public class LARCbot extends ActorRobot {
 	public void onPaint(Graphics2D g) {
 		envBuilder.doPaint(g);
 
+	}
+	
+	@Override
+	public void onBattleEnded(BattleEndedEvent event) {
+		super.onBattleEnded(event);
+		
+		attackAgent.save("LARCAgents\\attackagent");
+		moveAgent.save("LARCAgents\\moveagent");
 	}
 }
