@@ -13,7 +13,7 @@ public class AttackEnvironment implements Environment {
 
 	private static final boolean DEBUG = false;
 
-	private int ringDiameter;
+	private int ringThickness;
 	private Vector2D selfPosition;
 	private double gunHeading;
 
@@ -22,7 +22,7 @@ public class AttackEnvironment implements Environment {
 	public AttackEnvironment(int ringThickness, int ringElementSize,
 			Vector2D selfPosition, double gunHeading, int battleFieldWidth,
 			int battleFieldHeight) {
-		this.ringDiameter = ringThickness;
+		this.ringThickness = ringThickness;
 		this.selfPosition = selfPosition;
 		this.gunHeading = gunHeading;
 
@@ -80,7 +80,7 @@ public class AttackEnvironment implements Environment {
 		if (DEBUG)
 			System.out.printf("Gegner liegt in Winkel %f\n", direction);
 
-		int ringIndex = (int) ((distance - ringDiameter / 2) / ringDiameter);
+		int ringIndex = (int) ((distance - ringThickness / 2) / ringThickness);
 		if (ringIndex >= ringStructure.length) // Sonderfall: Gegner ist weiter
 												// entfernt als RingStructure
 												// zulässt
@@ -106,7 +106,7 @@ public class AttackEnvironment implements Environment {
 	public void doPaint(Graphics2D g) {
 		// Zeichne die Blickrichtung als grünen Punkt ein
 		g.setColor(new Color(0x00, 0xff, 0x00, 0x80));
-		Vector2D aim = selfPosition.add((new Vector2D(0, ringDiameter))
+		Vector2D aim = selfPosition.add((new Vector2D(0, ringThickness))
 				.rotate(gunHeading));
 		g.fillArc((int) (aim.getX() - 7.5), (int) (aim.getY() - 7.5), 15, 15,
 				0, 360);
@@ -114,22 +114,22 @@ public class AttackEnvironment implements Environment {
 		// Zeichne die Ringstruktur und die Felder in gelb ein
 		g.setColor(new Color(0xdf, 0xff, 0x00, 0x80));
 		// Zeichne zunächst einen Ring um den Bot selbst
-		g.drawArc((int) selfPosition.getX() - ringDiameter / 2,
-				(int) selfPosition.getY() - ringDiameter / 2, ringDiameter,
-				ringDiameter, 0, 360);
+		g.drawArc((int) selfPosition.getX() - ringThickness / 2,
+				(int) selfPosition.getY() - ringThickness / 2, ringThickness,
+				ringThickness, 0, 360);
 		// Zeichne alle anderen Ringe und die Felder
 		int ringIndex, fieldIndex, circleSize;
 		double rotation;
 		Vector2D vectorA, vectorB;
 		for (ringIndex = 0; ringIndex < ringStructure.length; ringIndex++) {
-			circleSize = ringDiameter + (ringIndex + 1) * ringDiameter * 2;
+			circleSize = ringThickness + (ringIndex + 1) * ringThickness * 2;
 			g.drawArc((int) selfPosition.getX() - circleSize / 2,
 					(int) selfPosition.getY() - circleSize / 2, circleSize,
 					circleSize, 0, 360);
 			for (fieldIndex = 0; fieldIndex < ringStructure[ringIndex].length; fieldIndex++) {
-				vectorA = new Vector2D(0, ringDiameter / 2 + ringIndex
-						* ringDiameter);
-				vectorB = vectorA.add(new Vector2D(0, ringDiameter));
+				vectorA = new Vector2D(0, ringThickness / 2 + ringIndex
+						* ringThickness);
+				vectorB = vectorA.add(new Vector2D(0, ringThickness));
 				rotation = gunHeading + fieldIndex * 360.0
 						/ ringStructure[ringIndex].length;
 				vectorA = selfPosition.add(vectorA.rotate(rotation));
@@ -155,32 +155,32 @@ public class AttackEnvironment implements Environment {
 		Vector2D workVector;
 
 		// Punkt unten links berechnen und einfügen
-		workVector = new Vector2D(0, ringDiameter / 2 + ringIndex
-				* ringDiameter);
+		workVector = new Vector2D(0, ringThickness / 2 + ringIndex
+				* ringThickness);
 		workVector = workVector.rotate(gunHeading + fieldIndex * 360.0
 				/ ringStructure[ringIndex].length);
 		workVector = selfPosition.add(workVector);
 		p.addPoint((int) workVector.getX(), (int) workVector.getY());
 
 		// Punkt unten rechts berechnen und einfügen
-		workVector = new Vector2D(0, ringDiameter / 2 + ringIndex
-				* ringDiameter);
+		workVector = new Vector2D(0, ringThickness / 2 + ringIndex
+				* ringThickness);
 		workVector = workVector.rotate(gunHeading + (fieldIndex + 1) * 360.0
 				/ ringStructure[ringIndex].length);
 		workVector = selfPosition.add(workVector);
 		p.addPoint((int) workVector.getX(), (int) workVector.getY());
 
 		// Punkt oben rechts berechnen und einfügen
-		workVector = new Vector2D(0, ringDiameter / 2 + (ringIndex + 1)
-				* ringDiameter);
+		workVector = new Vector2D(0, ringThickness / 2 + (ringIndex + 1)
+				* ringThickness);
 		workVector = workVector.rotate(gunHeading + (fieldIndex + 1) * 360.0
 				/ ringStructure[ringIndex].length);
 		workVector = selfPosition.add(workVector);
 		p.addPoint((int) workVector.getX(), (int) workVector.getY());
 
 		// Punkt oben links berechnen und einfügen
-		workVector = new Vector2D(0, ringDiameter / 2 + (ringIndex + 1)
-				* ringDiameter);
+		workVector = new Vector2D(0, ringThickness / 2 + (ringIndex + 1)
+				* ringThickness);
 		workVector = workVector.rotate(gunHeading + fieldIndex * 360.0
 				/ ringStructure[ringIndex].length);
 		workVector = selfPosition.add(workVector);
