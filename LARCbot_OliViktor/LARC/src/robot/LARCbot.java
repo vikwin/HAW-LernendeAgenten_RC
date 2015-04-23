@@ -37,8 +37,6 @@ public class LARCbot extends ActorRobot {
 	private Action lastMoveAgentAction = null, lastAttackAgentAction = null;
 
 	public LARCbot() {
-		this.moveAgent = new MoveAgent();
-		this.attackAgent = new AttackAgent(624);
 		this.radarState = RadarState.STOPPED;
 	}
 
@@ -76,9 +74,6 @@ public class LARCbot extends ActorRobot {
 				this);
 		radCond.setName("radarturn_completed");
 		this.addCustomEvent(radCond);
-
-		System.out.println("CreateEvents in LARCbot");
-
 	}
 
 	@Override
