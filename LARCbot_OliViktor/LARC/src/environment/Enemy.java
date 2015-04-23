@@ -5,6 +5,11 @@ import robocode.ScannedRobotEvent;
 import utils.Utils;
 import utils.Vector2D;
 
+/**
+ * 	Die Klasse Enemy kapselt alle Informationen, die man über einen Gegner erhalten kann.
+ * @author Viktor Winkelmann
+ *
+ */
 public class Enemy {
 	
 	private AdvancedRobot selfBot;
@@ -48,30 +53,61 @@ public class Enemy {
 		return position;
 	}
 	
+	/**
+	 * Liefert den eindeutigen Namen eines Gegners. Eindeutig heißt hier,
+	 * dass in einem Match nie zwei Gegner den gleichen Namen haben. 
+	 * @return Name
+	 */
 	public String getName() {
 		return name;
 	}
 
+	/**
+	 * Setzt den eindeutigen Namen eines Gegners. Eindeutig heißt hier,
+	 * dass in einem Match nie zwei Gegner den gleichen Namen haben. 
+	 * @param name Name
+	 */
 	public void setName(String name) {
 		this.name = name;
 	}
 
+	/**
+	 * Liefert einen absoluten Ortsvektor des Gegners. 
+	 * @return Ortsvektor
+	 */
 	public Vector2D getPosition() {
 		return position;
 	}
 
+	/**
+	 * Setzt einen absoluten Ortsvektor des Gegners. 
+	 * @param position Ortsvektor
+	 */
 	public void setPosition(Vector2D position) {
 		this.position = position;
 	}
 
+	/**
+	 * Liefert die Energie des Gegners.
+	 * @return Energie
+	 */
 	public double getEnergy() {
 		return energy;
 	}
 
+	/**
+	 * Setzt die Energie des Gegners.
+	 * @param energy Energie
+	 */
 	public void setEnergy(double energy) {
 		this.energy = energy;
 	}
 
+	/**
+	 * Liefert die Differenz der Energie des Gegners seit dem letzten Aufruf
+	 * von getEnergyDelta().
+	 * @return Differenz
+	 */
 	public double getEnergyDelta() {
 		if (lastEnergy < 0)
 			return 0;
@@ -82,42 +118,86 @@ public class Enemy {
 		return delta;
 	}
 
+	/**
+	 * Liefert die Ausrichtung des Gegners im Bereich 0 bis 360 Grad.
+	 * @return Richtung
+	 */
 	public double getHeading() {
 		return heading;
 	}
 
+	/**
+	 * Setzt die Ausrichtung des Gegners im Bereich 0 bis 360 Grad.
+	 * @return Richtung
+	 */
+	
 	public void setHeading(double heading) {
-		this.heading = heading;
+		this.heading = heading % 360;
 	}
 
+	/**
+	 * Liefert die Geschwindigkeit des Gegners.
+	 * @return Geschwindigkeit
+	 */
 	public double getVelocity() {
 		return velocity;
 	}
 
+	/**
+	 * Setzt die Geschwindigkeit des Gegners.
+	 * @param velocity Geschwindigkeit
+	 */
 	public void setVelocity(double velocity) {
 		this.velocity = velocity;
 	}
 
+	/**
+	 * Liefert die Distanz zum Gegner.
+	 * @return Distanz
+	 */
 	public double getDistance() {
 		return distance;
 	}
 
+	/**
+	 * Setzt die Distanz zum Gegner.
+	 * @param distance Distanz
+	 */
 	public void setDistance(double distance) {
 		this.distance = distance;
 	}
 
+	/**
+	 * Liefert die Richtung in der sich der Gegner befindet, relativ zur eigenen Ausrichtung
+	 * im Bereich -180 bis +180 Grad.
+	 * @return Richtung
+	 */
 	public double getBearing() {
 		return bearing;
 	}
 
+	/**
+	 * Setzt die Richtung in der sich der Gegner befindet, relativ zur eigenen Ausrichtung
+	 * im Bereich -180 bis +180 Grad.
+	 * @param bearing Richtung
+	 */
+	
 	public void setBearing(double bearing) {
 		this.bearing = bearing;
 	}
 
+	/**
+	 * Liefert die Zeit, zu der der Gegner zuletzt gesehen wurde.
+	 * @return Zeit
+	 */
 	public long getLastSeen() {
 		return lastSeen;
 	}
 
+	/**
+	 * Setzt die Zeit, zu der der Gegner zuletzt gesehen wurde.
+	 * @param lastSeen Zeit
+	 */
 	public void setLastSeen(long lastSeen) {
 		this.lastSeen = lastSeen;
 	}
