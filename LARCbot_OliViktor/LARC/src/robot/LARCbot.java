@@ -20,6 +20,8 @@ import agents.MoveAgent;
 import environment.EnvironmentBuilder;
 
 public class LARCbot extends ActorRobot {
+	// Gibt an, ob das einfach Belohnungssystem (per Energieäderungen) oder das Event basierte System verwendet werden soll
+	private static final boolean USE_SIMPLE_REWARD_SYSTEM = false;
 
 	private enum RadarState {
 		STOPPED, SCANNING, SCANFINISHED;
@@ -96,9 +98,15 @@ public class LARCbot extends ActorRobot {
 		switch (radarState) {
 		case SCANFINISHED:
 			envBuilder.create();
-			double reward = envBuilder.getReward();
+			
+			double reward = 0.0;
+			if (USE_SIMPLE_REWARD_SYSTEM) 
+				reward = envBuilder.getReward();	// Belohnung für die Agents anhand der Energieverändeurng
+			else
+				reward = getReward();				// Belohnung für die Agents anhand diverser Events
 			moveAgent.addReward(reward);
 			attackAgent.addReward(reward);
+			
 			doScan();
 			break;
 		case STOPPED:

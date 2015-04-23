@@ -2,6 +2,7 @@ package agents;
 
 import java.util.Arrays;
 import java.util.Random;
+import java.util.concurrent.LinkedBlockingQueue;
 
 import robot.Attack;
 import robot.Attack.GunPower;
@@ -13,6 +14,7 @@ public class AttackAgent extends AbstractAgent {
 
 	private Random rnd;
 	private int numberOfActions, normalizedSuccessChance;
+	private LinkedBlockingQueue<Integer> lastShotActions;
 
 	/**
 	 * @param ringfields
@@ -29,6 +31,8 @@ public class AttackAgent extends AbstractAgent {
 
 		actionList = new Double[ringfields * numberOfActions];
 		Arrays.fill(actionList, new Double(0.0));
+		
+		lastShotActions = new LinkedBlockingQueue<Integer>();
 	}
 
 	private int getActionWithMaxValue(int startID) {
@@ -77,20 +81,37 @@ public class AttackAgent extends AbstractAgent {
 		addToLastActionQueue(stateID * numberOfActions + actionID);
 
 //		System.out.println("AttackAgent asked for next action and returns #"
-//				+ actionID);
+//				+ (actionID % 36));
 
 		if (actionID == numberOfActions - 1) {
 			// Nothing Action
 			return Attack.NOTHING;
 		}
 		
-		return new Attack(GunPower.values()[actionID / 36], actionID % 36);
+		try {
+			lastShotActions.put(stateID * numberOfActions + actionID);
+		} catch (InterruptedException e) {
+			e.printStackTrace();
+		}
+		
+		return new Attack(GunPower.values()[actionID / 36], (actionID % 36) * 10);
 	}
 
 	@Override
 	public void addReward(double reward) {
-//		System.out.println("AttackAgent gets reward");
+//		System.out.println("AttackAgent gets reward: " + reward);
 		if (mode != AgentMode.FIGHTING) {
+			addRewardToLastActions(reward);
+		}
+	}
+	
+	public void addReward(double reward, double shotReward) {
+		if (mode != AgentMode.FIGHTING) {
+			Integer shotActionId = lastShotActions.poll();
+			if (shotActionId != null) {
+				actionList[shotActionId] += shotReward;
+			}
+			
 			addRewardToLastActions(reward);
 		}
 	}

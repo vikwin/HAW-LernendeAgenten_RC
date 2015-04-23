@@ -15,7 +15,7 @@ import org.json.simple.parser.ParseException;
 
 public abstract class AbstractAgent {
 	private static final double DISCOUNT_RATE = 0.9;
-	private static final int QUEUE_SIZE = 10, SAVE_TIMES = 10000;
+	private static final int QUEUE_SIZE = 10, SAVE_TIMES = 100000;
 	
 	private static int actionCounter = 0;
 	private static int[] fileCounter = new int[] { 0, 0 };
@@ -102,9 +102,14 @@ public abstract class AbstractAgent {
 	}
 
 	protected void addRewardToLastActions(double reward) {
+		if (reward == 0)
+			return;
+		
+//		String type = (this instanceof MoveAgent) ? "Move" : "Attack";
 		int i = queueEndIndex;
 		double d = 1;
 
+//		System.out.printf("Belohne %s mit %s: ", type, Double.toString(reward));
 		do {
 			i = (i + 1) % QUEUE_SIZE;
 
@@ -113,9 +118,12 @@ public abstract class AbstractAgent {
 			}
 
 			actionList[lastActionQueue[i]] += reward * d;
+			
+//			System.out.printf("#%d - ", lastActionQueue[i]);
 
 			d *= DISCOUNT_RATE;
 		} while (i != queueEndIndex);
+//		System.out.println();
 	}
 
 	private String getFileName() {
