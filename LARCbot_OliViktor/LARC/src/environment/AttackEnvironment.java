@@ -23,7 +23,7 @@ public class AttackEnvironment implements Environment {
 		this.ringDiameter = ringDiameter;
 		this.selfPosition = selfPosition;
 		this.gunHeading = gunHeading;
-		
+
 		ringStructure = new AttackEnvElement[(int) Math.max(fieldWidth
 				/ ringDiameter, fieldHeight / ringDiameter)][];
 		System.out.printf("AttackEnvironment hat %d Ringe.\n",
@@ -70,8 +70,18 @@ public class AttackEnvironment implements Environment {
 
 		System.out.printf("Gegner liegt in Winkel %f\n", direction);
 
-		int ringIndex = (int) ((distance - ringDiameter) / ringDiameter); // Hier Fehler
+		int ringIndex = (int) ((distance - ringDiameter / 2) / ringDiameter);
+		if (ringIndex >= ringStructure.length) // Sonderfall: Gegner ist weiter
+												// entfernt als RingStructure
+												// zulässt
+			ringIndex = ringStructure.length - 1;
 		int fieldIndex = (int) (direction / (360.0 / ringStructure[ringIndex].length));
+		if (direction % (360.0 / ringStructure[ringIndex].length) == 0) // Sonderfall:
+																		// Position
+																		// direkt
+																		// auf
+																		// "Trennlinie"
+			fieldIndex--;
 
 		return new int[] { ringIndex, fieldIndex };
 	}
@@ -107,13 +117,16 @@ public class AttackEnvironment implements Environment {
 					(int) selfPosition.getY() - circleSize / 2, circleSize,
 					circleSize, 0, 360);
 			for (fieldIndex = 0; fieldIndex < ringStructure[ringIndex].length; fieldIndex++) {
-				vectorA = new Vector2D(0, ringDiameter/2 + ringIndex * ringDiameter);
+				vectorA = new Vector2D(0, ringDiameter / 2 + ringIndex
+						* ringDiameter);
 				vectorB = vectorA.add(new Vector2D(0, ringDiameter));
-				rotation = gunHeading + fieldIndex * 360.0 / ringStructure[ringIndex].length;
+				rotation = gunHeading + fieldIndex * 360.0
+						/ ringStructure[ringIndex].length;
 				vectorA = selfPosition.add(vectorA.rotate(rotation));
 				vectorB = selfPosition.add(vectorB.rotate(rotation));
-				
-				g.drawLine((int)vectorA.getX(), (int)vectorA.getY(), (int)vectorB.getX(), (int)vectorB.getY());
+
+				g.drawLine((int) vectorA.getX(), (int) vectorA.getY(),
+						(int) vectorB.getX(), (int) vectorB.getY());
 			}
 		}
 
