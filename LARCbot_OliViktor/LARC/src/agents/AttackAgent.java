@@ -130,6 +130,7 @@ public class AttackAgent extends AbstractAgent {
 		if (mode != AgentMode.FIGHTING) {
 			if (++actionCounter >= SAVE_TIMES) {
 				save(TIMESTAMP, "attack_agent_" + fileCounter++);
+				actionCounter = 0;
 			}
 			
 			addRewardToLastActions(reward);

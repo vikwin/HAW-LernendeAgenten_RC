@@ -113,6 +113,7 @@ public class MoveAgent extends AbstractAgent {
 		if (mode != AgentMode.FIGHTING) {
 			if (++actionCounter >= SAVE_TIMES) {
 				save(TIMESTAMP, "move_agent_" + fileCounter++);
+				actionCounter = 0;
 			}
 			
 			addRewardToLastActions(reward);
