@@ -81,6 +81,7 @@ public class LARCEnvironment implements EnvironmentInterface {
 
 	@Override
 	public Reward_observation_terminal env_step(Action action) {
+	
 		this.currentEnergyRatio = this.robot.getEnergyRatio();
 
 		this.robot.getSelfGridPosition();
@@ -116,7 +117,7 @@ public class LARCEnvironment implements EnvironmentInterface {
 
 	private double calculateReward() {
 		if (this.currentEnergyRatio > this.previousEnergyRatio) {
-			this.lastReward = 1;
+			this.lastReward = 10;
 		} else if (this.currentEnergyRatio < this.previousEnergyRatio) {
 			this.lastReward = -1;
 		} else {

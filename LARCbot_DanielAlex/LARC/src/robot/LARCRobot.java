@@ -70,8 +70,9 @@ public class LARCRobot extends AdvancedRobot {
 		this.setAdjustRadarForGunTurn(true);
 		while (true) {
 			// default actions:
-			setTurnRadarLeft(360);
+			setTurnRadarRight(360);
 			execute();
+			
 		}
 	}
 
@@ -79,7 +80,6 @@ public class LARCRobot extends AdvancedRobot {
 	public void onScannedRobot(ScannedRobotEvent event) {
 		// point gun towards enemy:
 		setTurnGunRight(getHeading() - getGunHeading() + event.getBearing());
-
 		// update enemy-related state variables:
 		this.angleToEnemy = event.getBearing();
 		this.distanceToEnemy = event.getDistance();
@@ -117,14 +117,13 @@ public class LARCRobot extends AdvancedRobot {
 	}
 
 	public void move(double[] instructions) {
-		if (instructions[2] == 1.0) {
-			setFire(this.getEnergy() * 0.2);
+		if (this.getVelocity() == 0) {
+			if (instructions[2] == 1.0) {
+				setFire(this.getEnergy() * 0.2);
+			}
+			setAhead(instructions[0]);
+			setTurnLeft(instructions[1]);
 		}
-		setAhead(instructions[0]);
-		if (instructions[1] > 180.0) {
-			setTurnLeft(360 - instructions[1]);
-		}
-		setTurnRight(instructions[1]);
 	}
 
 	public void getSelfGridPosition() {
