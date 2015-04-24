@@ -21,7 +21,8 @@ import agents.MoveAgent;
 import environment.EnvironmentBuilder;
 
 public class LARCbot extends RewardRobot {
-	// Gibt an, ob das einfache Belohnungssystem (per Energieäderungen) oder das Event basierte System verwendet werden soll
+	// Gibt an, ob das einfache Belohnungssystem (per Energieäderungen) oder das
+	// Event basierte System verwendet werden soll
 	private static final boolean USE_SIMPLE_REWARD_SYSTEM = false;
 
 	private enum RadarState {
@@ -44,7 +45,7 @@ public class LARCbot extends RewardRobot {
 	@Override
 	public void run() {
 		super.run();
-	
+
 		createEvents();
 		// Der Environmentbuilder muss aus der run Methode heraus initialisiert
 		// werden, weil sonst der Zugriff auf die Eigenschaften des Spielfelds
@@ -52,7 +53,7 @@ public class LARCbot extends RewardRobot {
 		envBuilder = new EnvironmentBuilder(this);
 		moveAgent = new MoveAgent();
 		attackAgent = new AttackAgent(envBuilder.getAttackEnvStateCount());
-		
+
 		setAdjustGunForRobotTurn(true);
 		setAdjustRadarForGunTurn(true);
 		setAdjustRadarForRobotTurn(true);
@@ -60,9 +61,13 @@ public class LARCbot extends RewardRobot {
 		doScan();
 
 		while (true) {
-			act();
-			updateActions();
-			execute();
+			if (getEnergy() <= 0)
+				doNothing();
+			else {
+				act();
+				updateActions();
+				execute();
+			}
 		}
 
 	}
@@ -93,15 +98,18 @@ public class LARCbot extends RewardRobot {
 		switch (radarState) {
 		case SCANFINISHED:
 			envBuilder.create();
-			
+
 			double reward = 0.0;
-			if (USE_SIMPLE_REWARD_SYSTEM) 
-				reward = envBuilder.getReward();	// Belohnung für die Agents anhand der Energieverändeurng
+			if (USE_SIMPLE_REWARD_SYSTEM)
+				reward = envBuilder.getReward(); // Belohnung für die Agents
+													// anhand der
+													// Energieverändeurng
 			else
-				reward = getReward();				// Belohnung für die Agents anhand diverser Events
+				reward = getReward(); // Belohnung für die Agents anhand
+										// diverser Events
 			moveAgent.addReward(reward);
 			attackAgent.addReward(reward);
-			
+
 			doScan();
 			break;
 		case STOPPED:
@@ -110,7 +118,7 @@ public class LARCbot extends RewardRobot {
 		default:
 			break;
 		}
-		
+
 		// MoveAgent updaten und neue Action holen
 		if (lastMoveAgentAction == null || lastMoveAgentAction.hasFinished()) {
 			lastMoveAgentAction = getSerialActionByMovement(moveAgent
@@ -118,9 +126,10 @@ public class LARCbot extends RewardRobot {
 			this.addAction(lastMoveAgentAction);
 			updateActions();
 		}
-		
+
 		// AttackAgent updaten und neue Action holen
-		if (lastAttackAgentAction == null || lastAttackAgentAction.hasFinished()) {
+		if (lastAttackAgentAction == null
+				|| lastAttackAgentAction.hasFinished()) {
 			lastAttackAgentAction = getSerialActionByAttack(attackAgent
 					.getNextAction(envBuilder.getAttackEnvId()));
 			this.addAction(lastAttackAgentAction);
@@ -143,7 +152,8 @@ public class LARCbot extends RewardRobot {
 		double distance = getPosition().distanceTo(destination);
 
 		if (rotationAngle >= -90 && rotationAngle <= 90) {
-			// Nach rechts oder links drehen und vorwärts fahren (Winkel zwischen -90 und 90)
+			// Nach rechts oder links drehen und vorwärts fahren (Winkel
+			// zwischen -90 und 90)
 			turn = new TurnAction(rotationAngle);
 			move = new MoveAction(distance);
 
@@ -171,7 +181,6 @@ public class LARCbot extends RewardRobot {
 		return new SerialAction(Arrays.asList(new Action[] { gunturn, fire }));
 	}
 
-	
 	/**
 	 * Liefert einen Ortsvektor des Bots.
 	 * 
@@ -196,11 +205,11 @@ public class LARCbot extends RewardRobot {
 		envBuilder.doPaint(g);
 
 	}
-	
+
 	@Override
 	public void onBattleEnded(BattleEndedEvent event) {
 		super.onBattleEnded(event);
-		
+
 		attackAgent.saveOnBattleEnd();
 		moveAgent.saveOnBattleEnd();
 	}
