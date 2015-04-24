@@ -1,8 +1,11 @@
 package agents;
 
+import java.io.IOException;
 import java.util.Arrays;
 import java.util.Random;
 import java.util.concurrent.LinkedBlockingQueue;
+
+import org.json.simple.parser.ParseException;
 
 import robot.Attack;
 import robot.Attack.GunPower;
@@ -12,9 +15,29 @@ public class AttackAgent extends AbstractAgent {
 											// bevorzugte Action ausgeführt
 											// wird, in Prozent
 
+	private static Double[] actionList;
+	
+	protected static void fillActionList(Double[] values) {
+		actionList = values;		
+	}
+	
+	static {
+		if (LOAD_ON_START) {
+			try {
+				load("attack_agent");
+			} catch (IOException e) {
+				e.printStackTrace();
+			} catch (ParseException e) {
+				e.printStackTrace();
+			}
+		}
+	}
+	
 	private Random rnd;
 	private int numberOfActions, normalizedSuccessChance;
 	private LinkedBlockingQueue<Integer> lastShotActions;
+	
+	private int actionCounter, fileCounter;
 
 	/**
 	 * @param ringfields
@@ -33,6 +56,14 @@ public class AttackAgent extends AbstractAgent {
 		Arrays.fill(actionList, new Double(0.0));
 		
 		lastShotActions = new LinkedBlockingQueue<Integer>();
+		
+		actionCounter = 0;
+		fileCounter = 0;
+	}
+	
+	@Override
+	protected Double[] getActionList() {
+		return actionList;
 	}
 
 	private int getActionWithMaxValue(int startID) {
@@ -52,10 +83,7 @@ public class AttackAgent extends AbstractAgent {
 		return maxID;
 	}
 
-	@Override
 	public Attack getNextAction(int stateID) {
-		super.getNextAction(stateID);
-		
 		int actionID = -1;
 
 		switch (mode) {
@@ -101,6 +129,10 @@ public class AttackAgent extends AbstractAgent {
 	public void addReward(double reward) {
 //		System.out.println("AttackAgent gets reward: " + reward);
 		if (mode != AgentMode.FIGHTING) {
+			if (++actionCounter >= SAVE_TIMES) {
+				save(TIMESTAMP + "\\attack_agent_" + fileCounter++);
+			}
+			
 			addRewardToLastActions(reward);
 		}
 	}
@@ -114,5 +146,10 @@ public class AttackAgent extends AbstractAgent {
 			
 			addRewardToLastActions(reward);
 		}
+	}
+
+	@Override
+	public void saveOnBattleEnd() {
+		save("LARCAgents\\attack_agent");
 	}
 }

@@ -1,11 +1,7 @@
 package robot;
 
 import java.awt.Graphics2D;
-import java.io.File;
-import java.io.IOException;
 import java.util.Arrays;
-
-import org.json.simple.parser.ParseException;
 
 import robocode.BattleEndedEvent;
 import robocode.CustomEvent;
@@ -56,31 +52,6 @@ public class LARCbot extends RewardRobot {
 		envBuilder = new EnvironmentBuilder(this);
 		moveAgent = new MoveAgent();
 		attackAgent = new AttackAgent(envBuilder.getAttackEnvStateCount());
-		
-		File ma_mem = new File("LARCAgents\\moveagent.json");
-		if (ma_mem.exists() && !ma_mem.isDirectory())
-			try {
-				moveAgent.load("LARCAgents\\moveagent");
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-	
-		File aa_mem = new File("LARCAgents\\attackagent.json");
-		if (aa_mem.exists() && !aa_mem.isDirectory())
-			try {
-				attackAgent.load("LARCAgents\\attackagent");
-			} catch (IOException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			} catch (ParseException e) {
-				// TODO Auto-generated catch block
-				e.printStackTrace();
-			}
-	
 		
 		setAdjustGunForRobotTurn(true);
 		setAdjustRadarForGunTurn(true);

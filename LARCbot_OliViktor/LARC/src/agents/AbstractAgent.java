@@ -15,18 +15,20 @@ import org.json.simple.parser.ParseException;
 
 public abstract class AbstractAgent {
 	private static final double DISCOUNT_RATE = 0.9;
-	private static final int QUEUE_SIZE = 10, SAVE_TIMES = 100000;
-	
-	private static int actionCounter = 0;
-	private static int[] fileCounter = new int[] { 0, 0 };
+	private static final int QUEUE_SIZE = 10;
 
-	protected Double[] actionList;
+	protected static final int SAVE_TIMES = 100000;
+	protected static final String TIMESTAMP = new SimpleDateFormat("dd_MM_yyyy_HH_mm_ss").format(new Date());
+	protected static final boolean LOAD_ON_START = true;
+
 	protected AgentMode mode;
 
 	private int[] lastActionQueue;
 	private int queueEndIndex;
 	
-	private static String timestamp = null;
+	static {
+		new File("LARCAgents/" + TIMESTAMP).mkdirs();
+	}
 
 	protected AbstractAgent() {
 		mode = AgentMode.LEARNING;
@@ -34,15 +36,16 @@ public abstract class AbstractAgent {
 		lastActionQueue = new int[QUEUE_SIZE];
 		Arrays.fill(lastActionQueue, -1);
 		queueEndIndex = 0;
-
-		if (timestamp == null) {
-			timestamp = new SimpleDateFormat("dd_MM_yyyy_HH_mm_ss").format(new Date());
-			new File("LARCAgents/" + timestamp).mkdirs();
-		}
 	}
 
 	public void setMode(AgentMode newMode) {
 		mode = newMode;
+	}
+	
+	protected abstract Double[] getActionList();
+	
+	protected static void fillActionList(Double[] values) {
+		
 	}
 
 	/**
@@ -62,9 +65,10 @@ public abstract class AbstractAgent {
 				FileWriter fw = null;
 
 				try {
-					fw = new FileWriter(filename + ".json");
+					fw = new FileWriter("LARCAgents\\" + filename + ".json");
 
 					StringBuilder actionListString = new StringBuilder("["); // JSONValue.toJSONString(actionList);
+					Double[] actionList = getActionList();
 					for (double d : actionList) {
 						actionListString.append(d + ",");
 					}
@@ -86,13 +90,12 @@ public abstract class AbstractAgent {
 	}
 
 	@SuppressWarnings("unchecked")
-	public void load(String filename) throws IOException, ParseException {
-		FileReader reader = new FileReader(filename + ".json");
+	public static void load(String filename) throws IOException, ParseException {
+		FileReader reader = new FileReader("LARCAgents\\" + filename + ".json");
 		JSONParser parser = new JSONParser();
 
 		List<Double> obj = (List<Double>) ((JSONArray) parser.parse(reader));
-		actionList = obj.toArray(new Double[0]);
-
+		fillActionList(obj.toArray(new Double[0]));
 		reader.close();
 	}
 
@@ -105,11 +108,9 @@ public abstract class AbstractAgent {
 		if (reward == 0)
 			return;
 		
-//		String type = (this instanceof MoveAgent) ? "Move" : "Attack";
 		int i = queueEndIndex;
 		double d = 1;
 
-//		System.out.printf("Belohne %s mit %s: ", type, Double.toString(reward));
 		do {
 			i = (i + 1) % QUEUE_SIZE;
 
@@ -117,35 +118,13 @@ public abstract class AbstractAgent {
 				break;
 			}
 
-			actionList[lastActionQueue[i]] += reward * d;
+			getActionList()[lastActionQueue[i]] += reward * d;
 			
-//			System.out.printf("#%d - ", lastActionQueue[i]);
-
 			d *= DISCOUNT_RATE;
 		} while (i != queueEndIndex);
-//		System.out.println();
-	}
-
-	private String getFileName() {
-		if (this instanceof MoveAgent) {
-			return "LARCAgents\\" + timestamp + "\\move_agent_" + fileCounter[0]++;
-		} else {
-			return "LARCAgents\\" + timestamp + "\\attack_agent_" + fileCounter[1]++;
-		}
-
-	}
-
-	public Object getNextAction(int id) {
-		if (++actionCounter >= SAVE_TIMES) {
-			String fileName = getFileName();
-
-			actionCounter = 0;
-			this.save(fileName);
-			System.out.println("Agent saved as: " + fileName + ".json");
-		}
-
-		return null;
 	}
 
 	public abstract void addReward(double reward);
+	
+	public abstract void saveOnBattleEnd();
 }
