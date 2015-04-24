@@ -201,7 +201,7 @@ public class LARCbot extends RewardRobot {
 	public void onBattleEnded(BattleEndedEvent event) {
 		super.onBattleEnded(event);
 		
-		attackAgent.save("LARCAgents\\attackagent");
-		moveAgent.save("LARCAgents\\moveagent");
+		attackAgent.saveOnBattleEnd();
+		moveAgent.saveOnBattleEnd();
 	}
 }

@@ -11,7 +11,8 @@ import robot.Movement;
 public class MoveAgent extends AbstractAgent {
 	private static int SUCCESS_CHANCE = 80;		// Erfolgswahrscheinlich, dass die bevorzugte Action ausgeführt wird, in Prozent
 
-	private static Double[] actionList;
+	private static Double[] actionList = null;
+	private static int actionCounter = 0, fileCounter = 0;
 	
 	protected static void fillActionList(Double[] values) {
 		actionList = values;		
@@ -20,7 +21,7 @@ public class MoveAgent extends AbstractAgent {
 	static {
 		if (LOAD_ON_START) {
 			try {
-				load("move_agent");
+				load("", "move_agent");
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (ParseException e) {
@@ -32,7 +33,6 @@ public class MoveAgent extends AbstractAgent {
 	private Random rnd;
 	private int actionEnumSize, normalizedSuccessChance;
 	
-	private int actionCounter, fileCounter;
 	
 	/**
 	 * 
@@ -45,11 +45,10 @@ public class MoveAgent extends AbstractAgent {
 		actionEnumSize = Movement.values().length;
 		normalizedSuccessChance = SUCCESS_CHANCE - (Math.floorDiv(100 - SUCCESS_CHANCE, actionEnumSize - 1));
 		
-		actionList = new Double[gridFields * gridFields * actionEnumSize];
-		Arrays.fill(actionList, new Double(0.0));
-		
-		actionCounter = 0;
-		fileCounter = 0;
+		if (actionList == null) {
+			actionList = new Double[gridFields * gridFields * actionEnumSize];
+			Arrays.fill(actionList, new Double(0.0));
+		}
 	}
 	
 	public MoveAgent() {
@@ -113,7 +112,7 @@ public class MoveAgent extends AbstractAgent {
 //		System.out.println("MoveAgent gets reward");
 		if (mode != AgentMode.FIGHTING) {
 			if (++actionCounter >= SAVE_TIMES) {
-				save(TIMESTAMP + "\\move_agent_" + fileCounter++);
+				save(TIMESTAMP, "move_agent_" + fileCounter++);
 			}
 			
 			addRewardToLastActions(reward);
@@ -122,6 +121,6 @@ public class MoveAgent extends AbstractAgent {
 
 	@Override
 	public void saveOnBattleEnd() {
-		save("move_agent");
+		save("", "move_agent");
 	}
 }

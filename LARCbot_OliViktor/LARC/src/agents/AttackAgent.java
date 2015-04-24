@@ -15,7 +15,8 @@ public class AttackAgent extends AbstractAgent {
 											// bevorzugte Action ausgeführt
 											// wird, in Prozent
 
-	private static Double[] actionList;
+	private static Double[] actionList = null;
+	private static int actionCounter = 0, fileCounter = 0;
 	
 	protected static void fillActionList(Double[] values) {
 		actionList = values;		
@@ -24,7 +25,7 @@ public class AttackAgent extends AbstractAgent {
 	static {
 		if (LOAD_ON_START) {
 			try {
-				load("attack_agent");
+				load("", "attack_agent");
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (ParseException e) {
@@ -37,7 +38,6 @@ public class AttackAgent extends AbstractAgent {
 	private int numberOfActions, normalizedSuccessChance;
 	private LinkedBlockingQueue<Integer> lastShotActions;
 	
-	private int actionCounter, fileCounter;
 
 	/**
 	 * @param ringfields
@@ -52,13 +52,12 @@ public class AttackAgent extends AbstractAgent {
 		normalizedSuccessChance = SUCCESS_CHANCE
 				- (Math.floorDiv(100 - SUCCESS_CHANCE, numberOfActions - 1));
 
-		actionList = new Double[ringfields * numberOfActions];
-		Arrays.fill(actionList, new Double(0.0));
+		if (actionList == null) {
+			actionList = new Double[ringfields * numberOfActions];
+			Arrays.fill(actionList, new Double(0.0));
+		}
 		
 		lastShotActions = new LinkedBlockingQueue<Integer>();
-		
-		actionCounter = 0;
-		fileCounter = 0;
 	}
 	
 	@Override
@@ -130,7 +129,7 @@ public class AttackAgent extends AbstractAgent {
 //		System.out.println("AttackAgent gets reward: " + reward);
 		if (mode != AgentMode.FIGHTING) {
 			if (++actionCounter >= SAVE_TIMES) {
-				save(TIMESTAMP + "\\attack_agent_" + fileCounter++);
+				save(TIMESTAMP, "attack_agent_" + fileCounter++);
 			}
 			
 			addRewardToLastActions(reward);
@@ -150,6 +149,6 @@ public class AttackAgent extends AbstractAgent {
 
 	@Override
 	public void saveOnBattleEnd() {
-		save("LARCAgents\\attack_agent");
+		save("", "attack_agent");
 	}
 }

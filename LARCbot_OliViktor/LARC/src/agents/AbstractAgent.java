@@ -1,13 +1,16 @@
 package agents;
 
 import java.io.File;
-import java.io.FileReader;
-import java.io.FileWriter;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
 import java.util.Arrays;
 import java.util.Date;
 import java.util.List;
+import java.util.zip.ZipEntry;
+import java.util.zip.ZipFile;
+import java.util.zip.ZipOutputStream;
 
 import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
@@ -57,16 +60,17 @@ public abstract class AbstractAgent {
 	 *             Wenn die angebene Datei nicht vorhanden ist oder nicht
 	 *             zugreifbar
 	 */
-	public void save(final String filename) {
+	public void save(final String directory, final String filename) {
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
 
-				FileWriter fw = null;
-
 				try {
-					fw = new FileWriter("LARCAgents\\" + filename + ".json");
+					ZipOutputStream zos = new ZipOutputStream(new FileOutputStream("LARCAgents\\" + directory + "\\" + filename + ".zip"));
+					ZipEntry entry = new ZipEntry(filename + ".json");
 
+					zos.putNextEntry(entry);
+					
 					StringBuilder actionListString = new StringBuilder("["); // JSONValue.toJSONString(actionList);
 					Double[] actionList = getActionList();
 					for (double d : actionList) {
@@ -76,10 +80,10 @@ public abstract class AbstractAgent {
 							actionListString.length());
 					actionListString.append("]");
 
-					fw.write(actionListString.toString());
-					fw.close();
+					zos.write(actionListString.toString().getBytes());
+					zos.close();
 				} catch (IOException e) {
-					System.out.printf(
+					System.err.printf(
 							"### Fehler beim Speichern des Agents: %s ###\n",
 							e.getMessage());
 				}
@@ -90,13 +94,21 @@ public abstract class AbstractAgent {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static void load(String filename) throws IOException, ParseException {
-		FileReader reader = new FileReader("LARCAgents\\" + filename + ".json");
-		JSONParser parser = new JSONParser();
-
-		List<Double> obj = (List<Double>) ((JSONArray) parser.parse(reader));
-		fillActionList(obj.toArray(new Double[0]));
-		reader.close();
+	public static void load(String directory, String filename) throws IOException, ParseException {
+		File f = new File("LARCAgents\\" + directory + "\\" + filename + ".zip");
+		if (f.exists() && f.isFile()) {
+			ZipFile zf = new ZipFile("LARCAgents\\" + directory + "\\" + filename + ".zip");
+			ZipEntry ze = zf.getEntry(filename + ".json");
+			
+			InputStreamReader reader = new InputStreamReader(zf.getInputStream(ze));
+			JSONParser parser = new JSONParser();
+	
+			List<Double> obj = (List<Double>) ((JSONArray) parser.parse(reader));
+			fillActionList(obj.toArray(new Double[0]));
+			
+			reader.close();
+			zf.close();
+		}
 	}
 
 	protected void addToLastActionQueue(int id) {
