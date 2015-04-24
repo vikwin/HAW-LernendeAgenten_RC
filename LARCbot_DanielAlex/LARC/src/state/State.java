@@ -15,8 +15,8 @@ public class State {
 	public State() {
 	}
 
-	public void setHealthState(double energyRatio) {
-		if (energyRatio > 0.7) {
+	public void setHealthState(double energyRatio) {// Energy ratio: self/enemy
+		if (energyRatio < 0.7) {
 			this.health = healthState.BAD;
 		} else if (energyRatio > 1.3) {
 			this.health = healthState.GOOD;
@@ -26,8 +26,10 @@ public class State {
 	}
 
 	public int getStateID() {
-		return this.selfPos.getX() * 1 + this.selfPos.getY() * 15 + this.enemyPos.getX() * 15 * 20
+		int state = this.selfPos.getX() * 1 + this.selfPos.getY() * 15 + this.enemyPos.getX() * 15 * 20
 				+ this.enemyPos.getY() * 15 * 20 * 15 + this.health.ordinal() * 15 * 20 * 15 * 20;
+//		System.out.println(state);
+		return state;
 
 	}
 

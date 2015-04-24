@@ -2,23 +2,20 @@ package robot;
 
 import java.awt.Graphics2D;
 
-import org.rlcommunity.rlglue.codec.LocalGlue;
-import org.rlcommunity.rlglue.codec.RLGlue;
-
-import environment.LARCEnvironment;
-import agents.LARCAgent;
 import robocode.AdvancedRobot;
 import robocode.DeathEvent;
 import robocode.RobotDeathEvent;
 import robocode.ScannedRobotEvent;
 import state.State;
 import utility.Position;
+import agents.LARCAgent;
+import agents.MyAction;
+import environment.LARCEnvironment;
 
 public class LARCRobot extends AdvancedRobot {
 
 	private LARCEnvironment environment;
 	private LARCAgent agent;
-	private LARCExperiment experiment;
 	private double enemyX;
 	private double enemyY;
 	private double angleToEnemy;
@@ -30,7 +27,6 @@ public class LARCRobot extends AdvancedRobot {
 	private double selfEnergy;
 	private double enemyEnergy;
 	private double energyRatio;
-	private State currentState;
 	private State nextState;
 	private int lastReward;
 
@@ -42,37 +38,23 @@ public class LARCRobot extends AdvancedRobot {
 		this.gameOver = false;
 		this.environment = new LARCEnvironment(this);
 		this.agent = new LARCAgent(this);
-		this.experiment = new LARCExperiment(this);
-
-		// AgentLoader theAgentLoader = new AgentLoader(agent);
-		// // Create an environmentloader that will start the environment when
-		// its
-		// // run method is called
-		// EnvironmentLoader theEnvironmentLoader = new
-		// EnvironmentLoader(environment);
-		//
-		// // Create threads so that the agent and environment can run
-		// // asynchronously
-		// Thread agentThread = new Thread(theAgentLoader);
-		// Thread environmentThread = new Thread(theEnvironmentLoader);
-		//
-		// // Start the threads
-		// agentThread.start();
-		// environmentThread.start();
-
-		LocalGlue localGlueImplementation = new LocalGlue(environment, agent);
-		RLGlue.setGlue(localGlueImplementation);
-		experiment.start();
 	}
 
 	@Override
 	public void run() {
 		this.setAdjustRadarForGunTurn(true);
-		while (true) {
+		// init
+		this.environment.env_init();
+		this.agent.agent_init();
+		int stateID = this.environment.env_start();
+		int actionID = this.agent.agent_start(stateID);
+		while (!this.getGameOver()) {
 			// default actions:
 			setTurnRadarRight(360);
+			// stepping
+			stateID = this.environment.env_step(actionID);
+			actionID = this.agent.agent_step(stateID);
 			execute();
-			
 		}
 	}
 
@@ -92,11 +74,19 @@ public class LARCRobot extends AdvancedRobot {
 	@Override
 	public void onDeath(DeathEvent event) {
 		this.gameOver = true;
+		this.lastReward = -10;
+		this.agent.agent_end();
+		this.environment.env_cleanup();
+		this.agent.agent_cleanup();
 	}
 
 	@Override
 	public void onRobotDeath(RobotDeathEvent event) {
 		this.gameOver = true;
+		this.lastReward = 10;
+		this.agent.agent_end();
+		this.environment.env_cleanup();
+		this.agent.agent_cleanup();
 	}
 
 	private void updateEnergyRatio() {
@@ -154,14 +144,6 @@ public class LARCRobot extends AdvancedRobot {
 
 	public Position getEnemyGridPos() {
 		return enemyGridPos;
-	}
-
-	public State getCurrentState() {
-		return currentState;
-	}
-
-	public void setCurrentState(State currentState) {
-		this.currentState = currentState;
 	}
 
 	public int getLastReward() {
