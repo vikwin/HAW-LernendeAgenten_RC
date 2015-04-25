@@ -37,11 +37,13 @@ public class LARCEnvironment implements IEnvironment {
 
 	@Override
 	public int env_start() {
-		this.currentEnergyRatio = this.robot.getEnergyRatio();
 
+		// update Robot grid position
 		this.robot.getSelfGridPosition();
 		this.robot.getEnemyGridPosition();
 
+		// update currentState
+		this.currentEnergyRatio = this.robot.getEnergyRatio();
 		this.currentState.setSelfPos(this.robot.getSelfGridPos());
 		this.currentState.setEnemyPos(this.robot.getEnemyGridPos());
 		this.currentState.setHealthState(currentEnergyRatio);
@@ -51,12 +53,13 @@ public class LARCEnvironment implements IEnvironment {
 
 	@Override
 	public int env_step(int action) {
-
-		this.currentEnergyRatio = this.robot.getEnergyRatio();
-
+		
+		// update Robot grid position
 		this.robot.getSelfGridPosition();
 		this.robot.getEnemyGridPosition();
 
+		// update currentStateF
+		this.currentEnergyRatio = this.robot.getEnergyRatio();
 		this.currentState.setSelfPos(this.robot.getSelfGridPos());
 		this.currentState.setEnemyPos(this.robot.getEnemyGridPos());
 		this.currentState.setHealthState(currentEnergyRatio);
@@ -64,7 +67,6 @@ public class LARCEnvironment implements IEnvironment {
 		this.calculateReward();
 
 		this.previousEnergyRatio = this.currentEnergyRatio;
-		this.robot.setNextState(this.currentState);
 		return this.currentState.getStateID();
 	}
 
@@ -73,6 +75,10 @@ public class LARCEnvironment implements IEnvironment {
 		// TODO Auto-generated method stub
 	}
 
+	/**
+	 * calculates the Reward based on the current State and the chosen action
+	 * @return reward
+	 */
 	private double calculateReward() {
 		if (this.currentEnergyRatio > this.previousEnergyRatio) {
 			this.lastReward = 1;
@@ -83,9 +89,5 @@ public class LARCEnvironment implements IEnvironment {
 		}
 		this.robot.setLastReward(lastReward);
 		return this.lastReward;
-	}
-
-	public boolean gameOver() {
-		return this.robot.getGameOver();
 	}
 }

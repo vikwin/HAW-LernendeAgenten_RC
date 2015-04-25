@@ -6,10 +6,8 @@ import robocode.AdvancedRobot;
 import robocode.DeathEvent;
 import robocode.RobotDeathEvent;
 import robocode.ScannedRobotEvent;
-import state.State;
 import utility.Position;
 import agents.LARCAgent;
-import agents.MyAction;
 import environment.LARCEnvironment;
 
 public class LARCRobot extends AdvancedRobot {
@@ -27,7 +25,6 @@ public class LARCRobot extends AdvancedRobot {
 	private double selfEnergy;
 	private double enemyEnergy;
 	private double energyRatio;
-	private State nextState;
 	private int lastReward;
 
 	public LARCRobot() {
@@ -154,22 +151,16 @@ public class LARCRobot extends AdvancedRobot {
 		this.lastReward = lastReward;
 	}
 
-	public State getNextState() {
-		return nextState;
-	}
-
-	public void setNextState(State nextState) {
-		this.nextState = nextState;
-	}
-
 	public double getEnergyRatio() {
 		return energyRatio;
 	}
 
 	@Override
 	public void onPaint(Graphics2D g) {
+		
 		// Set the paint color to red
 		g.setColor(java.awt.Color.RED);
+		
 		// draw grid
 		for (int i = 0; i < this.getBattleFieldWidth(); i += LARCEnvironment.TILESIZE) {
 			for (int j = 0; j < this.getBattleFieldHeight(); j += LARCEnvironment.TILESIZE) {

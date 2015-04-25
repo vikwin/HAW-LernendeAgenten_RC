@@ -7,17 +7,19 @@ public class MyAction {
 	private final double SHORTDIST = 40.0;
 	private final double LONGDIST = Math.sqrt(2 * SHORTDIST * SHORTDIST); // pythagoras für hypothenuse
 	private LARCRobot myRobot;
-	private SpecificAction mySpecificAction;
 
 	public MyAction(LARCRobot myRobot) {
 		this.myRobot = myRobot;
-		this.mySpecificAction = SpecificAction.NORDFIRE; // whatever
 	}
 
-	// double[distance,angle,fire ]
+	/**
+	 * return move vector
+	 * 
+	 * @param action
+	 * @return double[distance,angle,fire]
+	 */
 	public double[] getMoveVector(SpecificAction action) {
-		double[] array = new double[4];
-		this.mySpecificAction = action;
+		double[] array = new double[3];
 		double currentHeading = this.myRobot.getHeading();
 		double normHeading = this.normalizeDegrees(currentHeading);
 		switch (action) {
@@ -106,15 +108,13 @@ public class MyAction {
 			return null;
 		}
 	}
-
-	public SpecificAction getMySpecificAction() {
-		return mySpecificAction;
-	}
-
-	public void setMySpecificAction(SpecificAction mySpecificAction) {
-		this.mySpecificAction = mySpecificAction;
-	}
-
+	
+	/**
+	 * normalizes degrees
+	 * 
+	 * @param degrees
+	 * @return normalized degrees
+	 */
 	public double normalizeDegrees(double degrees) {
 		while (degrees > 180)
 			degrees -= 360;

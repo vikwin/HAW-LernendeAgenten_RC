@@ -23,8 +23,8 @@ public class LARCAgent implements IAgent {
 	private double sarsa_gamma = 0.9; // Time Discount factor
 	private double sarsa_alpha = 0.5; // learning rate (importance of new information)
 	private int lastAction;
-	private MyAction myAction;
 	private int lastState;
+	private MyAction myAction;
 	private double[][] valueFunction = null;
 	private boolean policyFrozen = false;
 	private boolean exploringFrozen = false;
@@ -50,14 +50,14 @@ public class LARCAgent implements IAgent {
 			try {
 				this.saveValueFunction(PATH, valueFunction);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				System.out.println("Save ist fehlgeschlagen!!!");
 				e.printStackTrace();
 			}
 		} else {
 			try {
 				loadValueFunction(PATH);
 			} catch (IOException e) {
-				// TODO Auto-generated catch block
+				System.out.println("Load ist fehlgeschlagen!!!");
 				e.printStackTrace();
 			}
 		}
@@ -72,7 +72,6 @@ public class LARCAgent implements IAgent {
 		lastState = state;
 
 		SpecificAction nextAction = SpecificAction.values()[newActionInt];
-
 		this.myRobot.move(this.myAction.getMoveVector(nextAction));
 
 		return newActionInt;
@@ -119,7 +118,7 @@ public class LARCAgent implements IAgent {
 		try {
 			saveValueFunction(PATH, valueFunction);
 		} catch (IOException e) {
-			// TODO Auto-generated catch block
+			System.out.println("Save ist fehlgeschlagen!!!");
 			e.printStackTrace();
 		}
 	}
@@ -132,12 +131,11 @@ public class LARCAgent implements IAgent {
 	}
 
 	/**
-	 *
-	 * Selects a random action with probability 1-sarsa_epsilon, and the action with the highest value otherwise. This is a quick'n'dirty implementation, it does not do
-	 * tie-breaking.
+	 * returns the best actionInt to a state if exploration is frozen.
+	 * otherwise returns random action with a chance based on the exploration-rate.
 	 * 
 	 * @param theState
-	 * @return
+	 * @return maxIndex
 	 */
 	private int egreedy(int theState) {
 		if (!exploringFrozen) {
@@ -156,37 +154,46 @@ public class LARCAgent implements IAgent {
 		return maxIndex;
 	}
 
-	public void saveValueFunction(String filename, double[][] vf) throws IOException {
+	/**
+	 * Saves the value function to a file named filePath.
+	 * 
+	 * @param filePath
+	 * @param valueFunction
+	 * @throws IOException
+	 */
+	public void saveValueFunction(String filePath, double[][] valuefunction) throws IOException {
 		BufferedWriter outputWriter = null;
-		outputWriter = new BufferedWriter(new FileWriter(filename));
+		outputWriter = new BufferedWriter(new FileWriter(filePath));
 		for (int a = 0; a < NO_OF_ACTIONS; a++) {
 			for (int s = 0; s < NO_OF_STATES; s++) {
 				if (a == 0 && s == 0) {
-					outputWriter.write(vf[a][s] + "");
+					outputWriter.write(valuefunction[a][s] + "");
 				} else {
 					outputWriter.newLine();
-					outputWriter.write(vf[a][s] + "");
+					outputWriter.write(valuefunction[a][s] + "");
 				}
 			}
 		}
 		outputWriter.flush();
 		outputWriter.close();
-		System.out.println("SAVE WAS CALLE !!!");
+		System.out.println("Saved valueFunction!!!");
 	}
 
 	/**
-	 * Loads the value function from a file named theFileName. Must be called after init but before cleanup.
+	 * Loads the value function from a file named theFileName.
 	 * 
-	 * @param theFileName
+	 * @param filePath
+	 * @throws IOException
 	 */
-	private void loadValueFunction(String theFileName) throws IOException {
+	private void loadValueFunction(String filePath) throws IOException {
 		BufferedReader outputReader = null;
-		outputReader = new BufferedReader(new FileReader(theFileName));
+		outputReader = new BufferedReader(new FileReader(filePath));
 		for (int a = 0; a < NO_OF_ACTIONS; a++) {
 			for (int s = 0; s < NO_OF_STATES; s++) {
 				valueFunction[a][s] = Double.parseDouble(outputReader.readLine());
 			}
 		}
 		outputReader.close();
+		System.out.println("Read valueFunction!!!");
 	}
 }
