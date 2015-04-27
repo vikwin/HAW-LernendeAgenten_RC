@@ -472,7 +472,7 @@ public class ConfigurationWindow {
 	}
 
 	private void start() {
-		String rHome = Config.getStringValue("RobocodeHome"), robocodeArgs = "", battle = "", vmArgs = "-Xmx512M -Dsun.io.useCanonCaches=false -Ddebug=true -DNOSECURITY=true -DPARALLEL=true", s = "";
+		String rHome = Config.getStringValue("RobocodeHome"), robocodeArgs = "", battle = "", vmArgs = "-Xmx512M -Dsun.io.useCanonCaches=false -Ddebug=true -DNOSECURITY=true -DPARALLEL=true";
 		ArrayList<String> classpath = new ArrayList<String>();
 
 		classpath.add(rHome + "\\libs\\robocode.jar");
@@ -500,10 +500,21 @@ public class ConfigurationWindow {
 					"java " + vmArgs + " -cp " + String.join(";", classpath)
 							+ " robocode.Robocode " + robocodeArgs, null,
 					new File(rHome));
-			BufferedReader reader = new BufferedReader(new InputStreamReader(robocodeProcess.getInputStream()));
-			while ((s = reader.readLine()) != null) {
-				System.out.println(s);
-			}
+			
+			new Thread(new Runnable() {
+				@Override
+				public void run() {
+					String s = "";
+					BufferedReader reader = new BufferedReader(new InputStreamReader(robocodeProcess.getInputStream()));
+					try {
+						while ((s = reader.readLine()) != null) {
+							System.out.println(s);
+						}
+					} catch (IOException e) {
+						e.printStackTrace();
+					}
+				}
+			}).start();
 //			System.out.println(robocodeProcess.waitFor());
 		} catch (IOException e) {
 			e.printStackTrace();
