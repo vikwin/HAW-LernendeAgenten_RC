@@ -140,6 +140,15 @@ public class EnvironmentBuilder {
 	public int getAttackEnvStateCount() {
 		return attackEnv.getStateCount();
 	}
+	
+	/**
+	 * Liefert die Gesamtzahl möglicher Zustände in der MoveEnvironment.
+	 * 
+	 * @return Anzahl
+	 */
+	public int getMoveEnvStateCount() {
+		return moveEnv.getStateCount();
+	}
 
 	/**
 	 * Liefert eine Zahl für die Belohnung der Aktionen des Bots.
