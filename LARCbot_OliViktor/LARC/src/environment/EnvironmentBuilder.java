@@ -37,8 +37,6 @@ public class EnvironmentBuilder {
 		selfBot = bot;
 		selfBotLastEnergy = selfBot.getEnergy();
 
-		System.out.println("Grid_Size: " + GRID_SIZE);
-		
 		moveEnv = new MoveEnvironment(ROBOT_SIZE, GRID_SIZE,
 				(int) selfBot.getBattleFieldWidth(),
 				(int) selfBot.getBattleFieldHeight());

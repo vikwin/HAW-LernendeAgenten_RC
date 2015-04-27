@@ -131,7 +131,7 @@ public abstract class AbstractAgent {
 			n = (n + 1) % QUEUE_SIZE;
 			i = (i + 1) % QUEUE_SIZE;
 
-			if (lastActionQueue[i] < 0) {
+			if (lastActionQueue[i] < 0 || lastActionQueue[n] < 0) {
 				break;
 			}
 			val = getActionList()[lastActionQueue[i]];
