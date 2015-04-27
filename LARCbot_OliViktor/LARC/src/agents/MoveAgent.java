@@ -7,9 +7,10 @@ import java.util.Random;
 import org.json.simple.parser.ParseException;
 
 import robot.Movement;
+import utils.Config;
 
 public class MoveAgent extends AbstractAgent {
-	private static int SUCCESS_CHANCE = 80;		// Erfolgswahrscheinlich, dass die bevorzugte Action ausgeführt wird, in Prozent
+	private static int SUCCESS_CHANCE = Config.getIntValue("Agent_SuccesChance"); // Erfolgswahrscheinlich, dass die bevorzugte Action ausgeführt wird, in Prozent
 
 	private static Double[] actionList = null;
 	private static int actionCounter = 0, fileCounter = 0;

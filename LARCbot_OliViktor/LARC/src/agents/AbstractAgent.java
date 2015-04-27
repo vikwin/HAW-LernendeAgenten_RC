@@ -16,11 +16,13 @@ import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
 import org.json.simple.parser.ParseException;
 
+import utils.Config;
+
 public abstract class AbstractAgent {
 	private static final double DISCOUNT_RATE = 0.9;
 	private static final int QUEUE_SIZE = 10;
 
-	protected static final int SAVE_TIMES = 100000;
+	protected static final int SAVE_TIMES = Config.getIntValue("Agent_SaveTimes");
 	protected static final String TIMESTAMP = new SimpleDateFormat("dd_MM_yyyy_HH_mm_ss").format(new Date());
 	protected static final boolean LOAD_ON_START = true;
 

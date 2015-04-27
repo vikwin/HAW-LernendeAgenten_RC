@@ -5,6 +5,7 @@ import java.util.HashMap;
 
 import robocode.AdvancedRobot;
 import robocode.ScannedRobotEvent;
+import utils.Config;
 import utils.Utils;
 
 /**
@@ -18,13 +19,13 @@ public class EnvironmentBuilder {
 
 	private static final int ROBOT_SIZE = 40; // Die Seitenlänge der Bots in
 												// Pixeln
-	private static final int GRID_SIZE = ROBOT_SIZE; // Die Seitenlänge eines
-														// einzelnen Feldes (für
-														// MoveEnvironment)
+	private static final int GRID_SIZE = Config.getIntValue("Env_GridSize");// Die Seitenlänge eines
+																			// einzelnen Feldes (für
+																			// MoveEnvironment)
 
-	private static final boolean DEBUG = false;
-	private static final boolean PAINT_ATTACK_ENV = true;
-	private static final boolean PAINT_MOVE_ENV = false;
+	private static final boolean DEBUG = Config.getBoolValue("Env_Debug");
+	private static final boolean PAINT_ATTACK_ENV = Config.getBoolValue("Env_PaintAttackEnv");
+	private static final boolean PAINT_MOVE_ENV = Config.getBoolValue("Env_PaintMoveEnv");
 
 	private HashMap<String, Enemy> enemies = new HashMap<String, Enemy>();
 	private AdvancedRobot selfBot;
@@ -35,7 +36,7 @@ public class EnvironmentBuilder {
 	public EnvironmentBuilder(AdvancedRobot bot) {
 		selfBot = bot;
 		selfBotLastEnergy = selfBot.getEnergy();
-		
+
 		moveEnv = new MoveEnvironment(ROBOT_SIZE, GRID_SIZE,
 				(int) selfBot.getBattleFieldWidth(),
 				(int) selfBot.getBattleFieldHeight());
@@ -94,43 +95,47 @@ public class EnvironmentBuilder {
 		moveEnv.update(enemies.values(), selfBot);
 		attackEnv.update(enemies.values(), selfBot);
 	}
-	
+
 	/**
 	 * Liefert eine eindeutige ID für die aktuelle MoveAgent Umwelt.
+	 * 
 	 * @return Die ID
 	 */
 	public int getMoveEnvId() {
 		return moveEnv.getId();
 	}
-	
+
 	/**
 	 * Liefert eine eindeutige ID für die aktuelle AttackAgent Umwelt.
+	 * 
 	 * @return Die ID
 	 */
 	public int getAttackEnvId() {
 		return attackEnv.getId();
 	}
-	
+
 	/**
 	 * Liefert die Gesamtzahl möglicher Zustände in der AttackEnvironment.
+	 * 
 	 * @return Anzahl
 	 */
 	public int getAttackEnvStateCount() {
 		return attackEnv.getStateCount();
 	}
-	
+
 	/**
 	 * Liefert eine Zahl für die Belohnung der Aktionen des Bots.
+	 * 
 	 * @return Die Belohnung
 	 */
 	public double getReward() {
 		double reward = selfBot.getEnergy() - selfBotLastEnergy;
 		selfBotLastEnergy = selfBot.getEnergy();
-		
+
 		for (Enemy e : enemies.values()) {
 			reward -= e.getEnergyDelta();
 		}
-		
+
 		return reward;
 	}
 }

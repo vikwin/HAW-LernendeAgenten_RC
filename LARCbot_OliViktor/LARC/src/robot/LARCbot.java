@@ -14,6 +14,7 @@ import robot.actionsystem.MoveAction;
 import robot.actionsystem.SerialAction;
 import robot.actionsystem.TurnAction;
 import robot.rewardsystem.RewardRobot;
+import utils.Config;
 import utils.Utils;
 import utils.Vector2D;
 import agents.AttackAgent;
@@ -23,7 +24,7 @@ import environment.EnvironmentBuilder;
 public class LARCbot extends RewardRobot {
 	// Gibt an, ob das einfache Belohnungssystem (per Energieäderungen) oder das
 	// Event basierte System verwendet werden soll
-	private static final boolean USE_SIMPLE_REWARD_SYSTEM = false;
+	private static final boolean USE_SIMPLE_REWARD_SYSTEM = Config.getBoolValue("Robot_SimpleReward");
 
 	private enum RadarState {
 		STOPPED, SCANNING, SCANFINISHED;

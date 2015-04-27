@@ -6,12 +6,13 @@ import java.awt.Polygon;
 import java.util.Collection;
 
 import robocode.AdvancedRobot;
+import utils.Config;
 import utils.Utils;
 import utils.Vector2D;
 
 public class AttackEnvironment implements Environment {
 
-	private static final boolean DEBUG = false;
+	private static final boolean DEBUG = Config.getBoolValue("Env_Debug");
 
 	private int ringThickness;
 	private Vector2D selfPosition;
