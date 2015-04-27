@@ -19,9 +19,9 @@ import org.json.simple.parser.ParseException;
 import utils.Config;
 
 public abstract class AbstractAgent {
-	private static final double LEARN_RATE = Config.getIntValue("Agent_LearnRate") / 100;
-	private static final double DISCOUNT_RATE = Config.getIntValue("Agent_DiscountRate") / 100;
-	private static final double LAMBDA = Config.getIntValue("Agent_Lambda") / 100;
+	private static final double LEARN_RATE = Config.getIntValue("Agent_LearnRate") / 100.0;
+	private static final double DISCOUNT_RATE = Config.getIntValue("Agent_DiscountRate") / 100.0;
+	private static final double LAMBDA = Config.getIntValue("Agent_Lambda") / 100.0;
 	private static final int QUEUE_SIZE = Config.getIntValue("Agent_QueueSize");
 	private static final double REWARD_CAP = 5;
 
