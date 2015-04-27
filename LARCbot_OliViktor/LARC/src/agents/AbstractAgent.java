@@ -122,9 +122,6 @@ public abstract class AbstractAgent {
 	}
 
 	protected void addRewardToLastActions(double reward) {
-		if (reward == 0)
-			return;
-		
 		int n = queueEndIndex, i = queueEndIndex + 1;
 		double lambda = 1, val, nextVal;
 
