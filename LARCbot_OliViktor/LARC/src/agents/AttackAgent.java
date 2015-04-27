@@ -7,8 +7,8 @@ import java.util.concurrent.LinkedBlockingQueue;
 
 import org.json.simple.parser.ParseException;
 
-import robot.Attack;
-import robot.Attack.GunPower;
+import robot.ComplexAttack;
+import robot.ComplexAttack.GunPower;
 import utils.Config;
 
 public class AttackAgent extends AbstractAgent {
@@ -81,7 +81,7 @@ public class AttackAgent extends AbstractAgent {
 		return maxID;
 	}
 
-	public Attack getNextAction(int stateID) {
+	public ComplexAttack getNextAction(int stateID) {
 		int actionID = -1;
 
 		switch (mode) {
@@ -111,7 +111,7 @@ public class AttackAgent extends AbstractAgent {
 
 		if (actionID == numberOfActions - 1) {
 			// Nothing Action
-			return Attack.NOTHING;
+			return ComplexAttack.NOTHING;
 		}
 		
 		try {
@@ -120,7 +120,7 @@ public class AttackAgent extends AbstractAgent {
 			e.printStackTrace();
 		}
 		
-		return new Attack(GunPower.values()[actionID / 36], (actionID % 36) * 10);
+		return new ComplexAttack(GunPower.values()[actionID / 36], (actionID % 36) * 10);
 	}
 
 	@Override

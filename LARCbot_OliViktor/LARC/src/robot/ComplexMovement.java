@@ -2,7 +2,7 @@ package robot;
 
 import utils.Vector2D;
 
-public enum Movement {
+public enum ComplexMovement {
 	UP, UPRIGHT, RIGHT, DOWNRIGHT, DOWN, DOWNLEFT, LEFT, UPLEFT, NOTHING;
 	
 	private static double MOVE_RADIUS = 40.0;

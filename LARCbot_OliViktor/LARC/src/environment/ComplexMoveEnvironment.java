@@ -9,12 +9,15 @@ import utils.Utils;
 import utils.Vector2D;
 
 /**
- * Konkrete Klasse zur Abbildung der Umwelt für den MoveAgent.
+ * Konkrete Klasse zur Abbildung der Umwelt für den MoveAgent. Hierbei wird die Welt in einer 
+ * Gitterstuktur abgebildet, in der die eigene Position sowie die des Gegners markiert sind.
+ * 
+ * Bei einem 300 Felder großen Spielfeld ergeben sich 300*300 = 90.000 Zustände.
  * 
  * @author Viktor Winkelmann
  *
  */
-public class MoveEnvironment implements Environment {
+public class ComplexMoveEnvironment implements Environment {
 
 	private MoveEnvElement[][] field;
 	private int robotSize, gridSize, fieldWidth, fieldHeight;
@@ -22,7 +25,7 @@ public class MoveEnvironment implements Environment {
 	// Diese Variablen werden für getId benötigt, bitte Hinweis zu getId beachten
 	private int selfFieldNum, enemyFieldNum;
 	
-	public MoveEnvironment(int robotSize, int gridSize, int fieldWidth,
+	public ComplexMoveEnvironment(int robotSize, int gridSize, int fieldWidth,
 			int fieldHeight) {
 		this.robotSize = robotSize;
 		this.gridSize = gridSize;

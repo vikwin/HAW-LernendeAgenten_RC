@@ -6,7 +6,7 @@ import java.util.Random;
 
 import org.json.simple.parser.ParseException;
 
-import robot.Movement;
+import robot.ComplexMovement;
 import utils.Config;
 
 public class MoveAgent extends AbstractAgent {
@@ -43,7 +43,7 @@ public class MoveAgent extends AbstractAgent {
 		super();
 		rnd = new Random();
 		
-		actionEnumSize = Movement.values().length;
+		actionEnumSize = ComplexMovement.values().length;
 		normalizedSuccessChance = SUCCESS_CHANCE - (Math.floorDiv(100 - SUCCESS_CHANCE, actionEnumSize - 1));
 		
 		if (actionList == null) {
@@ -78,7 +78,7 @@ public class MoveAgent extends AbstractAgent {
 		return maxID;
 	}
 	
-	public Movement getNextAction(int stateID) {
+	public ComplexMovement getNextAction(int stateID) {
 		int actionID = -1;
 		
 		switch (mode) {
@@ -105,7 +105,7 @@ public class MoveAgent extends AbstractAgent {
 		
 //		System.out.println("MoveAgent asked for next action and returns #" + actionID);
 		
-		return Movement.values()[actionID];
+		return ComplexMovement.values()[actionID];
 	}
 	
 	@Override

@@ -10,7 +10,7 @@ import utils.Config;
 import utils.Utils;
 import utils.Vector2D;
 
-public class AttackEnvironment implements Environment {
+public class ComplexAttackEnvironment implements Environment {
 
 	private static final boolean DEBUG = Config.getBoolValue("Env_Debug");
 
@@ -20,7 +20,7 @@ public class AttackEnvironment implements Environment {
 
 	private AttackEnvElement[][] ringStructure;
 
-	public AttackEnvironment(int ringThickness, int ringElementSize,
+	public ComplexAttackEnvironment(int ringThickness, int ringElementSize,
 			Vector2D selfPosition, double gunHeading, int battleFieldWidth,
 			int battleFieldHeight) {
 		this.ringThickness = ringThickness;

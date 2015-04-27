@@ -25,6 +25,10 @@ public class LARCbot extends RewardRobot {
 	// Gibt an, ob das einfache Belohnungssystem (per Energieäderungen) oder das
 	// Event basierte System verwendet werden soll
 	private static final boolean USE_SIMPLE_REWARD_SYSTEM = Config.getBoolValue("Robot_SimpleReward");
+	
+	// Komplexe oder Simple Umgebungen benutzen
+	private static final boolean COMPLEX_ATTACK_ENV = true;  
+	private static final boolean COMPLEX_MOVE_ENV = true;
 
 	private enum RadarState {
 		STOPPED, SCANNING, SCANFINISHED;
@@ -51,7 +55,7 @@ public class LARCbot extends RewardRobot {
 		// Der Environmentbuilder muss aus der run Methode heraus initialisiert
 		// werden, weil sonst der Zugriff auf die Eigenschaften des Spielfelds
 		// verwehrt wird
-		envBuilder = new EnvironmentBuilder(this);
+		envBuilder = new EnvironmentBuilder(this, COMPLEX_MOVE_ENV, COMPLEX_ATTACK_ENV);
 		moveAgent = new MoveAgent();
 		attackAgent = new AttackAgent(envBuilder.getAttackEnvStateCount());
 
@@ -138,11 +142,11 @@ public class LARCbot extends RewardRobot {
 		}
 	}
 
-	private SerialAction getSerialActionByMovement(Movement movement) {
+	private SerialAction getSerialActionByMovement(ComplexMovement movement) {
 		TurnAction turn = null;
 		MoveAction move = null;
 
-		if (movement == Movement.NOTHING)
+		if (movement == ComplexMovement.NOTHING)
 			return new SerialAction(Arrays.asList(new Action[] {}));
 
 		Vector2D destination = getPosition().add(movement.getMoveVector());
@@ -172,8 +176,8 @@ public class LARCbot extends RewardRobot {
 		return new SerialAction(Arrays.asList(new Action[] { turn, move }));
 	}
 
-	private SerialAction getSerialActionByAttack(Attack attack) {
-		if (attack == Attack.NOTHING)
+	private SerialAction getSerialActionByAttack(ComplexAttack attack) {
+		if (attack == ComplexAttack.NOTHING)
 			return new SerialAction(Arrays.asList(new Action[] {}));
 
 		GunTurnAction gunturn = new GunTurnAction(attack.getDirection());

@@ -19,13 +19,19 @@ public class EnvironmentBuilder {
 
 	private static final int ROBOT_SIZE = 40; // Die Seitenlänge der Bots in
 												// Pixeln
-	private static final int GRID_SIZE = Config.getIntValue("Env_GridSize");// Die Seitenlänge eines
-																			// einzelnen Feldes (für
+	private static final int GRID_SIZE = Config.getIntValue("Env_GridSize");// Die
+																			// Seitenlänge
+																			// eines
+																			// einzelnen
+																			// Feldes
+																			// (für
 																			// MoveEnvironment)
 
 	private static final boolean DEBUG = Config.getBoolValue("Env_Debug");
-	private static final boolean PAINT_ATTACK_ENV = Config.getBoolValue("Env_PaintAttackEnv");
-	private static final boolean PAINT_MOVE_ENV = Config.getBoolValue("Env_PaintMoveEnv");
+	private static final boolean PAINT_ATTACK_ENV = Config
+			.getBoolValue("Env_PaintAttackEnv");
+	private static final boolean PAINT_MOVE_ENV = Config
+			.getBoolValue("Env_PaintMoveEnv");
 
 	private HashMap<String, Enemy> enemies = new HashMap<String, Enemy>();
 	private AdvancedRobot selfBot;
@@ -33,18 +39,30 @@ public class EnvironmentBuilder {
 
 	private Environment moveEnv, attackEnv;
 
-	public EnvironmentBuilder(AdvancedRobot bot) {
+	public EnvironmentBuilder(AdvancedRobot bot, boolean useComplexMoveEnv, boolean useComplexAttackEnv) {
 		selfBot = bot;
 		selfBotLastEnergy = selfBot.getEnergy();
 
-		moveEnv = new MoveEnvironment(ROBOT_SIZE, GRID_SIZE,
-				(int) selfBot.getBattleFieldWidth(),
-				(int) selfBot.getBattleFieldHeight());
-
-		attackEnv = new AttackEnvironment(ROBOT_SIZE * 2, ROBOT_SIZE,
-				Utils.getBotCoordinates(bot), bot.getGunHeading(),
-				(int) selfBot.getBattleFieldWidth(),
-				(int) selfBot.getBattleFieldHeight());
+		if (useComplexMoveEnv)
+			moveEnv = new ComplexMoveEnvironment(ROBOT_SIZE, GRID_SIZE,
+					(int) selfBot.getBattleFieldWidth(),
+					(int) selfBot.getBattleFieldHeight());
+		else
+			moveEnv = new ComplexMoveEnvironment(ROBOT_SIZE, GRID_SIZE,
+					(int) selfBot.getBattleFieldWidth(),
+					(int) selfBot.getBattleFieldHeight()); // TODO Auf Simple
+															// umstellen
+		if (useComplexAttackEnv)
+			attackEnv = new ComplexAttackEnvironment(ROBOT_SIZE * 2,
+					ROBOT_SIZE, Utils.getBotCoordinates(bot),
+					bot.getGunHeading(), (int) selfBot.getBattleFieldWidth(),
+					(int) selfBot.getBattleFieldHeight());
+		else
+			attackEnv = new ComplexAttackEnvironment(ROBOT_SIZE * 2,
+					ROBOT_SIZE, Utils.getBotCoordinates(bot),
+					bot.getGunHeading(), (int) selfBot.getBattleFieldWidth(),
+					(int) selfBot.getBattleFieldHeight()); // TODO Auf Simple
+															// umstellen
 	}
 
 	/**

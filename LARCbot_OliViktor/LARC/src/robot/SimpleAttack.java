@@ -3,7 +3,8 @@ package robot;
 import robocode.Rules;
 import robocode.util.Utils;
 
-public class Attack {
+// TODO Anpassen auf SimpleEnvironments
+public class SimpleAttack {
 	public static enum GunPower {
 		LOW, MEDIUM, HIGH;
 		
@@ -24,9 +25,9 @@ public class Attack {
 	private GunPower power;
 	private double direction;
 	
-	public static Attack NOTHING = new Attack(null, 360);
+	public static SimpleAttack NOTHING = new SimpleAttack(null, 360);
 	
-	public Attack(GunPower power, double direction) {
+	public SimpleAttack(GunPower power, double direction) {
 		this.power = power;
 		this.direction = Utils.normalRelativeAngleDegrees(direction);
 	}
