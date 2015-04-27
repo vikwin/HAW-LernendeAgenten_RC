@@ -1,7 +1,6 @@
 package robot;
 
 import robocode.Rules;
-import robocode.util.Utils;
 
 // TODO Anpassen auf SimpleEnvironments
 public class SimpleAttack {
@@ -22,20 +21,44 @@ public class SimpleAttack {
 		}
 	}
 
+	public static final SimpleAttack NOTHING = new SimpleAttack(null, 360);
+	private static final int MAX_DIRECTION = 30;
+	private static int count = ((MAX_DIRECTION / 10) * 2 + 1) * 3 + 1;
+	
+	public static SimpleAttack byId(int id) {
+		if (id == count - 1)
+			return NOTHING;
+		
+		int possibleDir = (MAX_DIRECTION / 10) * 2 + 1;
+		return new SimpleAttack(GunPower.values()[(id / possibleDir)], (id % possibleDir) * 10 - MAX_DIRECTION);
+	}
+	
+	public static int getActionCount() {
+		return count;
+	}
+	
 	private GunPower power;
 	private double direction;
 	
-	public static SimpleAttack NOTHING = new SimpleAttack(null, 360);
-	
 	public SimpleAttack(GunPower power, double direction) {
 		this.power = power;
-		this.direction = Utils.normalRelativeAngleDegrees(direction);
+		
+		if (direction > MAX_DIRECTION)
+			this.direction = MAX_DIRECTION;
+		else if (direction < -MAX_DIRECTION)
+			this.direction = -MAX_DIRECTION;
+		else			
+			this.direction = direction;
 	}
 
 	public GunPower getPower() {
 		return power;
 	}
 
+	/**
+	 * Die Richtung, in die die Kanone gedreht werden soll, abhängig vom Gegner
+	 * @return Die Richtung der Kanone von -30° bis +30°
+	 */
 	public double getDirection() {
 		return direction;
 	}
