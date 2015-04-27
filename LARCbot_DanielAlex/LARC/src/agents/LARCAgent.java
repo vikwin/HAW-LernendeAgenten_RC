@@ -14,8 +14,9 @@ public class LARCAgent implements IAgent {
 
 	public static final String PATH = "qValues.csv";
 
-	public static final int NO_OF_STATES = 270000;
-	public static final int NO_OF_ACTIONS = 16;
+	public static final int NO_OF_STATES = 300*300*3;
+	public static final int NO_OF_ACTIONS = 2*8*3;
+	public static double[][] VALUE_FUNCTION = new double[NO_OF_ACTIONS][NO_OF_STATES];
 	public static final double INITIAL_Q_VALUE = 0.0;
 	private Random randGenerator = new Random();
 	// private double sarsa_stepsize = 0.1; // TBD
@@ -25,7 +26,6 @@ public class LARCAgent implements IAgent {
 	private int lastAction;
 	private int lastState;
 	private MyAction myAction;
-	private double[][] valueFunction = null;
 	private boolean policyFrozen = false;
 	private boolean exploringFrozen = false;
 	private LARCRobot myRobot;
@@ -40,27 +40,27 @@ public class LARCAgent implements IAgent {
 
 	@Override
 	public void agent_init() {
-		valueFunction = new double[NO_OF_ACTIONS][NO_OF_STATES];
-		if (!new File(PATH).isFile()) {
-			for (int i = 0; i < NO_OF_ACTIONS; i++) {
-				for (int j = 0; j < NO_OF_STATES; j++) {
-					valueFunction[i][j] = INITIAL_Q_VALUE;
-				}
-			}
-			try {
-				this.saveValueFunction(PATH, valueFunction);
-			} catch (IOException e) {
-				System.out.println("Save ist fehlgeschlagen!!!");
-				e.printStackTrace();
-			}
-		} else {
-			try {
-				loadValueFunction(PATH);
-			} catch (IOException e) {
-				System.out.println("Load ist fehlgeschlagen!!!");
-				e.printStackTrace();
-			}
-		}
+//		valueFunction = new double[NO_OF_ACTIONS][NO_OF_STATES];
+//		if (!new File(PATH).isFile()) {
+//			for (int i = 0; i < NO_OF_ACTIONS; i++) {
+//				for (int j = 0; j < NO_OF_STATES; j++) {
+//					valueFunction[i][j] = INITIAL_Q_VALUE;
+//				}
+//			}
+//			try {
+//				this.saveValueFunction(PATH, valueFunction);
+//			} catch (IOException e) {
+//				System.out.println("Save ist fehlgeschlagen!!!");
+//				e.printStackTrace();
+//			}
+//		} else {
+//			try {
+//				loadValueFunction(PATH);
+//			} catch (IOException e) {
+//				System.out.println("Load ist fehlgeschlagen!!!");
+//				e.printStackTrace();
+//			}
+//		}
 	}
 
 	@Override
@@ -86,15 +86,15 @@ public class LARCAgent implements IAgent {
 		this.myRobot.move(this.myAction.getMoveVector(nextAction));
 
 		// AGENT LEARNING:
-		this.oldQValue = this.valueFunction[lastAction][lastState];
-		this.nextQValue = this.valueFunction[newActionInt][state];
+		this.oldQValue = this.VALUE_FUNCTION[lastAction][lastState];
+		this.nextQValue = this.VALUE_FUNCTION[newActionInt][state];
 
 		// sarsa-function:
 		this.newQValue = this.oldQValue + sarsa_alpha
 				* (myRobot.getLastReward() + this.sarsa_gamma * this.nextQValue - this.oldQValue);
 
 		if (!policyFrozen) {
-			this.valueFunction[lastAction][lastState] = this.newQValue; // zuweisen des neu gelernten q-wertes
+			this.VALUE_FUNCTION[lastAction][lastState] = this.newQValue; // zuweisen des neu gelernten q-wertes
 		}
 
 		lastAction = newActionInt;
@@ -106,17 +106,17 @@ public class LARCAgent implements IAgent {
 	@Override
 	public void agent_end() {
 		// AGENT TREMINAL LEARNING:
-		this.oldQValue = this.valueFunction[lastAction][lastState];
+		this.oldQValue = this.VALUE_FUNCTION[lastAction][lastState];
 
 		// sarsa-function:
 		this.newQValue = this.oldQValue + sarsa_alpha * (myRobot.getLastReward() - this.oldQValue);
 
 		if (!policyFrozen) {
-			this.valueFunction[lastAction][lastState] = this.newQValue;
+			this.VALUE_FUNCTION[lastAction][lastState] = this.newQValue;
 		}
 
 		try {
-			saveValueFunction(PATH, valueFunction);
+			saveValueFunction(PATH, VALUE_FUNCTION);
 		} catch (IOException e) {
 			System.out.println("Save ist fehlgeschlagen!!!");
 			e.printStackTrace();
@@ -127,7 +127,7 @@ public class LARCAgent implements IAgent {
 	public void agent_cleanup() {
 		lastAction = 0;
 		lastState = 0;
-		valueFunction = null;
+		VALUE_FUNCTION = null;
 	}
 
 	/**
@@ -147,7 +147,7 @@ public class LARCAgent implements IAgent {
 		/* otherwise choose the greedy action */
 		int maxIndex = 0;
 		for (int a = 1; a < NO_OF_ACTIONS; a++) {
-			if (valueFunction[a][theState] > valueFunction[maxIndex][theState]) {
+			if (VALUE_FUNCTION[a][theState] > VALUE_FUNCTION[maxIndex][theState]) {
 				maxIndex = a;
 			}
 		}
@@ -158,7 +158,7 @@ public class LARCAgent implements IAgent {
 	 * Saves the value function to a file named filePath.
 	 * 
 	 * @param filePath
-	 * @param valueFunction
+	 * @param VALUE_FUNCTION
 	 * @throws IOException
 	 */
 	public void saveValueFunction(String filePath, double[][] valuefunction) throws IOException {
@@ -190,7 +190,7 @@ public class LARCAgent implements IAgent {
 		outputReader = new BufferedReader(new FileReader(filePath));
 		for (int a = 0; a < NO_OF_ACTIONS; a++) {
 			for (int s = 0; s < NO_OF_STATES; s++) {
-				valueFunction[a][s] = Double.parseDouble(outputReader.readLine());
+				VALUE_FUNCTION[a][s] = Double.parseDouble(outputReader.readLine());
 			}
 		}
 		outputReader.close();
