@@ -5,6 +5,18 @@ import java.util.Collection;
 
 import robocode.AdvancedRobot;
 
+/**
+ * Konkrete Klasse zur Abbildung der Umwelt für den AttackAgent. Hierbei wird die Welt 
+ * in einer Ringstruktur abgebildet, die den Abstand zum Gegner darstellt. Für den Gegner
+ * ist außerdem bekannt, in welche der acht Himmelsrichtungen er sich bewegt.
+ * 
+ * Bei z. B. 10 Ringen würde sich somit folgende Anzahl möglicher Zustände ergeben:
+ * 
+ * 10 * 8  = 80 Zustände 
+ * 
+ * @author Viktor Winkelmann
+ *
+ */
 public class SimpleAttackEnvironment implements Environment {
 
 	@Override
