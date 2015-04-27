@@ -1,17 +1,13 @@
 package environment;
 
 import robot.LARCRobot;
+import state.GunToEnemy;
 import state.State;
 
 public class LARCEnvironment implements IEnvironment {
 
 	public static final int TILESIZE = 40;
 
-	private static final int BATTLEFIELDWIDTH = 800;
-
-	private static final int BATTLEFIELDHEIGHT = 600;
-
-	private GridStates[][] grid;
 	private LARCRobot robot;
 	private double currentEnergyRatio;
 	private double previousEnergyRatio;
@@ -25,12 +21,6 @@ public class LARCEnvironment implements IEnvironment {
 
 	@Override
 	public void env_init() {
-		this.grid = new GridStates[(int) (BATTLEFIELDWIDTH / TILESIZE)][(int) (BATTLEFIELDHEIGHT / TILESIZE)];
-		for (int i = 0; i < grid.length; i++) {
-			for (int j = 0; j < grid[0].length; j++) {
-				grid[i][j] = GridStates.EMPTY;
-			}
-		}
 		this.currentEnergyRatio = 1;
 		this.lastReward = 0;
 	}
@@ -46,14 +36,14 @@ public class LARCEnvironment implements IEnvironment {
 		this.currentEnergyRatio = this.robot.getEnergyRatio();
 		this.currentState.setSelfPos(this.robot.getSelfGridPos());
 		this.currentState.setEnemyPos(this.robot.getEnemyGridPos());
-		this.currentState.setHealthState(currentEnergyRatio);
+		this.currentState.setGunToEnemy(this.calculateGunToEnemy());
 
 		return this.currentState.getStateID();
 	}
 
 	@Override
 	public int env_step(int action) {
-		
+
 		// update Robot grid position
 		this.robot.getSelfGridPosition();
 		this.robot.getEnemyGridPosition();
@@ -62,8 +52,7 @@ public class LARCEnvironment implements IEnvironment {
 		this.currentEnergyRatio = this.robot.getEnergyRatio();
 		this.currentState.setSelfPos(this.robot.getSelfGridPos());
 		this.currentState.setEnemyPos(this.robot.getEnemyGridPos());
-		this.currentState.setHealthState(currentEnergyRatio);
-
+		this.currentState.setGunToEnemy(this.calculateGunToEnemy());
 		this.calculateReward();
 
 		this.previousEnergyRatio = this.currentEnergyRatio;
@@ -77,6 +66,7 @@ public class LARCEnvironment implements IEnvironment {
 
 	/**
 	 * calculates the Reward based on the current State and the chosen action
+	 * 
 	 * @return reward
 	 */
 	private double calculateReward() {
@@ -89,5 +79,15 @@ public class LARCEnvironment implements IEnvironment {
 		}
 		this.robot.setLastReward(lastReward);
 		return this.lastReward;
+	}
+
+	public GunToEnemy calculateGunToEnemy() {
+		GunToEnemy gunToEnemy = GunToEnemy.AHEAD;
+		if (this.robot.getHeading() - this.robot.getGunHeading() + this.robot.getAngleToEnemy() > 0.0) {
+			gunToEnemy = GunToEnemy.RIGHT;
+		} else if ((this.robot.getHeading() - this.robot.getGunHeading() + this.robot.getAngleToEnemy() < 0.0)) {
+			gunToEnemy = GunToEnemy.LEFT;
+		}
+		return gunToEnemy;
 	}
 }
