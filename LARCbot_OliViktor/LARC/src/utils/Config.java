@@ -8,7 +8,7 @@ import java.util.HashMap;
 import java.util.Scanner;
 
 public class Config {
-	private static final String CONFIG_FILENAME = "gui.cfg";
+	private static final String CONFIG_FILENAME = "LARCBot.cfg";
 	
 	private static HashMap<String, String> values;
 	
@@ -41,6 +41,7 @@ public class Config {
 	}
 	
 	public static int getIntValue(String key) {
+		
 		if (values.containsKey(key)) {
 			return Integer.parseInt(values.get(key));
 		} else {
@@ -96,6 +97,7 @@ public class Config {
 	
 	public static void save() {
 		saveFile(values, CONFIG_FILENAME);
+		saveFile(values, values.get("RobocodeHome") + File.separator + CONFIG_FILENAME);
 	}
 	
 	public static String createAndSaveBattle() {
