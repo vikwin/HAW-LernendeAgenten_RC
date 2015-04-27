@@ -30,10 +30,9 @@ import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 
 import utils.Config;
-
-import com.sun.java.swing.plaf.windows.WindowsLookAndFeel;
 
 public class ConfigurationWindow {
 
@@ -50,7 +49,7 @@ public class ConfigurationWindow {
 		EventQueue.invokeLater(new Runnable() {
 			public void run() {
 				try {
-					UIManager.setLookAndFeel(new WindowsLookAndFeel());
+					UIManager.setLookAndFeel(new NimbusLookAndFeel());
 
 					ConfigurationWindow window = new ConfigurationWindow();
 					window.frmLarcbotExperimentKonfigurator.setVisible(true);
@@ -83,7 +82,7 @@ public class ConfigurationWindow {
 		frmLarcbotExperimentKonfigurator
 				.setTitle("LARCBot Experiment Konfigurator");
 		frmLarcbotExperimentKonfigurator.setResizable(false);
-		frmLarcbotExperimentKonfigurator.setBounds(100, 100, 418, 291);
+		frmLarcbotExperimentKonfigurator.setBounds(100, 100, 470, 374);
 		frmLarcbotExperimentKonfigurator
 				.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmLarcbotExperimentKonfigurator.getContentPane().setLayout(
@@ -101,7 +100,7 @@ public class ConfigurationWindow {
 		JPanel agent_panel = new JPanel();
 		agent_panel.setBackground(Color.WHITE);
 		agent_panel.setBorder(new TitledBorder(null, "Agenten", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		agent_panel.setBounds(10, 11, 196, 118);
+		agent_panel.setBounds(10, 11, 227, 260);
 		bot_panel.add(agent_panel);
 		agent_panel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		
@@ -132,22 +131,27 @@ public class ConfigurationWindow {
 		JPanel panel_3 = new JPanel();
 		panel_3.setBackground(Color.WHITE);
 		agent_panel.add(panel_3);
-		FlowLayout flowLayout_5 = (FlowLayout) panel_3.getLayout();
-		flowLayout_5.setAlignment(FlowLayout.LEFT);
-		flowLayout_5.setHgap(3);
+		panel_3.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 5));
 		
 		JLabel lblNewLabel = new JLabel("Speicherzyklus:");
 		panel_3.add(lblNewLabel);
+		val = Config.getIntValue("Agent_SaveTimes");
+		
+		JPanel panel_5 = new JPanel();
+		FlowLayout flowLayout_5 = (FlowLayout) panel_5.getLayout();
+		flowLayout_5.setHgap(20);
+		flowLayout_5.setVgap(0);
+		panel_5.setBackground(Color.WHITE);
+		agent_panel.add(panel_5);
 		
 		JSpinner saveTimes = new JSpinner();
-		panel_3.add(saveTimes);
-		val = Config.getIntValue("Agent_SaveTimes");
+		panel_5.add(saveTimes);
 		saveTimes.setModel(new SpinnerNumberModel(val < 10000 ? 10000 : val, 10000, 10000000, 10000));
 		
 		JPanel robot_panel = new JPanel();
 		robot_panel.setBackground(Color.WHITE);
 		robot_panel.setBorder(new TitledBorder(null, "Roboter", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		robot_panel.setBounds(10, 140, 196, 56);
+		robot_panel.setBounds(249, 11, 209, 60);
 		bot_panel.add(robot_panel);
 		robot_panel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		
@@ -165,7 +169,7 @@ public class ConfigurationWindow {
 		JPanel env_panel = new JPanel();
 		env_panel.setBackground(Color.WHITE);
 		env_panel.setBorder(new TitledBorder(null, "Umwelt", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		env_panel.setBounds(216, 11, 181, 149);
+		env_panel.setBounds(249, 108, 209, 163);
 		bot_panel.add(env_panel);
 		env_panel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		
@@ -224,7 +228,7 @@ public class ConfigurationWindow {
 
 		JPanel settings_panel = new JPanel();
 		settings_panel.setBackground(Color.WHITE);
-		settings_panel.setBounds(7, 7, 178, 172);
+		settings_panel.setBounds(7, 7, 206, 172);
 		settings_panel.setBorder(new EmptyBorder(0, 0, 0, 10));
 		robocode_panel.add(settings_panel);
 		settings_panel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
@@ -276,11 +280,35 @@ public class ConfigurationWindow {
 		panel_2.add(lblRunden);
 		lblRunden.setHorizontalAlignment(SwingConstants.LEFT);
 		
+		JPanel enemy_panel = new JPanel();
+		enemy_panel.setBorder(new TitledBorder(null, "Gegner", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		enemy_panel.setBackground(Color.WHITE);
+		enemy_panel.setBounds(225, 76, 233, 195);
+		FlowLayout fl_enemy_panel = (FlowLayout) enemy_panel.getLayout();
+		fl_enemy_panel.setAlignment(FlowLayout.LEFT);
+		fl_enemy_panel.setVgap(0);
+		fl_enemy_panel.setHgap(0);
+		robocode_panel.add(enemy_panel);
+
+		JList<String> robot_list = new JList<String>();
+		robot_list.setBorder(null);
+		robot_listModel = new DefaultListModel<String>();
+		robot_listModel.addElement("#######################");
+		loadRobots();
+		robot_list.setSelectedValue(Config.getStringValue("EnemyRobot"), true);
+		robot_list.setModel(robot_listModel);
+		robot_list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+
+		JScrollPane scrollPane = new JScrollPane(robot_list);
+		scrollPane.setViewportBorder(null);
+		enemy_panel.add(scrollPane);
+		
 		JPanel panel_12 = new JPanel();
+		panel_12.setBounds(225, 7, 233, 70);
+		robocode_panel.add(panel_12);
 		panel_12.setBorder(new TitledBorder(null, "Robocode Home Directory:", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		panel_12.setBackground(Color.WHITE);
-		settings_panel.add(panel_12);
-		FlowLayout fl_panel_12 = new FlowLayout(FlowLayout.CENTER, 0, 5);
+		FlowLayout fl_panel_12 = new FlowLayout(FlowLayout.LEFT, 0, 5);
 		panel_12.setLayout(fl_panel_12);
 		
 		robocodeHome = new JTextField();
@@ -304,30 +332,6 @@ public class ConfigurationWindow {
 		});
 		button.setBackground(Color.WHITE);
 		panel_12.add(button);
-		
-		JPanel enemy_panel = new JPanel();
-		enemy_panel.setBorder(new TitledBorder(null, "Gegner", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		enemy_panel.setBackground(Color.WHITE);
-		enemy_panel.setBounds(195, 7, 205, 183);
-		FlowLayout fl_enemy_panel = (FlowLayout) enemy_panel.getLayout();
-		fl_enemy_panel.setAlignment(FlowLayout.LEFT);
-		fl_enemy_panel.setVgap(0);
-		fl_enemy_panel.setHgap(0);
-		robocode_panel.add(enemy_panel);
-
-		JList<String> robot_list = new JList<String>();
-		robot_list.setBorder(null);
-		robot_list.setVisibleRowCount(10);
-		robot_listModel = new DefaultListModel<String>();
-		robot_listModel.addElement("#######################");
-		loadRobots();
-		robot_list.setSelectedValue(Config.getStringValue("EnemyRobot"), true);
-		robot_list.setModel(robot_listModel);
-		robot_list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
-
-		JScrollPane scrollPane = new JScrollPane(robot_list);
-		scrollPane.setViewportBorder(null);
-		enemy_panel.add(scrollPane);
 
 		JPanel button_panel = new JPanel();
 		button_panel.setBackground(Color.WHITE);
