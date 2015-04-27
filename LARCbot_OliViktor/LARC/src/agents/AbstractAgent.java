@@ -19,7 +19,9 @@ import org.json.simple.parser.ParseException;
 import utils.Config;
 
 public abstract class AbstractAgent {
-	private static final double DISCOUNT_RATE = 0.9;
+	private static final double LEARN_RATE = Config.getIntValue("Agent_LearnRate") / 100;
+	private static final double DISCOUNT_RATE = Config.getIntValue("Agent_DiscountRate") / 100;
+	private static final double LAMBDA = Config.getIntValue("Agent_Lambda") / 100;
 	private static final int QUEUE_SIZE = 10;
 
 	protected static final int SAVE_TIMES = Config.getIntValue("Agent_SaveTimes");
@@ -122,19 +124,21 @@ public abstract class AbstractAgent {
 		if (reward == 0)
 			return;
 		
-		int i = queueEndIndex;
-		double d = 1;
+		int n = queueEndIndex, i = queueEndIndex + 1;
+		double lambda = 1, val, nextVal;
 
 		do {
+			n = (n + 1) % QUEUE_SIZE;
 			i = (i + 1) % QUEUE_SIZE;
 
 			if (lastActionQueue[i] < 0) {
 				break;
 			}
-
-			getActionList()[lastActionQueue[i]] += reward * d;
+			val = getActionList()[lastActionQueue[i]];
+			nextVal = getActionList()[lastActionQueue[n]];
+			getActionList()[lastActionQueue[i]] += lambda * (LEARN_RATE * (reward + (DISCOUNT_RATE * nextVal) - val));
 			
-			d *= DISCOUNT_RATE;
+			lambda *= LAMBDA;
 		} while (i != queueEndIndex);
 	}
 
