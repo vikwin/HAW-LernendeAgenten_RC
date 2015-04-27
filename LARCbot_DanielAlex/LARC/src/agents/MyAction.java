@@ -12,7 +12,7 @@ public class MyAction {
 
 	public MyAction(LARCRobot myRobot) {
 		this.myRobot = myRobot;
-		this.mySpecificAction = SpecificAction.NORDFIRE; // whatever
+		this.mySpecificAction = SpecificAction.NORDFIRE_TURNLEFT; // whatever
 	}
 
 	// double[distance,angle,fire ]
@@ -22,12 +22,7 @@ public class MyAction {
 		double currentHeading = this.myRobot.getHeading();
 		double normHeading = Position.normalizeDegrees(currentHeading);
 		switch (action) {
-		case NORDFIRE:
-			array[0] = this.SHORTDIST;
-			array[2] = 1.0;
-			array[1] = Position.normalizeDegrees(0 - normHeading);
-			array[3] = 0;
-			return array;
+
 		case NORDFIRE_TURNLEFT:
 			array[0] = this.LONGDIST;
 			array[2] = 0.0;
@@ -39,12 +34,6 @@ public class MyAction {
 			array[2] = 0.0;
 			array[1] = Position.normalizeDegrees(0 - normHeading);
 			array[3] = 2;
-			return array;
-		case NORD:
-			array[0] = this.SHORTDIST;
-			array[2] = 0.0;
-			array[1] = Position.normalizeDegrees(0 - normHeading);
-			array[3] = 0;
 			return array;
 		case NORD_TURNLEFT:
 			array[0] = this.SHORTDIST;
@@ -58,12 +47,6 @@ public class MyAction {
 			array[1] = Position.normalizeDegrees(0 - normHeading);
 			array[3] = 2;
 			return array;
-		case NORDOSTFIRE:
-			array[0] = this.LONGDIST;
-			array[2] = 1.0;
-			array[1] = Position.normalizeDegrees(45 - normHeading);
-			array[3] = 0;
-			return array;
 		case NORDOSTFIRE_TURNLEFT:
 			array[0] = this.LONGDIST;
 			array[2] = 1.0;
@@ -75,12 +58,6 @@ public class MyAction {
 			array[2] = 1.0;
 			array[1] = Position.normalizeDegrees(45 - normHeading);
 			array[3] = 2;
-			return array;
-		case NORDOST:
-			array[0] = this.LONGDIST;
-			array[2] = 0.0;
-			array[1] = Position.normalizeDegrees(45 - normHeading);
-			array[3] = 0;
 			return array;
 		case NORDOST_TURNLEFT:
 			array[0] = this.LONGDIST;
@@ -94,12 +71,6 @@ public class MyAction {
 			array[1] = Position.normalizeDegrees(45 - normHeading);
 			array[3] = 2;
 			return array;
-		case OSTFIRE:
-			array[0] = this.SHORTDIST;
-			array[2] = 1.0;
-			array[1] = Position.normalizeDegrees(90 - normHeading);
-			array[3] = 0;
-			return array;
 		case OSTFIRE_TURNLEFT:
 			array[0] = this.SHORTDIST;
 			array[2] = 1.0;
@@ -111,12 +82,6 @@ public class MyAction {
 			array[2] = 1.0;
 			array[1] = Position.normalizeDegrees(90 - normHeading);
 			array[3] = 2;
-			return array;
-		case OST:
-			array[0] = this.SHORTDIST;
-			array[2] = 0.0;
-			array[1] = Position.normalizeDegrees(90 - normHeading);
-			array[3] = 0;
 			return array;
 		case OST_TURNLEFT:
 			array[0] = this.SHORTDIST;
@@ -130,12 +95,6 @@ public class MyAction {
 			array[1] = Position.normalizeDegrees(90 - normHeading);
 			array[3] = 2;
 			return array;
-		case SUEDOSTFIRE:
-			array[0] = this.LONGDIST;
-			array[2] = 1.0;
-			array[1] = Position.normalizeDegrees(135 - normHeading);
-			array[3] = 0;
-			return array;
 		case SUEDOSTFIRE_TURNLEFT:
 			array[0] = this.LONGDIST;
 			array[2] = 1.0;
@@ -147,12 +106,6 @@ public class MyAction {
 			array[2] = 1.0;
 			array[1] = Position.normalizeDegrees(135 - normHeading);
 			array[3] = 2;
-			return array;
-		case SUEDOST:
-			array[0] = this.LONGDIST;
-			array[2] = 0.0;
-			array[1] = Position.normalizeDegrees(135 - normHeading);
-			array[3] = 0;
 			return array;
 		case SUEDOST_TURNLEFT:
 			array[0] = this.LONGDIST;
@@ -166,12 +119,6 @@ public class MyAction {
 			array[1] = Position.normalizeDegrees(135 - normHeading);
 			array[3] = 2;
 			return array;
-		case SUEDFIRE:
-			array[0] = this.SHORTDIST;
-			array[2] = 1.0;
-			array[1] = Position.normalizeDegrees(180 - normHeading);
-			array[3] = 0;
-			return array;
 		case SUEDFIRE_TURNLEFT:
 			array[0] = this.SHORTDIST;
 			array[2] = 1.0;
@@ -183,12 +130,6 @@ public class MyAction {
 			array[2] = 1.0;
 			array[1] = Position.normalizeDegrees(180 - normHeading);
 			array[3] = 2;
-			return array;
-		case SUED:
-			array[0] = this.SHORTDIST;
-			array[2] = 0.0;
-			array[1] = Position.normalizeDegrees(180 - normHeading);
-			array[3] = 0;
 			return array;
 		case SUED_TURNLEFT:
 			array[0] = this.SHORTDIST;
@@ -202,12 +143,6 @@ public class MyAction {
 			array[1] = Position.normalizeDegrees(180 - normHeading);
 			array[3] = 2;
 			return array;
-		case SUEDWESTFIRE:
-			array[0] = this.LONGDIST;
-			array[2] = 1.0;
-			array[1] = Position.normalizeDegrees(-135 - normHeading);
-			array[3] = 0;
-			return array;
 		case SUEDWESTFIRE_TURNLEFT:
 			array[0] = this.LONGDIST;
 			array[2] = 1.0;
@@ -219,12 +154,6 @@ public class MyAction {
 			array[2] = 1.0;
 			array[1] = Position.normalizeDegrees(-135 - normHeading);
 			array[3] = 2;
-			return array;
-		case SUEDWEST:
-			array[0] = this.LONGDIST;
-			array[2] = 0.0;
-			array[1] = Position.normalizeDegrees(-135 - normHeading);
-			array[3] = 0;
 			return array;
 		case SUEDWEST_TURNLEFT:
 			array[0] = this.LONGDIST;
@@ -238,12 +167,6 @@ public class MyAction {
 			array[1] = Position.normalizeDegrees(-135 - normHeading);
 			array[3] = 2;
 			return array;
-		case WESTFIRE:
-			array[0] = this.SHORTDIST;
-			array[2] = 1.0;
-			array[1] = Position.normalizeDegrees(-90 - normHeading);
-			array[3] = 0;
-			return array;
 		case WESTFIRE_TURNLEFT:
 			array[0] = this.SHORTDIST;
 			array[2] = 1.0;
@@ -255,12 +178,6 @@ public class MyAction {
 			array[2] = 1.0;
 			array[1] = Position.normalizeDegrees(-90 - normHeading);
 			array[3] = 2;
-			return array;
-		case WEST:
-			array[0] = this.SHORTDIST;
-			array[2] = 0.0;
-			array[1] = Position.normalizeDegrees(-90 - normHeading);
-			array[3] = 0;
 			return array;
 		case WEST_TURNLEFT:
 			array[0] = this.SHORTDIST;
@@ -274,12 +191,6 @@ public class MyAction {
 			array[1] = Position.normalizeDegrees(-90 - normHeading);
 			array[3] = 2;
 			return array;
-		case NORDWESTFIRE:
-			array[0] = this.LONGDIST;
-			array[2] = 1.0;
-			array[1] = Position.normalizeDegrees(-45 - normHeading);
-			array[3] = 0;
-			return array;
 		case NORDWESTFIRE_TURNLEFT:
 			array[0] = this.LONGDIST;
 			array[2] = 1.0;
@@ -291,12 +202,6 @@ public class MyAction {
 			array[2] = 1.0;
 			array[1] = Position.normalizeDegrees(-45 - normHeading);
 			array[3] = 2;
-			return array;
-		case NORDWEST:
-			array[0] = this.LONGDIST;
-			array[2] = 1.0;
-			array[1] = Position.normalizeDegrees(-45 - normHeading);
-			array[3] = 0;
 			return array;
 		case NORDWEST_TURNLEFT:
 			array[0] = this.LONGDIST;

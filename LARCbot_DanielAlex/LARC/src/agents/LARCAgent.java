@@ -2,10 +2,10 @@ package agents;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
-import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.LinkedList;
 import java.util.Random;
 
 import robot.LARCRobot;
@@ -14,10 +14,11 @@ public class LARCAgent implements IAgent {
 
 	public static final String PATH = "qValues.csv";
 
-	public static final int NO_OF_STATES = 300*300*3;
-	public static final int NO_OF_ACTIONS = 2*8*3;
+	public static final int NO_OF_STATES = 300 * 300 * 3;
+	public static final int NO_OF_ACTIONS = 2 * 8 * 2;
 	public static double[][] VALUE_FUNCTION = new double[NO_OF_ACTIONS][NO_OF_STATES];
 	public static final double INITIAL_Q_VALUE = 0.0;
+	public static final int LAMBDA_CAPACITY = 15;
 	private Random randGenerator = new Random();
 	// private double sarsa_stepsize = 0.1; // TBD
 	private double sarsa_epsilon = 1.0; // Exploration rate
@@ -32,35 +33,37 @@ public class LARCAgent implements IAgent {
 	private double oldQValue;
 	private double nextQValue;
 	private double newQValue;
+	private LinkedList<int[]> lastStatesForLambda;
 
 	public LARCAgent(LARCRobot myRobot) {
 		this.myRobot = myRobot;
 		this.myAction = new MyAction(this.myRobot);
+		this.lastStatesForLambda = new LinkedList<int[]>();
 	}
 
 	@Override
 	public void agent_init() {
-//		valueFunction = new double[NO_OF_ACTIONS][NO_OF_STATES];
-//		if (!new File(PATH).isFile()) {
-//			for (int i = 0; i < NO_OF_ACTIONS; i++) {
-//				for (int j = 0; j < NO_OF_STATES; j++) {
-//					valueFunction[i][j] = INITIAL_Q_VALUE;
-//				}
-//			}
-//			try {
-//				this.saveValueFunction(PATH, valueFunction);
-//			} catch (IOException e) {
-//				System.out.println("Save ist fehlgeschlagen!!!");
-//				e.printStackTrace();
-//			}
-//		} else {
-//			try {
-//				loadValueFunction(PATH);
-//			} catch (IOException e) {
-//				System.out.println("Load ist fehlgeschlagen!!!");
-//				e.printStackTrace();
-//			}
-//		}
+		// valueFunction = new double[NO_OF_ACTIONS][NO_OF_STATES];
+		// if (!new File(PATH).isFile()) {
+		// for (int i = 0; i < NO_OF_ACTIONS; i++) {
+		// for (int j = 0; j < NO_OF_STATES; j++) {
+		// valueFunction[i][j] = INITIAL_Q_VALUE;
+		// }
+		// }
+		// try {
+		// this.saveValueFunction(PATH, valueFunction);
+		// } catch (IOException e) {
+		// System.out.println("Save ist fehlgeschlagen!!!");
+		// e.printStackTrace();
+		// }
+		// } else {
+		// try {
+		// loadValueFunction(PATH);
+		// } catch (IOException e) {
+		// System.out.println("Load ist fehlgeschlagen!!!");
+		// e.printStackTrace();
+		// }
+		// }
 	}
 
 	@Override
@@ -85,16 +88,12 @@ public class LARCAgent implements IAgent {
 
 		this.myRobot.move(this.myAction.getMoveVector(nextAction));
 
-		// AGENT LEARNING:
-		this.oldQValue = this.VALUE_FUNCTION[lastAction][lastState];
-		this.nextQValue = this.VALUE_FUNCTION[newActionInt][state];
-
 		// sarsa-function:
 		this.newQValue = this.oldQValue + sarsa_alpha
 				* (myRobot.getLastReward() + this.sarsa_gamma * this.nextQValue - this.oldQValue);
 
 		if (!policyFrozen) {
-			this.VALUE_FUNCTION[lastAction][lastState] = this.newQValue; // zuweisen des neu gelernten q-wertes
+			VALUE_FUNCTION[lastAction][lastState] = this.newQValue; // zuweisen des neu gelernten q-wertes
 		}
 
 		lastAction = newActionInt;
@@ -106,13 +105,13 @@ public class LARCAgent implements IAgent {
 	@Override
 	public void agent_end() {
 		// AGENT TREMINAL LEARNING:
-		this.oldQValue = this.VALUE_FUNCTION[lastAction][lastState];
+		this.oldQValue = VALUE_FUNCTION[lastAction][lastState];
 
 		// sarsa-function:
 		this.newQValue = this.oldQValue + sarsa_alpha * (myRobot.getLastReward() - this.oldQValue);
 
 		if (!policyFrozen) {
-			this.VALUE_FUNCTION[lastAction][lastState] = this.newQValue;
+			VALUE_FUNCTION[lastAction][lastState] = this.newQValue;
 		}
 
 		try {
@@ -131,8 +130,7 @@ public class LARCAgent implements IAgent {
 	}
 
 	/**
-	 * returns the best actionInt to a state if exploration is frozen.
-	 * otherwise returns random action with a chance based on the exploration-rate.
+	 * returns the best actionInt to a state if exploration is frozen. otherwise returns random action with a chance based on the exploration-rate.
 	 * 
 	 * @param theState
 	 * @return maxIndex
@@ -152,6 +150,34 @@ public class LARCAgent implements IAgent {
 			}
 		}
 		return maxIndex;
+	}
+
+	public void doTheSilenceOfTheLambda() {
+		// int hanibal = 1;
+		// AGENT LEARNING:
+		this.nextQValue = VALUE_FUNCTION[this.lastStatesForLambda.get(lastAction)[0]][this.lastStatesForLambda
+				.get(lastState)[1]];
+		this.oldQValue = VALUE_FUNCTION[this.lastStatesForLambda.get(this.lastStatesForLambda.size() - 1)[0]][this.lastStatesForLambda
+				.get(this.lastStatesForLambda.size() - 1)[1]];
+
+		for (int i = lastStatesForLambda.size(); i > 1; i--) {
+			this.oldQValue = VALUE_FUNCTION[this.lastStatesForLambda.get(i - 1)[0]][this.lastStatesForLambda
+					.get(i - 1)[1]];
+			this.nextQValue = VALUE_FUNCTION[this.lastStatesForLambda.get(i)[0]][this.lastStatesForLambda.get(i)[1]];
+
+			VALUE_FUNCTION[this.lastStatesForLambda.get(i)[0]][this.lastStatesForLambda.get(i)[1]] = this.oldQValue
+					+ sarsa_alpha * (myRobot.getLastReward() + this.sarsa_gamma * this.nextQValue - this.oldQValue);
+			;
+		}
+	}
+
+	public void addToLambda(int[] index) {
+		if (lastStatesForLambda.size() < LAMBDA_CAPACITY - 1) {
+			lastStatesForLambda.addLast(index);
+		} else {
+			lastStatesForLambda.remove(0);
+			lastStatesForLambda.addLast(index);;
+		}
 	}
 
 	/**
