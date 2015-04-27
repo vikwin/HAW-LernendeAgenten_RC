@@ -27,8 +27,8 @@ public class LARCbot extends RewardRobot {
 	private static final boolean USE_SIMPLE_REWARD_SYSTEM = Config.getBoolValue("Robot_SimpleReward");
 	
 	// Komplexe oder Simple Umgebungen benutzen
-	private static final boolean COMPLEX_ATTACK_ENV = true;  
-	private static final boolean COMPLEX_MOVE_ENV = true;
+	private static final boolean COMPLEX_ATTACK_ENV = Config.getBoolValue("Robot_UseExtendedAttackEnv");  
+	private static final boolean COMPLEX_MOVE_ENV = Config.getBoolValue("Robot_UseExtendedMoveEnv");
 
 	private enum RadarState {
 		STOPPED, SCANNING, SCANFINISHED;

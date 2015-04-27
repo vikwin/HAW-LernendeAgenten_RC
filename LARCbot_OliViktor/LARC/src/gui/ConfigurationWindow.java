@@ -30,6 +30,8 @@ import javax.swing.SwingConstants;
 import javax.swing.UIManager;
 import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
+import javax.swing.event.ChangeEvent;
+import javax.swing.event.ChangeListener;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 
 import utils.Config;
@@ -155,7 +157,7 @@ public class ConfigurationWindow {
 		panel_13.setBackground(Color.WHITE);
 		agent_panel.add(panel_13);
 		
-		JLabel lblPropagationtiefe = new JLabel("Propagationtiefe:");
+		JLabel lblPropagationtiefe = new JLabel("Propagationstiefe:");
 		panel_13.add(lblPropagationtiefe);
 		
 		JSpinner propagationDepth = new JSpinner();
@@ -224,7 +226,7 @@ public class ConfigurationWindow {
 		JPanel robot_panel = new JPanel();
 		robot_panel.setBackground(Color.WHITE);
 		robot_panel.setBorder(new TitledBorder(null, "Roboter", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		robot_panel.setBounds(241, 11, 217, 60);
+		robot_panel.setBounds(241, 11, 217, 135);
 		bot_panel.add(robot_panel);
 		robot_panel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		
@@ -232,22 +234,46 @@ public class ConfigurationWindow {
 		panel_4.setBackground(Color.WHITE);
 		robot_panel.add(panel_4);
 		FlowLayout flowLayout = (FlowLayout) panel_4.getLayout();
-		flowLayout.setHgap(0);
+		flowLayout.setVgap(8);
+		flowLayout.setHgap(3);
 		
 		JCheckBox simpleReward = new JCheckBox("Einfaches Belohnungssystem");
 		simpleReward.setBackground(Color.WHITE);
 		simpleReward.setSelected(Config.getBoolValue("Robot_SimpleReward"));
 		panel_4.add(simpleReward);
 		
+		JPanel panel_17 = new JPanel();
+		robot_panel.add(panel_17);
+		FlowLayout flowLayout_13 = (FlowLayout) panel_17.getLayout();
+		flowLayout_13.setVgap(8);
+		flowLayout_13.setHgap(3);
+		panel_17.setBackground(Color.WHITE);
+		
+		JCheckBox extendedAttackEnv = new JCheckBox("Erweiterte Angriffsumwelt");
+		extendedAttackEnv.setSelected(Config.getBoolValue("Robot_UseExtendedAttackEnv"));
+		panel_17.add(extendedAttackEnv);
+		
+		JPanel panel_18 = new JPanel();
+		robot_panel.add(panel_18);
+		FlowLayout flowLayout_14 = (FlowLayout) panel_18.getLayout();
+		flowLayout_14.setVgap(8);
+		flowLayout_14.setHgap(3);
+		panel_18.setBackground(Color.WHITE);
+		
+		JCheckBox extendedMoveEnv = new JCheckBox("Erweiterte Bewegungsumwelt");
+		extendedMoveEnv.setSelected(Config.getBoolValue("Robot_UseExtendedMoveEnv"));
+		panel_18.add(extendedMoveEnv);
+		
 		JPanel env_panel = new JPanel();
 		env_panel.setBackground(Color.WHITE);
 		env_panel.setBorder(new TitledBorder(null, "Umwelt", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		env_panel.setBounds(241, 83, 217, 163);
+		env_panel.setBounds(241, 148, 217, 179);
 		bot_panel.add(env_panel);
 		env_panel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		
 		JPanel panel_8 = new JPanel();
 		FlowLayout flowLayout_4 = (FlowLayout) panel_8.getLayout();
+		flowLayout_4.setVgap(8);
 		flowLayout_4.setHgap(3);
 		panel_8.setBackground(Color.WHITE);
 		env_panel.add(panel_8);
@@ -259,6 +285,7 @@ public class ConfigurationWindow {
 		
 		JPanel panel_9 = new JPanel();
 		FlowLayout flowLayout_6 = (FlowLayout) panel_9.getLayout();
+		flowLayout_6.setVgap(8);
 		flowLayout_6.setAlignment(FlowLayout.LEFT);
 		flowLayout_6.setHgap(3);
 		panel_9.setBackground(Color.WHITE);
@@ -271,6 +298,7 @@ public class ConfigurationWindow {
 		
 		JPanel panel_10 = new JPanel();
 		FlowLayout flowLayout_7 = (FlowLayout) panel_10.getLayout();
+		flowLayout_7.setVgap(8);
 		flowLayout_7.setHgap(3);
 		flowLayout_7.setAlignment(FlowLayout.LEFT);
 		panel_10.setBackground(Color.WHITE);
@@ -281,18 +309,19 @@ public class ConfigurationWindow {
 		paintAttackEnv.setSelected(Config.getBoolValue("Env_PaintAttackEnv"));
 		panel_10.add(paintAttackEnv);
 		
-		JPanel panel_11 = new JPanel();
-		panel_11.setBackground(Color.WHITE);
-		env_panel.add(panel_11);
-		
+		JPanel moveGridSize_panel = new JPanel();
+		moveGridSize_panel.setBackground(Color.WHITE);
+		env_panel.add(moveGridSize_panel);
+
 		JSpinner moveGridSize = new JSpinner();
 		val = Config.getIntValue("Env_GridSize");
 		moveGridSize.setModel(new SpinnerNumberModel(val == 0 ? new Integer(40) : val, null, null, new Integer(1)));
 		moveGridSize.setBackground(Color.WHITE);
-		panel_11.add(moveGridSize);
+		moveGridSize.setEnabled(Config.getBoolValue("Env_UseExtendedMoveEnv"));
+		moveGridSize_panel.add(moveGridSize);
 		
 		JLabel lblNewLabel_1 = new JLabel("Bewegungsgittergröße");
-		panel_11.add(lblNewLabel_1);
+		moveGridSize_panel.add(lblNewLabel_1);
 		
 		JPanel robocode_panel = new JPanel();
 		robocode_panel.setBackground(Color.WHITE);
@@ -428,6 +457,8 @@ public class ConfigurationWindow {
 				Config.setIntValue("Agent_QueueSize", (int)propagationDepth.getValue());
 				
 				Config.setBoolValue("Robot_SimpleReward", simpleReward.isSelected());
+				Config.setBoolValue("Robot_UseExtendedMoveEnv", extendedMoveEnv.isSelected());
+				Config.setBoolValue("Robot_UseExtendedAttackEnv", extendedAttackEnv.isSelected());
 				
 				Config.setBoolValue("Env_Debug", envDebug.isSelected());
 				Config.setBoolValue("Env_PaintMoveEnv", paintMoveEnv.isSelected());
@@ -445,6 +476,12 @@ public class ConfigurationWindow {
 			}
 		});
 		button_panel.add(btnStart);
+		
+		extendedMoveEnv.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				moveGridSize.setEnabled(extendedMoveEnv.isSelected());
+			}
+		});
 	}
 
 	private void loadRobots() {
