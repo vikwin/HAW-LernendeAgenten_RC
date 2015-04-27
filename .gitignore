@@ -20,6 +20,9 @@ local.properties
 .settings/
 .loadpath
 
+LARCBot.cfg
+Thumbs.db
+
 # External tool builders
 .externalToolBuilders/
 
