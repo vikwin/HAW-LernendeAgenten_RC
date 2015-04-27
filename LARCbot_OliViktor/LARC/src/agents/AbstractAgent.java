@@ -140,6 +140,13 @@ public abstract class AbstractAgent {
 		} while (i != queueEndIndex);
 	}
 
+	/**
+	 * Gibt die nächste Aktion an
+	 * @param stateID Die ID des aktuellen Zustands der Umwelt
+	 * @return Die ID der nächsten Aktion
+	 */
+	public abstract int getNextAction(int stateID);
+	
 	public abstract void addReward(double reward);
 	
 	public abstract void saveOnBattleEnd();

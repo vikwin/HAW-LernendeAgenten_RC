@@ -3,12 +3,9 @@ package agents;
 import java.io.IOException;
 import java.util.Arrays;
 import java.util.Random;
-import java.util.concurrent.LinkedBlockingQueue;
 
 import org.json.simple.parser.ParseException;
 
-import robot.ComplexAttack;
-import robot.ComplexAttack.GunPower;
 import utils.Config;
 
 public class AttackAgent extends AbstractAgent {
@@ -34,29 +31,24 @@ public class AttackAgent extends AbstractAgent {
 	}
 	
 	private Random rnd;
-	private int numberOfActions, normalizedSuccessChance;
-	private LinkedBlockingQueue<Integer> lastShotActions;
-	
+	private int numberOfActions, normalizedSuccessChance;	
 
 	/**
-	 * @param ringfields
-	 *            Die Anzahl der Felder, die insgesamt in den Ringen zur
-	 *            Verfügung stehen.
+	 * @param environmentStateCount Anzahl der Zustände, die die Umwelt annehmen kann
+	 * @param actionCount Anzahl der möglichen Aktionen
 	 */
-	public AttackAgent(int ringfields) {
+	public AttackAgent(int stateCount, int actionCount) {
 		super();
 		rnd = new Random();
 
-		numberOfActions = (360 / 10) * 3 + 1;
+		numberOfActions = actionCount;
 		normalizedSuccessChance = SUCCESS_CHANCE
 				- (Math.floorDiv(100 - SUCCESS_CHANCE, numberOfActions - 1));
 
 		if (actionList == null) {
-			actionList = new Double[ringfields * numberOfActions];
+			actionList = new Double[stateCount * numberOfActions];
 			Arrays.fill(actionList, new Double(0.0));
 		}
-		
-		lastShotActions = new LinkedBlockingQueue<Integer>();
 	}
 	
 	@Override
@@ -81,7 +73,8 @@ public class AttackAgent extends AbstractAgent {
 		return maxID;
 	}
 
-	public ComplexAttack getNextAction(int stateID) {
+	@Override
+	public int getNextAction(int stateID) {
 		int actionID = -1;
 
 		switch (mode) {
@@ -108,19 +101,8 @@ public class AttackAgent extends AbstractAgent {
 
 //		System.out.println("AttackAgent asked for next action and returns #"
 //				+ (actionID % 36));
-
-		if (actionID == numberOfActions - 1) {
-			// Nothing Action
-			return ComplexAttack.NOTHING;
-		}
 		
-		try {
-			lastShotActions.put(stateID * numberOfActions + actionID);
-		} catch (InterruptedException e) {
-			e.printStackTrace();
-		}
-		
-		return new ComplexAttack(GunPower.values()[actionID / 36], (actionID % 36) * 10);
+		return actionID;
 	}
 
 	@Override
@@ -130,17 +112,6 @@ public class AttackAgent extends AbstractAgent {
 			if (++actionCounter >= SAVE_TIMES) {
 				save(TIMESTAMP, "attack_agent_" + fileCounter++);
 				actionCounter = 0;
-			}
-			
-			addRewardToLastActions(reward);
-		}
-	}
-	
-	public void addReward(double reward, double shotReward) {
-		if (mode != AgentMode.FIGHTING) {
-			Integer shotActionId = lastShotActions.poll();
-			if (shotActionId != null) {
-				actionList[shotActionId] += shotReward;
 			}
 			
 			addRewardToLastActions(reward);

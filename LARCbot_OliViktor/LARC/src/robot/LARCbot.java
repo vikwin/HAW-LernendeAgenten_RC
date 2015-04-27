@@ -56,8 +56,8 @@ public class LARCbot extends RewardRobot {
 		// werden, weil sonst der Zugriff auf die Eigenschaften des Spielfelds
 		// verwehrt wird
 		envBuilder = new EnvironmentBuilder(this, COMPLEX_MOVE_ENV, COMPLEX_ATTACK_ENV);
-		moveAgent = new MoveAgent();
-		attackAgent = new AttackAgent(envBuilder.getAttackEnvStateCount());
+		moveAgent = new MoveAgent(envBuilder.getMoveEnvStateCount(), COMPLEX_MOVE_ENV ? ComplexMovement.values().length : SimpleMovement.values().length);
+		attackAgent = new AttackAgent(envBuilder.getAttackEnvStateCount(), COMPLEX_ATTACK_ENV ? ComplexAttack.getActionCount() : SimpleAttack.getActionCount());
 
 		setAdjustGunForRobotTurn(true);
 		setAdjustRadarForGunTurn(true);
@@ -142,48 +142,61 @@ public class LARCbot extends RewardRobot {
 		}
 	}
 
-	private SerialAction getSerialActionByMovement(ComplexMovement movement) {
-		TurnAction turn = null;
-		MoveAction move = null;
-
-		if (movement == ComplexMovement.NOTHING)
-			return new SerialAction(Arrays.asList(new Action[] {}));
-
-		Vector2D destination = getPosition().add(movement.getMoveVector());
-
-		double rotationAngle = destination.subtract(getPosition())
-				.getNormalHeading() - Utils.normalizeHeading(getHeading());
-
-		double distance = getPosition().distanceTo(destination);
-
-		if (rotationAngle >= -90 && rotationAngle <= 90) {
-			// Nach rechts oder links drehen und vorwärts fahren (Winkel
-			// zwischen -90 und 90)
-			turn = new TurnAction(rotationAngle);
-			move = new MoveAction(distance);
-
-		} else if (rotationAngle > 90) {
-			// Nach links drehen und rückwärts fahren (Winkel über 90)
-			turn = new TurnAction(rotationAngle - 180);
-			move = new MoveAction(-distance);
-
+	private SerialAction getSerialActionByMovement(int movementId) {
+		if (COMPLEX_MOVE_ENV) {
+			ComplexMovement movement = ComplexMovement.byId(movementId);
+			TurnAction turn = null;
+			MoveAction move = null;
+	
+			if (movement == ComplexMovement.NOTHING)
+				return new SerialAction(Arrays.asList(new Action[] {}));
+	
+			Vector2D destination = getPosition().add(movement.getMoveVector());
+	
+			double rotationAngle = destination.subtract(getPosition())
+					.getNormalHeading() - Utils.normalizeHeading(getHeading());
+	
+			double distance = getPosition().distanceTo(destination);
+	
+			if (rotationAngle >= -90 && rotationAngle <= 90) {
+				// Nach rechts oder links drehen und vorwärts fahren (Winkel
+				// zwischen -90 und 90)
+				turn = new TurnAction(rotationAngle);
+				move = new MoveAction(distance);
+	
+			} else if (rotationAngle > 90) {
+				// Nach links drehen und rückwärts fahren (Winkel über 90)
+				turn = new TurnAction(rotationAngle - 180);
+				move = new MoveAction(-distance);
+	
+			} else {
+				// Nach rechts drehen und rückwärts fahren (Winkel unter -90)
+				turn = new TurnAction(180 + rotationAngle);
+				move = new MoveAction(distance);
+			}
+	
+			return new SerialAction(Arrays.asList(new Action[] { turn, move }));
 		} else {
-			// Nach rechts drehen und rückwärts fahren (Winkel unter -90)
-			turn = new TurnAction(180 + rotationAngle);
-			move = new MoveAction(distance);
+			// TODO: Einbauen, was bei SimpleMoveEnvironment passieren soll
+			return null;
 		}
-
-		return new SerialAction(Arrays.asList(new Action[] { turn, move }));
 	}
 
-	private SerialAction getSerialActionByAttack(ComplexAttack attack) {
-		if (attack == ComplexAttack.NOTHING)
-			return new SerialAction(Arrays.asList(new Action[] {}));
-
-		GunTurnAction gunturn = new GunTurnAction(attack.getDirection());
-		FireAction fire = new FireAction(attack.getPower().toDouble());
-
-		return new SerialAction(Arrays.asList(new Action[] { gunturn, fire }));
+	private SerialAction getSerialActionByAttack(int attackId) {
+		if (COMPLEX_ATTACK_ENV) {
+			ComplexAttack attack = ComplexAttack.byId(attackId);
+			
+			if (attack == ComplexAttack.NOTHING)
+				return new SerialAction(Arrays.asList(new Action[] {}));
+	
+			GunTurnAction gunturn = new GunTurnAction(attack.getDirection());
+			FireAction fire = new FireAction(attack.getPower().toDouble());
+	
+			return new SerialAction(Arrays.asList(new Action[] { gunturn, fire }));
+		} else {
+			// TODO: Einbauen, was bei SimpleAttackEnvironment passieren soll
+			return null;
+		}
 	}
 
 	/**

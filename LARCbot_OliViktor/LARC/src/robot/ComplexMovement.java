@@ -8,8 +8,12 @@ public enum ComplexMovement {
 	private static double MOVE_RADIUS = 40.0;
 	private static double MOVE_LEG_SIZE = Math.sqrt(2 * MOVE_RADIUS * MOVE_RADIUS);
 	
-	public int getID() {
-		return this.ordinal();
+	/**
+	 * @param id die ID der SimpleMovement
+	 * @return SimpleMovement, die zu der ID gehört
+	 */
+	public static ComplexMovement byId(int id) {
+		return values()[id];
 	}
 	
 	public Vector2D getMoveVector() {

@@ -6,7 +6,6 @@ import java.util.Random;
 
 import org.json.simple.parser.ParseException;
 
-import robot.ComplexMovement;
 import utils.Config;
 
 public class MoveAgent extends AbstractAgent {
@@ -32,28 +31,24 @@ public class MoveAgent extends AbstractAgent {
 	}
 	
 	private Random rnd;
-	private int actionEnumSize, normalizedSuccessChance;
+	private int actionCount, normalizedSuccessChance;
 	
 	
 	/**
-	 * 
-	 * @param gridFields Die Anzahl der Felder, die das Spielfeld als Grid hat.
+	 * @param environmentStateCount Anzahl der Zustände, die die Umwelt annehmen kann
+	 * @param actionCount Anzahl der möglichen Aktionen
 	 */
-	public MoveAgent(int gridFields) {
+	public MoveAgent(int environmentStateCount, int actionCount) {
 		super();
 		rnd = new Random();
 		
-		actionEnumSize = ComplexMovement.values().length;
-		normalizedSuccessChance = SUCCESS_CHANCE - (Math.floorDiv(100 - SUCCESS_CHANCE, actionEnumSize - 1));
+		this.actionCount = actionCount;
+		normalizedSuccessChance = SUCCESS_CHANCE - (Math.floorDiv(100 - SUCCESS_CHANCE, actionCount - 1));
 		
 		if (actionList == null) {
-			actionList = new Double[gridFields * gridFields * actionEnumSize];
+			actionList = new Double[environmentStateCount * actionCount];
 			Arrays.fill(actionList, new Double(0.0));
 		}
-	}
-	
-	public MoveAgent() {
-		this(300);
 	}
 	
 	@Override
@@ -66,7 +61,7 @@ public class MoveAgent extends AbstractAgent {
 		double max = -1000000;
 		int maxID = -1;
 		
-		for (int i = 0; i < actionEnumSize; i++) {
+		for (int i = 0; i < actionCount; i++) {
 			if (actionList[startID + i] >= max) {
 				if (actionList[startID + i] != max || rnd.nextBoolean()) {
 					max = actionList[startID + i];
@@ -78,34 +73,35 @@ public class MoveAgent extends AbstractAgent {
 		return maxID;
 	}
 	
-	public ComplexMovement getNextAction(int stateID) {
+	@Override
+	public int getNextAction(int stateID) {
 		int actionID = -1;
 		
 		switch (mode) {
 		case RNDLEARN:
-			actionID = rnd.nextInt(actionEnumSize);
+			actionID = rnd.nextInt(actionCount);
 			break;
 			
 		case LEARNING:
 			int chance = rnd.nextInt(100);
 			
 			if (chance < normalizedSuccessChance) {
-				actionID = getActionWithMaxValue(stateID * actionEnumSize);
+				actionID = getActionWithMaxValue(stateID * actionCount);
 			} else {
-				actionID = rnd.nextInt(actionEnumSize);
+				actionID = rnd.nextInt(actionCount);
 			}
 			break;
 			
 		case FIGHTING:
-			actionID = getActionWithMaxValue(stateID * actionEnumSize);
+			actionID = getActionWithMaxValue(stateID * actionCount);
 			break;
 		}
 		
-		addToLastActionQueue(stateID * actionEnumSize + actionID);
+		addToLastActionQueue(stateID * actionCount + actionID);
 		
 //		System.out.println("MoveAgent asked for next action and returns #" + actionID);
 		
-		return ComplexMovement.values()[actionID];
+		return actionID;
 	}
 	
 	@Override
