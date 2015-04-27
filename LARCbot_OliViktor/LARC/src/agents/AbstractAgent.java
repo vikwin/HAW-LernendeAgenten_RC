@@ -22,7 +22,8 @@ public abstract class AbstractAgent {
 	private static final double LEARN_RATE = Config.getIntValue("Agent_LearnRate") / 100;
 	private static final double DISCOUNT_RATE = Config.getIntValue("Agent_DiscountRate") / 100;
 	private static final double LAMBDA = Config.getIntValue("Agent_Lambda") / 100;
-	private static final int QUEUE_SIZE = 10;
+	private static final int QUEUE_SIZE = Config.getIntValue("Agent_QueueSize");
+	private static final double REWARD_CAP = 5;
 
 	protected static final int SAVE_TIMES = Config.getIntValue("Agent_SaveTimes");
 	protected static final String TIMESTAMP = new SimpleDateFormat("dd_MM_yyyy_HH_mm_ss").format(new Date());
@@ -136,7 +137,7 @@ public abstract class AbstractAgent {
 			}
 			val = getActionList()[lastActionQueue[i]];
 			nextVal = getActionList()[lastActionQueue[n]];
-			getActionList()[lastActionQueue[i]] += lambda * (LEARN_RATE * (reward + (DISCOUNT_RATE * nextVal) - val));
+			getActionList()[lastActionQueue[i]] = Math.min(Math.max(val + lambda * (LEARN_RATE * (reward + (DISCOUNT_RATE * nextVal) - val)), -REWARD_CAP), REWARD_CAP);
 			
 			lambda *= LAMBDA;
 		} while (i != queueEndIndex);

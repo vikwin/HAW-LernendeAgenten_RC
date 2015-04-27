@@ -8,6 +8,7 @@ import robocode.HitByBulletEvent;
 import robocode.HitRobotEvent;
 import robocode.HitWallEvent;
 import robocode.RobotDeathEvent;
+import robocode.Rules;
 import robot.actionsystem.ActorRobot;
 
 /**
@@ -22,9 +23,9 @@ import robot.actionsystem.ActorRobot;
  *
  */
 public abstract class RewardRobot extends ActorRobot {
-	private static final double BULLET_REWARD = 20;		// Belohnung / Bestrafung für eine Kugel, wird mit der Power der Kugel multipliziert
-	private static final double HIT_REWARD = 10;		// Belohnung / Bestrafung wenn der Roboter gegen etwas gegen fährt
-	private static final double VICTORY_REWARD = 100;	// Belohnung für dem Sieg, Bestrafung für die Niederlage  
+	private static final double BULLET_REWARD = 3 / Rules.MAX_BULLET_POWER;		// Belohnung / Bestrafung für eine Kugel, wird mit der Power der Kugel multipliziert
+	private static final double HIT_REWARD = 1;			// Belohnung / Bestrafung wenn der Roboter gegen etwas gegen fährt
+	private static final double VICTORY_REWARD = 10;	// Belohnung für dem Sieg, Bestrafung für die Niederlage  
 	
 	private double reward;
 	private double shotReward;

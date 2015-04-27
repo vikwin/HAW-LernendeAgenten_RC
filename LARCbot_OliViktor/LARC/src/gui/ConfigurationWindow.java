@@ -82,7 +82,7 @@ public class ConfigurationWindow {
 		frmLarcbotExperimentKonfigurator
 				.setTitle("LARCBot Experiment Konfigurator");
 		frmLarcbotExperimentKonfigurator.setResizable(false);
-		frmLarcbotExperimentKonfigurator.setBounds(100, 100, 470, 388);
+		frmLarcbotExperimentKonfigurator.setBounds(100, 100, 470, 430);
 		frmLarcbotExperimentKonfigurator
 				.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmLarcbotExperimentKonfigurator.getContentPane().setLayout(
@@ -100,7 +100,7 @@ public class ConfigurationWindow {
 		JPanel agent_panel = new JPanel();
 		agent_panel.setBackground(Color.WHITE);
 		agent_panel.setBorder(new TitledBorder(null, "Agenten", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		agent_panel.setBounds(6, 11, 233, 280);
+		agent_panel.setBounds(6, 11, 233, 316);
 		bot_panel.add(agent_panel);
 		agent_panel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		
@@ -150,6 +150,19 @@ public class ConfigurationWindow {
 		panel_5.add(saveTimes);
 		val = Config.getIntValue("Agent_SaveTimes");
 		saveTimes.setModel(new SpinnerNumberModel(val < 10000 ? 10000 : val, 10000, 10000000, 10000));
+		
+		JPanel panel_13 = new JPanel();
+		panel_13.setBackground(Color.WHITE);
+		agent_panel.add(panel_13);
+		
+		JLabel lblPropagationtiefe = new JLabel("Propagationtiefe:");
+		panel_13.add(lblPropagationtiefe);
+		
+		JSpinner propagationDepth = new JSpinner();
+		val = Config.getIntValue("Agent_QueueSize");
+		propagationDepth.setModel(new SpinnerNumberModel(val == 0 ? 1 : val, 1, 100, 1));
+		propagationDepth.setBackground(Color.WHITE);
+		panel_13.add(propagationDepth);
 		
 		JPanel learnAlgorithm = new JPanel();
 		agent_panel.add(learnAlgorithm);
@@ -343,7 +356,7 @@ public class ConfigurationWindow {
 		JPanel enemy_panel = new JPanel();
 		enemy_panel.setBorder(new TitledBorder(null, "Gegner", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		enemy_panel.setBackground(Color.WHITE);
-		enemy_panel.setBounds(225, 76, 233, 195);
+		enemy_panel.setBounds(225, 76, 233, 251);
 		FlowLayout fl_enemy_panel = (FlowLayout) enemy_panel.getLayout();
 		fl_enemy_panel.setAlignment(FlowLayout.LEFT);
 		fl_enemy_panel.setVgap(0);
@@ -351,9 +364,10 @@ public class ConfigurationWindow {
 		robocode_panel.add(enemy_panel);
 
 		JList<String> robot_list = new JList<String>();
+		robot_list.setVisibleRowCount(11);
 		robot_list.setBorder(null);
 		robot_listModel = new DefaultListModel<String>();
-		robot_listModel.addElement("#######################");
+		robot_listModel.addElement("###########################");
 		loadRobots();
 		robot_list.setSelectedValue(Config.getStringValue("EnemyRobot"), true);
 		robot_list.setModel(robot_listModel);
@@ -385,6 +399,7 @@ public class ConfigurationWindow {
 				
 				if (res == JFileChooser.APPROVE_OPTION) {
 					robocodeHome.setText(fc.getSelectedFile().getPath());
+					Config.setStringValue("RobocodeHome", robocodeHome.getText());
 					
 					loadRobots();
 				}
@@ -410,6 +425,7 @@ public class ConfigurationWindow {
 				Config.setIntValue("Agent_LearnRate", (int)learnRate.getValue());
 				Config.setIntValue("Agent_DiscountRate", (int)discountRate.getValue());
 				Config.setIntValue("Agent_Lambda", (int)lambda.getValue());
+				Config.setIntValue("Agent_QueueSize", (int)propagationDepth.getValue());
 				
 				Config.setBoolValue("Robot_SimpleReward", simpleReward.isSelected());
 				
@@ -421,7 +437,6 @@ public class ConfigurationWindow {
 				Config.setBoolValue("ShowRobocodeGUI", showGUI.isSelected());
 				Config.setBoolValue("StartBattle", startBattle.isSelected());
 				Config.setIntValue("Rounds", (int)rounds.getValue());
-				Config.setStringValue("RobocodeHome", robocodeHome.getText());
 				Config.setStringValue("EnemyRobot", robot_list.getSelectedValue());
 				Config.setIntValue("FieldWidth", 800);
 				Config.setIntValue("FieldHeight", 600);
@@ -436,9 +451,8 @@ public class ConfigurationWindow {
 		String robocode = Config.getStringValue("RobocodeHome");
 		File robots = new File(robocode, "robots");
 
-		robot_listModel.removeAllElements();
-		
 		if (robots.isDirectory()) {
+			robot_listModel.removeAllElements();
 			for (File f : robots.listFiles()) {
 				String name = "";
 				if (f.isDirectory()) {
