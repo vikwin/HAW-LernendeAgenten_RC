@@ -26,8 +26,8 @@ public abstract class AbstractAgent {
 	private static final double REWARD_CAP = 5;
 
 	protected static final int SAVE_TIMES = Config.getIntValue("Agent_SaveTimes");
-	protected static final String TIMESTAMP = new SimpleDateFormat("dd_MM_yyyy_HH_mm_ss").format(new Date());
-	protected static final boolean LOAD_ON_START = true;
+	protected static final String TIMESTAMP = new SimpleDateFormat("dd_MM_yyyy_HH_mm_ss").format(new Date()), ENEMY;
+	protected static final boolean LOAD_ON_START = Config.getBoolValue("Agent_LoadOnStart");
 
 	protected AgentMode mode;
 
@@ -35,6 +35,11 @@ public abstract class AbstractAgent {
 	private int queueEndIndex;
 	
 	static {
+		if (Config.getBoolValue("StartBattle"))
+			ENEMY = "_" + Config.getStringValue("EnemyRobot");
+		else
+			ENEMY = "";
+		
 		new File("LARCAgents/" + TIMESTAMP).mkdirs();
 	}
 

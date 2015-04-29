@@ -369,7 +369,7 @@ public class ConfigurationWindow {
 
 		JSpinner rounds = new JSpinner();
 		val = Config.getIntValue("Rounds");
-		rounds.setModel(new SpinnerNumberModel(val < 10 ? 10 : val, 10, 10000000, 10));
+		rounds.setModel(new SpinnerNumberModel(val < 10 ? 10 : val, 10, 100000000, 10));
 		rounds_panel.add(rounds);
 
 		JPanel panel_2 = new JPanel();

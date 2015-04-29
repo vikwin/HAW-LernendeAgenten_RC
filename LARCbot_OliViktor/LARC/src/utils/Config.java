@@ -4,7 +4,10 @@ import java.io.File;
 import java.io.FileNotFoundException;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
+import java.util.Collections;
 import java.util.HashMap;
+import java.util.List;
 import java.util.Scanner;
 
 public class Config {
@@ -84,8 +87,10 @@ public class Config {
 	private static void saveFile(HashMap<String, String> elems, String filename) {
 		try {
 			FileWriter writer = new FileWriter(filename);
+			List<String> keys = new ArrayList<String>(elems.keySet());
+			Collections.sort(keys);
 			
-			for (String key : elems.keySet()) {
+			for (String key : keys) {
 				writer.write(key + "=" + elems.get(key) + "\n");
 			}
 			

@@ -14,6 +14,8 @@ public class AttackAgent extends AbstractAgent {
 	private static Double[] actionList = null;
 	private static int actionCounter = 0, fileCounter = 0;
 	
+	private static final String FILENAME = "attack_agent" + ENEMY;
+	
 	protected static void fillActionList(Double[] values) {
 		actionList = values;		
 	}
@@ -21,7 +23,7 @@ public class AttackAgent extends AbstractAgent {
 	static {
 		if (LOAD_ON_START) {
 			try {
-				load("", "attack_agent");
+				load("", FILENAME);
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (ParseException e) {
@@ -120,6 +122,6 @@ public class AttackAgent extends AbstractAgent {
 
 	@Override
 	public void saveOnBattleEnd() {
-		save("", "attack_agent");
+		save("", FILENAME);
 	}
 }
