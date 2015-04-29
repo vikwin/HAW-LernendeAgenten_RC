@@ -12,7 +12,15 @@ import agents.LARCAgent;
 import environment.LARCEnvironment;
 
 public class LARCRobot extends AdvancedRobot {
-
+	
+	public static final int ROUNDS_TO_LEARN = 10000;
+	
+	public static final int NO_OF_STATES = 300 * 300 * 3;
+	public static final int NO_OF_ACTIONS = 2 * 8 * 2;
+	public static double[][] VALUE_FUNCTION = new double[NO_OF_ACTIONS][NO_OF_STATES];
+	public static int EPISODE_COUNTER = 0;
+	public double currentGunAngleToEnemy;
+	public double oldGunAngleToEnemy = 0;
 	private static final double DEFAULT_GUNTURN = 10;
 	private LARCEnvironment environment;
 	private LARCAgent agent;
@@ -20,21 +28,21 @@ public class LARCRobot extends AdvancedRobot {
 	private double enemyY;
 	private double angleToEnemy;
 	private double distanceToEnemy;
-	private boolean gameOver;
 
 	private Position selfGridPos;
 	private Position enemyGridPos;
 	private double selfEnergy;
 	private double enemyEnergy;
 	private double energyRatio;
-	private int lastReward;
+	private int currentReward;
 
 	public LARCRobot() {
+		EPISODE_COUNTER++;
+		System.out.println("EPISODE COUNTER: " + EPISODE_COUNTER);
 		this.enemyX = 0;
 		this.enemyY = 0;
 		this.selfGridPos = new Position(1, 1);
 		this.enemyGridPos = new Position(2, 2);
-		this.gameOver = false;
 		this.environment = new LARCEnvironment(this);
 		this.agent = new LARCAgent(this);
 	}
@@ -48,7 +56,7 @@ public class LARCRobot extends AdvancedRobot {
 		this.agent.agent_init();
 		int stateID = this.environment.env_start();
 		int actionID = this.agent.agent_start(stateID);
-		while (!this.getGameOver()) {
+		while (true) {
 			// default actions:
 			setTurnRadarRight(360);
 			// stepping
@@ -76,9 +84,7 @@ public class LARCRobot extends AdvancedRobot {
 	private void updateEnergyRatio() {
 		if (this.enemyEnergy > 0) {
 			this.energyRatio = this.selfEnergy / this.enemyEnergy; // Energy ratio: self/enemy
-		} else {
-			this.gameOver = true;
-		}
+		} 
 	}
 
 	private void triangulateEnemyPosition() {
@@ -100,11 +106,7 @@ public class LARCRobot extends AdvancedRobot {
 		enemyGridPos.setY(((int) (this.getEnemyY() / LARCEnvironment.TILESIZE)));
 	}
 
-	public boolean getGameOver() {
-		return this.gameOver;
-	}
-
-	public double getEnemyX() {
+		public double getEnemyX() {
 		return enemyX;
 	}
 
@@ -120,12 +122,12 @@ public class LARCRobot extends AdvancedRobot {
 		return enemyGridPos;
 	}
 
-	public int getLastReward() {
-		return lastReward;
+	public int getCurrentReward() {
+		return currentReward;
 	}
 
-	public void setLastReward(int lastReward) {
-		this.lastReward = lastReward;
+	public void setCurrentReward(int lastReward) {
+		this.currentReward = lastReward;
 	}
 
 	public double getEnergyRatio() {
@@ -146,6 +148,7 @@ public class LARCRobot extends AdvancedRobot {
 		// point gun towards enemy:
 		// setTurnGunRight(getHeading() - getGunHeading() + event.getBearing());
 		// update enemy-related state variables:
+		this.currentGunAngleToEnemy = Math.abs(getHeading() - getGunHeading() + event.getBearing()); 
 		this.angleToEnemy = event.getBearing();
 		this.distanceToEnemy = event.getDistance();
 		this.triangulateEnemyPosition();
@@ -156,8 +159,6 @@ public class LARCRobot extends AdvancedRobot {
 
 	@Override
 	public void onDeath(DeathEvent event) {
-		this.gameOver = true;
-		this.lastReward = -10;
 		this.agent.agent_end();
 		this.environment.env_cleanup();
 		this.agent.agent_cleanup();
@@ -165,8 +166,7 @@ public class LARCRobot extends AdvancedRobot {
 
 	@Override
 	public void onRobotDeath(RobotDeathEvent event) {
-		this.gameOver = true;
-		this.lastReward = 10;
+		this.currentReward = 10;
 		this.agent.agent_end();
 		this.environment.env_cleanup();
 		this.agent.agent_cleanup();

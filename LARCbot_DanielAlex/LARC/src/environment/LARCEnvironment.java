@@ -55,6 +55,7 @@ public class LARCEnvironment implements IEnvironment {
 		this.currentState.setGunToEnemy(this.calculateGunToEnemy());
 		this.calculateReward();
 
+		this.robot.oldGunAngleToEnemy = this.robot.currentGunAngleToEnemy;
 		this.previousEnergyRatio = this.currentEnergyRatio;
 		return this.currentState.getStateID();
 	}
@@ -71,13 +72,16 @@ public class LARCEnvironment implements IEnvironment {
 	 */
 	private double calculateReward() {
 		if (this.currentEnergyRatio > this.previousEnergyRatio) {
-			this.lastReward = 1;
+			this.lastReward = 2;
 		} else if (this.currentEnergyRatio < this.previousEnergyRatio) {
 			this.lastReward = -1;
 		} else {
 			this.lastReward = 0;
 		}
-		this.robot.setLastReward(lastReward);
+		if (this.robot.currentGunAngleToEnemy < this.robot.oldGunAngleToEnemy) {
+			this.lastReward += 1;
+		}
+		this.robot.setCurrentReward(lastReward);
 		return this.lastReward;
 	}
 

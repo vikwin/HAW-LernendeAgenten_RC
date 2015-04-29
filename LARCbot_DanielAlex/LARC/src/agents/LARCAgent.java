@@ -2,6 +2,7 @@ package agents;
 
 import java.io.BufferedReader;
 import java.io.BufferedWriter;
+import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
@@ -14,119 +15,132 @@ public class LARCAgent implements IAgent {
 
 	public static final String PATH = "qValues.csv";
 
-	public static final int NO_OF_STATES = 300 * 300 * 3;
-	public static final int NO_OF_ACTIONS = 2 * 8 * 2;
-	public static double[][] VALUE_FUNCTION = new double[NO_OF_ACTIONS][NO_OF_STATES];
+	public static double[][] E_TRACE_FUNCTION;
 	public static final double INITIAL_Q_VALUE = 0.0;
 	public static final int LAMBDA_CAPACITY = 15;
+
+	private static final double SARSA_EPSILON = 1.0; // Exploration rate
+	private static final double SARSA_GAMMA = 0.9; // Time Discount factor
+	private static final double SARSA_ALPHA = 0.5; // learning rate (importance of new information)
+	private static final double LAMBDA_VALUE = 0.95; // Abschwächungsfaktor
+
 	private Random randGenerator = new Random();
-	// private double sarsa_stepsize = 0.1; // TBD
-	private double sarsa_epsilon = 1.0; // Exploration rate
-	private double sarsa_gamma = 0.9; // Time Discount factor
-	private double sarsa_alpha = 0.5; // learning rate (importance of new information)
-	private int lastAction;
-	private int lastState;
+	private int previousActionInt;
+	private int previousStateInt;
+	private int currentActionInt;
+	private int currentStateInt;
 	private MyAction myAction;
-	private boolean policyFrozen = false;
-	private boolean exploringFrozen = false;
+	private boolean policyFrozen = true;
+	private boolean exploringFrozen = true;
 	private LARCRobot myRobot;
-	private double oldQValue;
-	private double nextQValue;
-	private double newQValue;
+	private double previousStateQValue;
+	private double currentStateQValue;
 	private LinkedList<int[]> lastStatesForLambda;
+	private double currentQDataValue;
 
 	public LARCAgent(LARCRobot myRobot) {
 		this.myRobot = myRobot;
 		this.myAction = new MyAction(this.myRobot);
-		this.lastStatesForLambda = new LinkedList<int[]>();
 	}
 
 	@Override
 	public void agent_init() {
-		// valueFunction = new double[NO_OF_ACTIONS][NO_OF_STATES];
-		// if (!new File(PATH).isFile()) {
-		// for (int i = 0; i < NO_OF_ACTIONS; i++) {
-		// for (int j = 0; j < NO_OF_STATES; j++) {
-		// valueFunction[i][j] = INITIAL_Q_VALUE;
-		// }
-		// }
-		// try {
-		// this.saveValueFunction(PATH, valueFunction);
-		// } catch (IOException e) {
-		// System.out.println("Save ist fehlgeschlagen!!!");
-		// e.printStackTrace();
-		// }
-		// } else {
-		// try {
-		// loadValueFunction(PATH);
-		// } catch (IOException e) {
-		// System.out.println("Load ist fehlgeschlagen!!!");
-		// e.printStackTrace();
-		// }
-		// }
+		this.lastStatesForLambda = new LinkedList<int[]>();
+		E_TRACE_FUNCTION = new double[LARCRobot.NO_OF_ACTIONS][LARCRobot.NO_OF_STATES];
+		if (new File(PATH).isFile() && LARCRobot.EPISODE_COUNTER == 0) {
+			try {
+				loadValueFunction(PATH);
+			} catch (IOException e) {
+				System.out.println("Load ist fehlgeschlagen!!!");
+				e.printStackTrace();
+			}
+		}
 	}
 
 	@Override
-	public int agent_start(int state) {
+	public int agent_start(int stateInt) {
 
-		int newActionInt = egreedy(state);
+		currentActionInt = egreedy(stateInt);
 
-		lastAction = newActionInt;
-		lastState = state;
+		previousActionInt = currentActionInt;
+		previousStateInt = stateInt;
 
-		SpecificAction nextAction = SpecificAction.values()[newActionInt];
-		this.myRobot.move(this.myAction.getMoveVector(nextAction));
+		this.add(new int[] { previousActionInt, previousStateInt });
 
-		return newActionInt;
+		return currentActionInt;
 	}
 
 	@Override
-	public int agent_step(int state) {
-		int newActionInt = egreedy(state);
-
-		SpecificAction nextAction = SpecificAction.values()[newActionInt];
-
+	public int agent_step(int stateInt) {
+		SpecificAction nextAction = SpecificAction.values()[currentActionInt];
 		this.myRobot.move(this.myAction.getMoveVector(nextAction));
 
-		// sarsa-function:
-		this.newQValue = this.oldQValue + sarsa_alpha
-				* (myRobot.getLastReward() + this.sarsa_gamma * this.nextQValue - this.oldQValue);
+		currentActionInt = egreedy(stateInt);
+		currentStateInt = stateInt;
 
 		if (!policyFrozen) {
-			VALUE_FUNCTION[lastAction][lastState] = this.newQValue; // zuweisen des neu gelernten q-wertes
+			this.doTheSilenceOfTheLambda(); // zuweisen des neu gelernten q-wertes
 		}
 
-		lastAction = newActionInt;
-		lastState = state;
+		previousActionInt = currentActionInt;
+		previousStateInt = currentStateInt;
 
-		return newActionInt;
+		this.add(new int[] { previousActionInt, previousStateInt });
+
+		return currentActionInt;
 	}
 
 	@Override
 	public void agent_end() {
-		// AGENT TREMINAL LEARNING:
-		this.oldQValue = VALUE_FUNCTION[lastAction][lastState];
-
-		// sarsa-function:
-		this.newQValue = this.oldQValue + sarsa_alpha * (myRobot.getLastReward() - this.oldQValue);
 
 		if (!policyFrozen) {
-			VALUE_FUNCTION[lastAction][lastState] = this.newQValue;
+			this.doTheSilenceOfTheLambda(); // zuweisen des neu gelernten q-wertes
 		}
 
-		try {
-			saveValueFunction(PATH, VALUE_FUNCTION);
-		} catch (IOException e) {
-			System.out.println("Save ist fehlgeschlagen!!!");
-			e.printStackTrace();
+		if (LARCRobot.EPISODE_COUNTER >= LARCRobot.ROUNDS_TO_LEARN) {
+			try {
+				this.saveValueFunction(LARCAgent.PATH, LARCRobot.VALUE_FUNCTION);
+			} catch (IOException e) {
+				System.out.println("SAFE FUNCTION HAS FUCKED US!");
+			}
 		}
 	}
 
 	@Override
 	public void agent_cleanup() {
-		lastAction = 0;
-		lastState = 0;
-		VALUE_FUNCTION = null;
+		this.lastStatesForLambda.clear();
+		this.previousActionInt = 0;
+		this.previousStateInt = 0;
+	}
+
+	/********************************************************************************************************************/
+	public void doTheSilenceOfTheLambda() {
+		this.computeQDelta();
+		E_TRACE_FUNCTION[previousActionInt][previousStateInt]++;
+
+		// Q(a,s) += alpha*delta*etrace(a,s)
+		// etrace(a,s) *= gamme * lambda
+		for (int i = lastStatesForLambda.size() - 1; i >= 1; i--) {
+			LARCRobot.VALUE_FUNCTION[this.lastStatesForLambda.get(i)[0]][this.lastStatesForLambda.get(i)[1]] += SARSA_ALPHA
+					* currentQDataValue
+					* E_TRACE_FUNCTION[this.lastStatesForLambda.get(i)[0]][this.lastStatesForLambda.get(i)[1]];
+			E_TRACE_FUNCTION[this.lastStatesForLambda.get(i)[0]][this.lastStatesForLambda.get(i)[1]] *= SARSA_GAMMA
+					* LAMBDA_VALUE;
+		}
+	}
+
+	public void computeQDelta() {
+		this.previousStateQValue = LARCRobot.VALUE_FUNCTION[previousActionInt][previousStateInt];
+		this.currentStateQValue = LARCRobot.VALUE_FUNCTION[currentActionInt][currentStateInt];
+		this.currentQDataValue = myRobot.getCurrentReward() + SARSA_GAMMA * this.currentStateQValue
+				- this.previousStateQValue;
+	}
+
+	public void add(int[] indexPair) {
+		if (lastStatesForLambda.size() >= LAMBDA_CAPACITY) {
+			this.lastStatesForLambda.poll();
+		}
+		this.lastStatesForLambda.add(indexPair);
 	}
 
 	/**
@@ -137,61 +151,34 @@ public class LARCAgent implements IAgent {
 	 */
 	private int egreedy(int theState) {
 		if (!exploringFrozen) {
-			if (randGenerator.nextDouble() <= sarsa_epsilon) { // best option is selected 1-epsilon of the time
-				return randGenerator.nextInt(NO_OF_ACTIONS);
+			if (randGenerator.nextDouble() <= SARSA_EPSILON) { // best option is selected 1-epsilon of the time
+				return randGenerator.nextInt(LARCRobot.NO_OF_ACTIONS);
 			}
 		}
 
 		/* otherwise choose the greedy action */
 		int maxIndex = 0;
-		for (int a = 1; a < NO_OF_ACTIONS; a++) {
-			if (VALUE_FUNCTION[a][theState] > VALUE_FUNCTION[maxIndex][theState]) {
+		for (int a = 1; a < LARCRobot.NO_OF_ACTIONS; a++) {
+			if (LARCRobot.VALUE_FUNCTION[a][theState] > LARCRobot.VALUE_FUNCTION[maxIndex][theState]) {
 				maxIndex = a;
 			}
 		}
 		return maxIndex;
 	}
 
-	public void doTheSilenceOfTheLambda() {
-		// int hanibal = 1;
-		// AGENT LEARNING:
-		this.nextQValue = VALUE_FUNCTION[this.lastStatesForLambda.get(lastAction)[0]][this.lastStatesForLambda
-				.get(lastState)[1]];
-		this.oldQValue = VALUE_FUNCTION[this.lastStatesForLambda.get(this.lastStatesForLambda.size() - 1)[0]][this.lastStatesForLambda
-				.get(this.lastStatesForLambda.size() - 1)[1]];
-
-		for (int i = lastStatesForLambda.size(); i > 1; i--) {
-			this.oldQValue = VALUE_FUNCTION[this.lastStatesForLambda.get(i - 1)[0]][this.lastStatesForLambda
-					.get(i - 1)[1]];
-			this.nextQValue = VALUE_FUNCTION[this.lastStatesForLambda.get(i)[0]][this.lastStatesForLambda.get(i)[1]];
-
-			VALUE_FUNCTION[this.lastStatesForLambda.get(i)[0]][this.lastStatesForLambda.get(i)[1]] = this.oldQValue
-					+ sarsa_alpha * (myRobot.getLastReward() + this.sarsa_gamma * this.nextQValue - this.oldQValue);
-			;
-		}
-	}
-
-	public void addToLambda(int[] index) {
-		if (lastStatesForLambda.size() < LAMBDA_CAPACITY - 1) {
-			lastStatesForLambda.addLast(index);
-		} else {
-			lastStatesForLambda.remove(0);
-			lastStatesForLambda.addLast(index);;
-		}
-	}
-
 	/**
 	 * Saves the value function to a file named filePath.
 	 * 
 	 * @param filePath
-	 * @param VALUE_FUNCTION
+	 * @param LARCRobot
+	 *            .VALUE_FUNCTION
 	 * @throws IOException
 	 */
 	public void saveValueFunction(String filePath, double[][] valuefunction) throws IOException {
 		BufferedWriter outputWriter = null;
 		outputWriter = new BufferedWriter(new FileWriter(filePath));
-		for (int a = 0; a < NO_OF_ACTIONS; a++) {
-			for (int s = 0; s < NO_OF_STATES; s++) {
+		for (int a = 0; a < LARCRobot.NO_OF_ACTIONS; a++) {
+			for (int s = 0; s < LARCRobot.NO_OF_STATES; s++) {
 				if (a == 0 && s == 0) {
 					outputWriter.write(valuefunction[a][s] + "");
 				} else {
@@ -214,9 +201,9 @@ public class LARCAgent implements IAgent {
 	private void loadValueFunction(String filePath) throws IOException {
 		BufferedReader outputReader = null;
 		outputReader = new BufferedReader(new FileReader(filePath));
-		for (int a = 0; a < NO_OF_ACTIONS; a++) {
-			for (int s = 0; s < NO_OF_STATES; s++) {
-				VALUE_FUNCTION[a][s] = Double.parseDouble(outputReader.readLine());
+		for (int a = 0; a < LARCRobot.NO_OF_ACTIONS; a++) {
+			for (int s = 0; s < LARCRobot.NO_OF_STATES; s++) {
+				LARCRobot.VALUE_FUNCTION[a][s] = Double.parseDouble(outputReader.readLine());
 			}
 		}
 		outputReader.close();
