@@ -12,11 +12,11 @@ import agents.LARCAgent;
 import environment.LARCEnvironment;
 
 public class LARCRobot extends AdvancedRobot {
-	
-	public static final int ROUNDS_TO_LEARN = 10000;
-	
-	public static final int NO_OF_STATES = 300 * 300 * 3;
-	public static final int NO_OF_ACTIONS = 2 * 8 * 2;
+
+	public static final int ROUNDS_TO_LEARN = 1000;
+
+	public static final int NO_OF_STATES = 5 * 8 * 36; // GridPos * GegnerPos * GunPos
+	public static final int NO_OF_ACTIONS = 2 * 8 * 2; // Fire * Direction * MoveGun
 	public static double[][] VALUE_FUNCTION = new double[NO_OF_ACTIONS][NO_OF_STATES];
 	public static int EPISODE_COUNTER = 0;
 	public double currentGunAngleToEnemy;
@@ -35,6 +35,7 @@ public class LARCRobot extends AdvancedRobot {
 	private double enemyEnergy;
 	private double energyRatio;
 	private int currentReward;
+	private double gunPostion;
 
 	public LARCRobot() {
 		EPISODE_COUNTER++;
@@ -49,6 +50,8 @@ public class LARCRobot extends AdvancedRobot {
 
 	@Override
 	public void run() {
+		this.setTurnGunLeft(this.getGunHeading() % 10);
+		this.execute();
 		this.setAdjustRadarForGunTurn(true);
 		this.setColors(Color.CYAN, Color.CYAN, Color.CYAN, Color.CYAN, Color.CYAN);
 		// init
@@ -84,7 +87,7 @@ public class LARCRobot extends AdvancedRobot {
 	private void updateEnergyRatio() {
 		if (this.enemyEnergy > 0) {
 			this.energyRatio = this.selfEnergy / this.enemyEnergy; // Energy ratio: self/enemy
-		} 
+		}
 	}
 
 	private void triangulateEnemyPosition() {
@@ -106,7 +109,7 @@ public class LARCRobot extends AdvancedRobot {
 		enemyGridPos.setY(((int) (this.getEnemyY() / LARCEnvironment.TILESIZE)));
 	}
 
-		public double getEnemyX() {
+	public double getEnemyX() {
 		return enemyX;
 	}
 
@@ -142,15 +145,20 @@ public class LARCRobot extends AdvancedRobot {
 		this.angleToEnemy = angleToEnemy;
 	}
 
+	public double getGunPostion() {
+		return gunPostion;
+	}
+
 	/*************************************************************************************************************************/
 	@Override
 	public void onScannedRobot(ScannedRobotEvent event) {
 		// point gun towards enemy:
 		// setTurnGunRight(getHeading() - getGunHeading() + event.getBearing());
 		// update enemy-related state variables:
-		this.currentGunAngleToEnemy = Math.abs(getHeading() - getGunHeading() + event.getBearing()); 
+		this.currentGunAngleToEnemy = Math.abs(getHeading() - getGunHeading() + event.getBearing());
 		this.angleToEnemy = event.getBearing();
 		this.distanceToEnemy = event.getDistance();
+		this.gunPostion = this.getGunHeading();
 		this.triangulateEnemyPosition();
 		this.enemyEnergy = event.getEnergy();
 		this.selfEnergy = this.getEnergy();

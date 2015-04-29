@@ -1,66 +1,80 @@
 package state;
 
+import environment.LARCEnvironment;
 import utility.Position;
 
 public class State {
 
-	public enum healthState {
-		BAD, NEUTRAL, GOOD;
+	private static final int MAXGRIDX = 800 / LARCEnvironment.TILESIZE;
+
+	private static final int MAXGRIDY = 600 / LARCEnvironment.TILESIZE;
+
+	public enum EdgeState {
+		MID, LEFTEDGE, RIGHTEDGE, TOPEDGE, BOTTOMEDGE;
 	}
 
-	private Position selfPos;
-	private Position enemyPos;
-	private GunToEnemy gunToEnemy;
-
-	// private healthState health;
-
-	public State() {
+	public enum EnemyPosition {
+		NORD, NORDOST, OST, SUEDOST, SUED, SUEDWEST, WEST, NORDWEST;
 	}
 
-	// public void setHealthState(double energyRatio) {// Energy ratio: self/enemy
-	// if (energyRatio < 0.7) {
-	// this.health = healthState.BAD;
-	// } else if (energyRatio > 1.3) {
-	// this.health = healthState.GOOD;
-	// } else {
-	// this.health = healthState.NEUTRAL;
-	// }
-	// }
+	public EdgeState edgeState;
+	public EnemyPosition enemyPosition;
+	public int gunPosition;
 
 	public int getStateID() {
-		int state = this.selfPos.getX() * 1 + this.selfPos.getY() * 15 + this.enemyPos.getX() * 15 * 20
-				+ this.enemyPos.getY() * 15 * 20 * 15 + this.gunToEnemy.ordinal() * 15 * 20 * 15 * 20;
-		// + this.health.ordinal() * 15 * 20 * 15 * 20;
-		// System.out.println(state);
+		int state = this.edgeState.ordinal() * EdgeState.values().length + this.enemyPosition.ordinal()
+				* EdgeState.values().length + this.gunPosition * 36;
 		return state;
-
 	}
 
-	// public healthState getHealth() {
-	// return health;
-	// }
-
-	public Position getSelfPos() {
-		return selfPos;
+	public EdgeState getEdgeState() {
+		return edgeState;
 	}
 
-	public void setSelfPos(Position selfPos) {
-		this.selfPos = selfPos;
+	public void setEdgeState(Position position) {
+		this.edgeState = EdgeState.MID;
+		if (position.getX() == 0) {
+			this.edgeState = EdgeState.LEFTEDGE;
+		} else if (position.getX() == MAXGRIDX) {
+			this.edgeState = EdgeState.RIGHTEDGE;
+		} else if (position.getY() == 0) {
+			this.edgeState = EdgeState.BOTTOMEDGE;
+		} else if (position.getY() == MAXGRIDY) {
+			this.edgeState = EdgeState.TOPEDGE;
+		}
 	}
 
-	public Position getEnemyPos() {
-		return enemyPos;
+	public EnemyPosition getEnemyPosition() {
+		return enemyPosition;
 	}
 
-	public void setEnemyPos(Position enemyPos) {
-		this.enemyPos = enemyPos;
+	public void setEnemyPosition(double angleToEnemy) {
+		this.enemyPosition = EnemyPosition.NORD;
+		if (angleToEnemy < -157.5) {
+			this.enemyPosition = EnemyPosition.SUED;
+		} else if (angleToEnemy < -112.5) {
+			this.enemyPosition = EnemyPosition.SUEDWEST;
+		} else if (angleToEnemy < -67.5) {
+			this.enemyPosition = EnemyPosition.WEST;
+		} else if (angleToEnemy < -22.5) {
+			this.enemyPosition = EnemyPosition.NORDWEST;
+		} else if (angleToEnemy > 157.5) {
+			this.enemyPosition = EnemyPosition.SUED;
+		} else if (angleToEnemy > 112.5) {
+			this.enemyPosition = EnemyPosition.SUEDOST;
+		} else if (angleToEnemy > 67.5) {
+			this.enemyPosition = EnemyPosition.OST;
+		} else if (angleToEnemy > 22.5) {
+			this.enemyPosition = EnemyPosition.NORDOST;
+		}
 	}
 
-	public GunToEnemy getGunToEnemy() {
-		return gunToEnemy;
+	public int getGunPos() {
+		return gunPosition;
 	}
 
-	public void setGunToEnemy(GunToEnemy gunToEnemy) {
-		this.gunToEnemy = gunToEnemy;
+	public void setGunPosition(double gunPosition) {
+		gunPosition -= (gunPosition % 10);
+		this.gunPosition = (int) gunPosition / 10;
 	}
 }
