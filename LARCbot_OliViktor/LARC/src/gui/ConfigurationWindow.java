@@ -237,9 +237,9 @@ public class ConfigurationWindow {
 		flowLayout.setVgap(8);
 		flowLayout.setHgap(3);
 		
-		JCheckBox simpleReward = new JCheckBox("Einfaches Belohnungssystem");
+		JCheckBox simpleReward = new JCheckBox("Erweitertes Belohnungssystem");
 		simpleReward.setBackground(Color.WHITE);
-		simpleReward.setSelected(Config.getBoolValue("Robot_SimpleReward"));
+		simpleReward.setSelected(!Config.getBoolValue("Robot_SimpleReward"));
 		panel_4.add(simpleReward);
 		
 		JPanel panel_17 = new JPanel();
@@ -398,9 +398,9 @@ public class ConfigurationWindow {
 		robot_listModel = new DefaultListModel<String>();
 		robot_listModel.addElement("###########################");
 		loadRobots();
-		robot_list.setSelectedValue(Config.getStringValue("EnemyRobot"), true);
 		robot_list.setModel(robot_listModel);
 		robot_list.setSelectionMode(ListSelectionModel.SINGLE_SELECTION);
+		robot_list.setSelectedValue(Config.getStringValue("EnemyRobot"), true);
 
 		JScrollPane scrollPane = new JScrollPane(robot_list);
 		scrollPane.setViewportBorder(null);
@@ -456,7 +456,7 @@ public class ConfigurationWindow {
 				Config.setIntValue("Agent_Lambda", (int)lambda.getValue());
 				Config.setIntValue("Agent_QueueSize", (int)propagationDepth.getValue());
 				
-				Config.setBoolValue("Robot_SimpleReward", simpleReward.isSelected());
+				Config.setBoolValue("Robot_SimpleReward", !simpleReward.isSelected());
 				Config.setBoolValue("Robot_UseExtendedMoveEnv", extendedMoveEnv.isSelected());
 				Config.setBoolValue("Robot_UseExtendedAttackEnv", extendedAttackEnv.isSelected());
 				
