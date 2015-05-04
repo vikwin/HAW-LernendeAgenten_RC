@@ -149,6 +149,19 @@ public class EnvironmentBuilder {
 	public int getMoveEnvStateCount() {
 		return moveEnv.getStateCount();
 	}
+	
+	/**
+	 * Liefert den Gegner, der am nächsten zu einem selbst steht.
+	 * @return der nächste Gegner
+	 */
+	public Enemy getNearestEnemy() {
+		// wir haben aktuell nur einen Gegner
+		for (String s : enemies.keySet()) {
+			return enemies.get(s);
+		}
+		
+		return null;
+	}
 
 	/**
 	 * Liefert eine Zahl für die Belohnung der Aktionen des Bots.

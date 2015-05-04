@@ -24,11 +24,14 @@ import environment.EnvironmentBuilder;
 public class LARCbot extends RewardRobot {
 	// Gibt an, ob das einfache Belohnungssystem (per Energieäderungen) oder das
 	// Event basierte System verwendet werden soll
-	private static final boolean USE_SIMPLE_REWARD_SYSTEM = Config.getBoolValue("Robot_SimpleReward");
-	
+	private static final boolean USE_SIMPLE_REWARD_SYSTEM = Config
+			.getBoolValue("Robot_SimpleReward");
+
 	// Komplexe oder Simple Umgebungen benutzen
-	private static final boolean COMPLEX_ATTACK_ENV = Config.getBoolValue("Robot_UseExtendedAttackEnv");  
-	private static final boolean COMPLEX_MOVE_ENV = Config.getBoolValue("Robot_UseExtendedMoveEnv");
+	private static final boolean COMPLEX_ATTACK_ENV = Config
+			.getBoolValue("Robot_UseExtendedAttackEnv");
+	private static final boolean COMPLEX_MOVE_ENV = Config
+			.getBoolValue("Robot_UseExtendedMoveEnv");
 
 	private enum RadarState {
 		STOPPED, SCANNING, SCANFINISHED;
@@ -55,9 +58,14 @@ public class LARCbot extends RewardRobot {
 		// Der Environmentbuilder muss aus der run Methode heraus initialisiert
 		// werden, weil sonst der Zugriff auf die Eigenschaften des Spielfelds
 		// verwehrt wird
-		envBuilder = new EnvironmentBuilder(this, COMPLEX_MOVE_ENV, COMPLEX_ATTACK_ENV);
-		moveAgent = new MoveAgent(envBuilder.getMoveEnvStateCount(), COMPLEX_MOVE_ENV ? ComplexMovement.values().length : SimpleMovement.values().length);
-		attackAgent = new AttackAgent(envBuilder.getAttackEnvStateCount(), COMPLEX_ATTACK_ENV ? ComplexAttack.getActionCount() : SimpleAttack.getActionCount());
+		envBuilder = new EnvironmentBuilder(this, COMPLEX_MOVE_ENV,
+				COMPLEX_ATTACK_ENV);
+		moveAgent = new MoveAgent(envBuilder.getMoveEnvStateCount(),
+				COMPLEX_MOVE_ENV ? ComplexMovement.values().length
+						: SimpleMovement.values().length);
+		attackAgent = new AttackAgent(envBuilder.getAttackEnvStateCount(),
+				COMPLEX_ATTACK_ENV ? ComplexAttack.getActionCount()
+						: SimpleAttack.getActionCount());
 
 		setAdjustGunForRobotTurn(true);
 		setAdjustRadarForGunTurn(true);
@@ -65,14 +73,18 @@ public class LARCbot extends RewardRobot {
 
 		doScan();
 
-		while (true) {
-			if (getEnergy() <= 0)
-				doNothing();
-			else {
-				act();
-				updateActions();
-				execute();
+		try {
+			while (true) {
+				if (getEnergy() <= 0)
+					doNothing();
+				else {
+					act();
+					updateActions();
+					execute();
+				}
 			}
+		} catch (ThreadDeath e) {
+			System.out.println("LARCBot stopped because of ThreadDeath Exception");
 		}
 
 	}
@@ -141,62 +153,101 @@ public class LARCbot extends RewardRobot {
 			updateActions();
 		}
 	}
+	
+	private double getNearestEnemyBearing() {
+		return getHeading() + envBuilder.getNearestEnemy().getBearing();
+	}
+
+	@SuppressWarnings("unused")
+	private void aimAtEnemy() {
+		this.addAction(new GunTurnAction(getNearestEnemyBearing()));
+	}
 
 	private SerialAction getSerialActionByMovement(int movementId) {
+		boolean nothing = false;
+		TurnAction turn = null;
+		MoveAction move = null;
+		Vector2D destination = null;
+		
 		if (COMPLEX_MOVE_ENV) {
 			ComplexMovement movement = ComplexMovement.byId(movementId);
-			TurnAction turn = null;
-			MoveAction move = null;
-	
+
 			if (movement == ComplexMovement.NOTHING)
-				return new SerialAction(Arrays.asList(new Action[] {}));
-	
-			Vector2D destination = getPosition().add(movement.getMoveVector());
-	
-			double rotationAngle = destination.subtract(getPosition())
-					.getNormalHeading() - Utils.normalizeHeading(getHeading());
-	
-			double distance = getPosition().distanceTo(destination);
-	
-			if (rotationAngle >= -90 && rotationAngle <= 90) {
-				// Nach rechts oder links drehen und vorwärts fahren (Winkel
-				// zwischen -90 und 90)
-				turn = new TurnAction(rotationAngle);
-				move = new MoveAction(distance);
-	
-			} else if (rotationAngle > 90) {
-				// Nach links drehen und rückwärts fahren (Winkel über 90)
-				turn = new TurnAction(rotationAngle - 180);
-				move = new MoveAction(-distance);
-	
-			} else {
-				// Nach rechts drehen und rückwärts fahren (Winkel unter -90)
-				turn = new TurnAction(180 + rotationAngle);
-				move = new MoveAction(distance);
-			}
-	
-			return new SerialAction(Arrays.asList(new Action[] { turn, move }));
+				nothing = true;
+			else
+				destination = getPosition().add(movement.getMoveVector());
 		} else {
 			// TODO: Einbauen, was bei SimpleMoveEnvironment passieren soll
-			return null;
+			SimpleMovement movement = SimpleMovement.byId(movementId);
+
+			if (movement == SimpleMovement.NOTHING)
+				nothing = true;
+			else
+				destination = getPosition().add(movement.getMoveVector());
 		}
+		
+		
+		if (nothing)
+			return new SerialAction(Arrays.asList(new Action[] {}));
+		
+		double rotationAngle = destination.subtract(getPosition())
+				.getNormalHeading() - Utils.normalizeHeading(getHeading());
+
+		double distance = getPosition().distanceTo(destination);
+
+		if (rotationAngle >= -90 && rotationAngle <= 90) {
+			// Nach rechts oder links drehen und vorwärts fahren (Winkel
+			// zwischen -90 und 90)
+			turn = new TurnAction(rotationAngle);
+			move = new MoveAction(distance);
+
+		} else if (rotationAngle > 90) {
+			// Nach links drehen und rückwärts fahren (Winkel über 90)
+			turn = new TurnAction(rotationAngle - 180);
+			move = new MoveAction(-distance);
+
+		} else {
+			// Nach rechts drehen und rückwärts fahren (Winkel unter -90)
+			turn = new TurnAction(180 + rotationAngle);
+			move = new MoveAction(distance);
+		}
+
+		return new SerialAction(Arrays.asList(new Action[] { turn, move }));
 	}
 
 	private SerialAction getSerialActionByAttack(int attackId) {
+		boolean nothing = false;
+		double gunTurnDirection = 0, firePower = 0;
+		
 		if (COMPLEX_ATTACK_ENV) {
 			ComplexAttack attack = ComplexAttack.byId(attackId);
-			
-			if (attack == ComplexAttack.NOTHING)
-				return new SerialAction(Arrays.asList(new Action[] {}));
-	
-			GunTurnAction gunturn = new GunTurnAction(attack.getDirection());
-			FireAction fire = new FireAction(attack.getPower().toDouble());
-	
-			return new SerialAction(Arrays.asList(new Action[] { gunturn, fire }));
+
+			if (attack == ComplexAttack.NOTHING) {
+				nothing = true;
+			} else {
+				gunTurnDirection = attack.getDirection();
+				firePower = attack.getPower().toDouble();
+			}
 		} else {
 			// TODO: Einbauen, was bei SimpleAttackEnvironment passieren soll
-			return null;
+			SimpleAttack attack = SimpleAttack.byId(attackId);
+			
+			if (attack == SimpleAttack.NOTHING) {
+				nothing = true;
+			} else {
+				gunTurnDirection = getNearestEnemyBearing() + attack.getDirection();
+				firePower = attack.getPower().toDouble();
+			}
 		}
+		
+		if (nothing)
+			return new SerialAction(Arrays.asList(new Action[] {}));
+
+		GunTurnAction gunturn = new GunTurnAction(robocode.util.Utils.normalRelativeAngleDegrees(gunTurnDirection));
+		FireAction fire = new FireAction(firePower);
+
+		return new SerialAction(
+				Arrays.asList(new Action[] { gunturn, fire }));
 	}
 
 	/**

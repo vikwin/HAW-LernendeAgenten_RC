@@ -2,7 +2,6 @@ package robot;
 
 import utils.Vector2D;
 
-//TODO Anpassen auf SimpleEnvironments
 public enum SimpleMovement {
 	UP, UPRIGHT, RIGHT, DOWNRIGHT, DOWN, DOWNLEFT, LEFT, UPLEFT, NOTHING;
 	

@@ -2,7 +2,6 @@ package robot;
 
 import robocode.Rules;
 
-// TODO Anpassen auf SimpleEnvironments
 public class SimpleAttack {
 	public static enum GunPower {
 		LOW, MEDIUM, HIGH;
@@ -21,7 +20,7 @@ public class SimpleAttack {
 		}
 	}
 
-	public static final SimpleAttack NOTHING = new SimpleAttack(null, 360);
+	public static final SimpleAttack NOTHING = new SimpleAttack(null, 0);
 	private static final int MAX_DIRECTION = 30;
 	private static int count = ((MAX_DIRECTION / 10) * 2 + 1) * 3 + 1;
 	
