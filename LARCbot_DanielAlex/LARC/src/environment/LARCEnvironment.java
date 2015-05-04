@@ -6,7 +6,7 @@ import state.State;
 
 public class LARCEnvironment implements IEnvironment {
 
-	public static final int TILESIZE = 40;
+	public static final int TILESIZE = 50;
 
 	private LARCRobot robot;
 	private double currentEnergyRatio;
@@ -73,23 +73,27 @@ public class LARCEnvironment implements IEnvironment {
 	 */
 	private double calculateReward() {
 		if (this.currentEnergyRatio > this.previousEnergyRatio) {
-			this.lastReward = 2;
+			this.lastReward = 10;
 		} else if (this.currentEnergyRatio < this.previousEnergyRatio) {
-			this.lastReward = -1;
+			this.lastReward = -3;
 		} else {
 			this.lastReward = 0;
 		}
 		if (this.robot.currentGunAngleToEnemy < this.robot.oldGunAngleToEnemy) {
 			this.lastReward += 3;
 		} else {
-			this.lastReward -= 1;
+			this.lastReward -= 3;
+		}
+		if (this.robot.getSelfGridPos().getX() == 0 || this.robot.getSelfGridPos().getX() == State.MAXGRIDX - 1
+				|| this.robot.getSelfGridPos().getY() == 0 || this.robot.getSelfGridPos().getY() == State.MAXGRIDY - 1) {
+			this.lastReward -= 5; 
 		}
 		this.robot.setCurrentReward(lastReward);
 		return this.lastReward;
 	}
 
 	public GunToEnemy calculateGunToEnemy() {
-		//TODO delete
+		// TODO delete
 		GunToEnemy gunToEnemy = GunToEnemy.AHEAD;
 		if (this.robot.getHeading() - this.robot.getGunHeading() + this.robot.getAngleToEnemy() > 0.0) {
 			gunToEnemy = GunToEnemy.RIGHT;

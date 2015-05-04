@@ -19,10 +19,10 @@ public class LARCAgent implements IAgent {
 	public static final double INITIAL_Q_VALUE = 0.0;
 	public static final int LAMBDA_CAPACITY = 15;
 
-	private static final double SARSA_EPSILON = 1.0; // Exploration rate
+	private static final double SARSA_EPSILON = 0.1; // Exploration rate
 	private static final double SARSA_GAMMA = 0.9; // Time Discount factor
 	private static final double SARSA_ALPHA = 0.5; // learning rate (importance of new information)
-	private static final double LAMBDA_VALUE = 1.0; // Abschwächungsfaktor
+	private static final double LAMBDA_VALUE = 0.9; // Abschwächungsfaktor
 
 	private Random randGenerator = new Random();
 	private int previousActionInt;
@@ -30,8 +30,8 @@ public class LARCAgent implements IAgent {
 	private int currentActionInt;
 	private int currentStateInt;
 	private MyAction myAction;
-	private boolean policyFrozen = false; //lernen
-	private boolean exploringFrozen = false; //ausprobieren
+	private boolean policyFrozen = true; // lernen
+	private boolean exploringFrozen = true; // ausprobieren
 	private LARCRobot myRobot;
 	private double previousStateQValue;
 	private double currentStateQValue;
@@ -48,7 +48,7 @@ public class LARCAgent implements IAgent {
 		this.lastStatesForLambda = new LinkedList<int[]>();
 		E_TRACE_FUNCTION = new double[LARCRobot.NO_OF_ACTIONS][LARCRobot.NO_OF_STATES];
 		File file = new File(PATH);
-		if (file.isFile() && LARCRobot.EPISODE_COUNTER == 0) {
+		if (file.isFile() && this.myRobot.getRoundNum() == 0) {
 			try {
 				loadValueFunction(PATH);
 			} catch (IOException e) {
@@ -98,8 +98,8 @@ public class LARCAgent implements IAgent {
 			this.doTheSilenceOfTheLambda(); // zuweisen des neu gelernten q-wertes
 		}
 
-		//TODO do not save when learning is frozen
-		if (LARCRobot.EPISODE_COUNTER >= LARCRobot.ROUNDS_TO_LEARN && !policyFrozen) {
+		// TODO do not save when learning is frozen
+		if (this.myRobot.getNumRounds() - 1 == this.myRobot.getRoundNum() && !policyFrozen) {
 			try {
 				this.saveValueFunction(LARCAgent.PATH, LARCRobot.VALUE_FUNCTION);
 			} catch (IOException e) {

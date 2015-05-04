@@ -22,7 +22,12 @@ public class MyAction {
 		double currentHeading = this.myRobot.getHeading();
 		double normHeading = Position.normalizeDegrees(currentHeading);
 		switch (action) {
-
+		case BACK:
+			array[0] = -this.LONGDIST;
+			array[1] = 0.0;
+			array[2] = 0.0;
+			array[3] = 0.0;
+			return array;
 		case NORDFIRE_TURNLEFT:
 			array[0] = this.LONGDIST;
 			array[1] = Position.normalizeDegrees(0 - normHeading);
