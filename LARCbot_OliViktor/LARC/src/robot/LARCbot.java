@@ -21,6 +21,7 @@ import utils.Utils;
 import utils.Vector2D;
 import agents.AttackAgent;
 import agents.MoveAgent;
+import environment.Enemy;
 import environment.EnvironmentBuilder;
 
 public class LARCbot extends RewardRobot {
@@ -157,7 +158,12 @@ public class LARCbot extends RewardRobot {
 	}
 	
 	private double getNearestEnemyBearing() {
-		return getHeading() + envBuilder.getNearestEnemy().getBearing();
+		Enemy nearestEnemy = envBuilder.getNearestEnemy();
+		if (nearestEnemy == null) {
+			return 0;
+		} else {
+			return getHeading() + envBuilder.getNearestEnemy().getBearing();
+		}
 	}
 
 	@SuppressWarnings("unused")
