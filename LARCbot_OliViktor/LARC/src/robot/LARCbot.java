@@ -8,9 +8,11 @@ import robocode.CustomEvent;
 import robocode.RadarTurnCompleteCondition;
 import robocode.ScannedRobotEvent;
 import robot.actionsystem.Action;
+import robot.actionsystem.ConcurrentAction;
 import robot.actionsystem.FireAction;
 import robot.actionsystem.GunTurnAction;
 import robot.actionsystem.MoveAction;
+import robot.actionsystem.NothingAction;
 import robot.actionsystem.SerialAction;
 import robot.actionsystem.TurnAction;
 import robot.rewardsystem.RewardRobot;
@@ -138,7 +140,7 @@ public class LARCbot extends RewardRobot {
 
 		// MoveAgent updaten und neue Action holen
 		if (lastMoveAgentAction == null || lastMoveAgentAction.hasFinished()) {
-			lastMoveAgentAction = getSerialActionByMovement(moveAgent
+			lastMoveAgentAction = getActionByMovement(moveAgent
 					.getNextAction(envBuilder.getMoveEnvId()));
 			this.addAction(lastMoveAgentAction);
 			updateActions();
@@ -147,7 +149,7 @@ public class LARCbot extends RewardRobot {
 		// AttackAgent updaten und neue Action holen
 		if (lastAttackAgentAction == null
 				|| lastAttackAgentAction.hasFinished()) {
-			lastAttackAgentAction = getSerialActionByAttack(attackAgent
+			lastAttackAgentAction = getActionByAttack(attackAgent
 					.getNextAction(envBuilder.getAttackEnvId()));
 			this.addAction(lastAttackAgentAction);
 			updateActions();
@@ -163,7 +165,7 @@ public class LARCbot extends RewardRobot {
 		this.addAction(new GunTurnAction(getNearestEnemyBearing()));
 	}
 
-	private SerialAction getSerialActionByMovement(int movementId) {
+	private Action getActionByMovement(int movementId) {
 		boolean nothing = false;
 		TurnAction turn = null;
 		MoveAction move = null;
@@ -188,7 +190,7 @@ public class LARCbot extends RewardRobot {
 		
 		
 		if (nothing)
-			return new SerialAction(Arrays.asList(new Action[] {}));
+			return new NothingAction();
 		
 		double rotationAngle = destination.subtract(getPosition())
 				.getNormalHeading() - Utils.normalizeHeading(getHeading());
@@ -212,10 +214,11 @@ public class LARCbot extends RewardRobot {
 			move = new MoveAction(distance);
 		}
 
-		return new SerialAction(Arrays.asList(new Action[] { turn, move }));
+//		return new SerialAction(Arrays.asList(new Action[] { turn, move }));
+		return new ConcurrentAction(Arrays.asList(new Action[] { turn, move }));
 	}
 
-	private SerialAction getSerialActionByAttack(int attackId) {
+	private Action getActionByAttack(int attackId) {
 		boolean nothing = false;
 		double gunTurnDirection = 0, firePower = 0;
 		
@@ -240,8 +243,8 @@ public class LARCbot extends RewardRobot {
 			}
 		}
 		
-		if (nothing)
-			return new SerialAction(Arrays.asList(new Action[] {}));
+		if (nothing || !nothing)
+			return new NothingAction();
 
 		GunTurnAction gunturn = new GunTurnAction(robocode.util.Utils.normalRelativeAngleDegrees(gunTurnDirection));
 		FireAction fire = new FireAction(firePower);
