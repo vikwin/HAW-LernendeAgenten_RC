@@ -22,8 +22,8 @@ public class State {
 	public int gunPosition;
 
 	public int getStateID() {
-		int state = this.edgeState.ordinal() * EdgeState.values().length + this.enemyPosition.ordinal()
-				* EdgeState.values().length + this.gunPosition * 36;
+		int state = this.edgeState.ordinal() * 1 + this.enemyPosition.ordinal() * EdgeState.values().length
+				+ this.gunPosition * EnemyPosition.values().length * EdgeState.values().length;
 		return state;
 	}
 
@@ -35,11 +35,11 @@ public class State {
 		this.edgeState = EdgeState.MID;
 		if (position.getX() == 0) {
 			this.edgeState = EdgeState.LEFTEDGE;
-		} else if (position.getX() == MAXGRIDX) {
+		} else if (position.getX() == MAXGRIDX - 1) {
 			this.edgeState = EdgeState.RIGHTEDGE;
 		} else if (position.getY() == 0) {
 			this.edgeState = EdgeState.BOTTOMEDGE;
-		} else if (position.getY() == MAXGRIDY) {
+		} else if (position.getY() == MAXGRIDY - 1) {
 			this.edgeState = EdgeState.TOPEDGE;
 		}
 	}

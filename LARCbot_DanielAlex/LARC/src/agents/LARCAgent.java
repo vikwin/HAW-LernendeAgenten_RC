@@ -22,7 +22,7 @@ public class LARCAgent implements IAgent {
 	private static final double SARSA_EPSILON = 1.0; // Exploration rate
 	private static final double SARSA_GAMMA = 0.9; // Time Discount factor
 	private static final double SARSA_ALPHA = 0.5; // learning rate (importance of new information)
-	private static final double LAMBDA_VALUE = 0.95; // Abschwächungsfaktor
+	private static final double LAMBDA_VALUE = 1.0; // Abschwächungsfaktor
 
 	private Random randGenerator = new Random();
 	private int previousActionInt;
@@ -30,8 +30,8 @@ public class LARCAgent implements IAgent {
 	private int currentActionInt;
 	private int currentStateInt;
 	private MyAction myAction;
-	private boolean policyFrozen = true;
-	private boolean exploringFrozen = true;
+	private boolean policyFrozen = false; //lernen
+	private boolean exploringFrozen = false; //ausprobieren
 	private LARCRobot myRobot;
 	private double previousStateQValue;
 	private double currentStateQValue;
@@ -47,7 +47,8 @@ public class LARCAgent implements IAgent {
 	public void agent_init() {
 		this.lastStatesForLambda = new LinkedList<int[]>();
 		E_TRACE_FUNCTION = new double[LARCRobot.NO_OF_ACTIONS][LARCRobot.NO_OF_STATES];
-		if (new File(PATH).isFile() && LARCRobot.EPISODE_COUNTER == 0) {
+		File file = new File(PATH);
+		if (file.isFile() && LARCRobot.EPISODE_COUNTER == 0) {
 			try {
 				loadValueFunction(PATH);
 			} catch (IOException e) {
@@ -97,7 +98,8 @@ public class LARCAgent implements IAgent {
 			this.doTheSilenceOfTheLambda(); // zuweisen des neu gelernten q-wertes
 		}
 
-		if (LARCRobot.EPISODE_COUNTER >= LARCRobot.ROUNDS_TO_LEARN) {
+		//TODO do not save when learning is frozen
+		if (LARCRobot.EPISODE_COUNTER >= LARCRobot.ROUNDS_TO_LEARN && !policyFrozen) {
 			try {
 				this.saveValueFunction(LARCAgent.PATH, LARCRobot.VALUE_FUNCTION);
 			} catch (IOException e) {
@@ -158,7 +160,7 @@ public class LARCAgent implements IAgent {
 
 		/* otherwise choose the greedy action */
 		int maxIndex = 0;
-		for (int a = 1; a < LARCRobot.NO_OF_ACTIONS; a++) {
+		for (int a = 0; a < LARCRobot.NO_OF_ACTIONS; a++) {
 			if (LARCRobot.VALUE_FUNCTION[a][theState] > LARCRobot.VALUE_FUNCTION[maxIndex][theState]) {
 				maxIndex = a;
 			}
