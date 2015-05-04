@@ -141,7 +141,8 @@ public class SimpleMoveEnvironment implements Environment {
 		// Zeichne die Ringzwischenräume, in denen sich ein Gegner befindet, in
 		// rot ein
 		g.setColor(new Color(0xff, 0x00, 0x00, 0x80));
-		g.setStroke(new BasicStroke((float) ringThickness));
+		g.setStroke(new BasicStroke((float) ringThickness,
+				BasicStroke.CAP_ROUND, BasicStroke.JOIN_ROUND));
 
 		for (int i = 0; i < ringCount; i++) {
 			circleSize = robotSize + ringThickness + i * ringThickness * 2;

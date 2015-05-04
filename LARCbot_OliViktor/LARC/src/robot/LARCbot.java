@@ -249,7 +249,7 @@ public class LARCbot extends RewardRobot {
 			}
 		}
 		
-		if (nothing || !nothing)
+		if (nothing)
 			return new NothingAction();
 
 		GunTurnAction gunturn = new GunTurnAction(robocode.util.Utils.normalRelativeAngleDegrees(gunTurnDirection));
