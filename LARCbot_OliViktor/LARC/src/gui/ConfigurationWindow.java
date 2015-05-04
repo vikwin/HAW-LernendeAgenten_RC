@@ -84,7 +84,7 @@ public class ConfigurationWindow {
 		frmLarcbotExperimentKonfigurator
 				.setTitle("LARCBot Experiment Konfigurator");
 		frmLarcbotExperimentKonfigurator.setResizable(false);
-		frmLarcbotExperimentKonfigurator.setBounds(100, 100, 470, 430);
+		frmLarcbotExperimentKonfigurator.setBounds(100, 100, 478, 430);
 		frmLarcbotExperimentKonfigurator
 				.setDefaultCloseOperation(JFrame.EXIT_ON_CLOSE);
 		frmLarcbotExperimentKonfigurator.getContentPane().setLayout(
@@ -102,7 +102,7 @@ public class ConfigurationWindow {
 		JPanel agent_panel = new JPanel();
 		agent_panel.setBackground(Color.WHITE);
 		agent_panel.setBorder(new TitledBorder(null, "Agenten", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		agent_panel.setBounds(6, 11, 233, 316);
+		agent_panel.setBounds(6, 11, 231, 316);
 		bot_panel.add(agent_panel);
 		agent_panel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		
@@ -226,7 +226,7 @@ public class ConfigurationWindow {
 		JPanel robot_panel = new JPanel();
 		robot_panel.setBackground(Color.WHITE);
 		robot_panel.setBorder(new TitledBorder(null, "Roboter", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		robot_panel.setBounds(241, 11, 217, 135);
+		robot_panel.setBounds(241, 11, 225, 135);
 		bot_panel.add(robot_panel);
 		robot_panel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		
@@ -267,7 +267,7 @@ public class ConfigurationWindow {
 		JPanel env_panel = new JPanel();
 		env_panel.setBackground(Color.WHITE);
 		env_panel.setBorder(new TitledBorder(null, "Umwelt", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		env_panel.setBounds(241, 148, 217, 179);
+		env_panel.setBounds(241, 148, 225, 179);
 		bot_panel.add(env_panel);
 		env_panel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		
@@ -385,7 +385,7 @@ public class ConfigurationWindow {
 		JPanel enemy_panel = new JPanel();
 		enemy_panel.setBorder(new TitledBorder(null, "Gegner", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		enemy_panel.setBackground(Color.WHITE);
-		enemy_panel.setBounds(225, 76, 233, 251);
+		enemy_panel.setBounds(225, 76, 241, 251);
 		FlowLayout fl_enemy_panel = (FlowLayout) enemy_panel.getLayout();
 		fl_enemy_panel.setAlignment(FlowLayout.LEFT);
 		fl_enemy_panel.setVgap(0);
@@ -407,7 +407,7 @@ public class ConfigurationWindow {
 		enemy_panel.add(scrollPane);
 		
 		JPanel panel_12 = new JPanel();
-		panel_12.setBounds(225, 7, 233, 70);
+		panel_12.setBounds(225, 7, 241, 70);
 		robocode_panel.add(panel_12);
 		panel_12.setBorder(new TitledBorder(null, "Robocode Home Directory:", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		panel_12.setBackground(Color.WHITE);

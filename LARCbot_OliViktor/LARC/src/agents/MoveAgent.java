@@ -1,6 +1,7 @@
 package agents;
 
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.Arrays;
 import java.util.Random;
 
@@ -61,18 +62,20 @@ public class MoveAgent extends AbstractAgent {
 	private int getActionWithMaxValue(int startID) {
 		// Action mit dem höchsten Wert suchen
 		double max = -1000000;
-		int maxID = -1;
+		ArrayList<Integer> maxIDs = new ArrayList<Integer>();
 		
 		for (int i = 0; i < actionCount; i++) {
 			if (actionList[startID + i] >= max) {
-				if (actionList[startID + i] != max || rnd.nextBoolean()) {
+				if (actionList[startID + i] > max) {	
 					max = actionList[startID + i];
-					maxID = i;
+					maxIDs.clear();
 				}
+				
+				maxIDs.add(i);
 			}
 		}
 		
-		return maxID;
+		return maxIDs.get(rnd.nextInt(maxIDs.size()));
 	}
 	
 	@Override
