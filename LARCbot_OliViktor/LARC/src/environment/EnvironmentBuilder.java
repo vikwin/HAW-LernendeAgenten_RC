@@ -48,10 +48,10 @@ public class EnvironmentBuilder {
 					(int) selfBot.getBattleFieldWidth(),
 					(int) selfBot.getBattleFieldHeight());
 		else
-			moveEnv = new ComplexMoveEnvironment(ROBOT_SIZE, GRID_SIZE,
+			moveEnv = new SimpleMoveEnvironment(10, ROBOT_SIZE, 
 					(int) selfBot.getBattleFieldWidth(),
-					(int) selfBot.getBattleFieldHeight()); // TODO Auf Simple
-															// umstellen
+					(int) selfBot.getBattleFieldHeight()); 
+		
 		if (useComplexAttackEnv)
 			attackEnv = new ComplexAttackEnvironment(ROBOT_SIZE * 2,
 					ROBOT_SIZE, Utils.getBotCoordinates(bot),
