@@ -5,9 +5,9 @@ import utility.Position;
 
 public class State {
 
-	private static final int MAXGRIDX = 800 / LARCEnvironment.TILESIZE;
+	public static final int MAXGRIDX = 800 / LARCEnvironment.TILESIZE;
 
-	private static final int MAXGRIDY = 600 / LARCEnvironment.TILESIZE;
+	public static final int MAXGRIDY = 600 / LARCEnvironment.TILESIZE;
 
 	public enum EdgeState {
 		MID, LEFTEDGE, RIGHTEDGE, TOPEDGE, BOTTOMEDGE;

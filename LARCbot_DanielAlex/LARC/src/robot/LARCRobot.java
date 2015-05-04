@@ -13,12 +13,9 @@ import environment.LARCEnvironment;
 
 public class LARCRobot extends AdvancedRobot {
 
-	public static final int ROUNDS_TO_LEARN = 100000;
-
 	public static final int NO_OF_STATES = 5 * 8 * 36; // GridPos * GegnerPos * GunPos
-	public static final int NO_OF_ACTIONS = 2 * 8 * 2; // Fire * Direction * MoveGun
+	public static final int NO_OF_ACTIONS = 2 * 8 * 2 +1; // Fire * Direction * MoveGun + BACK
 	public static double[][] VALUE_FUNCTION = new double[NO_OF_ACTIONS][NO_OF_STATES];
-	public static int EPISODE_COUNTER = 0;
 	public double currentGunAngleToEnemy;
 	public double oldGunAngleToEnemy = 0;
 	private static final double DEFAULT_GUNTURN = 10;
@@ -38,7 +35,6 @@ public class LARCRobot extends AdvancedRobot {
 	private double gunPostion;
 
 	public LARCRobot() {
-		System.out.println("EPISODE COUNTER: " + EPISODE_COUNTER);
 		this.enemyX = 0;
 		this.enemyY = 0;
 		this.selfGridPos = new Position(1, 1);
@@ -52,6 +48,7 @@ public class LARCRobot extends AdvancedRobot {
 		this.setTurnGunLeft(this.getGunHeading() % 10);
 		this.execute();
 		this.setAdjustRadarForGunTurn(true);
+		this.setAdjustGunForRobotTurn(true);
 		this.setColors(Color.CYAN, Color.CYAN, Color.CYAN, Color.CYAN, Color.CYAN);
 		// init
 		this.environment.env_init();
@@ -59,8 +56,9 @@ public class LARCRobot extends AdvancedRobot {
 		int stateID = this.environment.env_start();
 		int actionID = this.agent.agent_start(stateID);
 		while (true) {
+			System.out.println("NUMBER OF ROUNDS: " + this.getRoundNum());
 			// default actions:
-			setTurnRadarRight(360);
+			setTurnRadarRight(2000);
 			// stepping
 			if (this.getGunTurnRemaining() == 0 && this.getVelocity() == 0) {
 				stateID = this.environment.env_step(actionID);
@@ -167,17 +165,15 @@ public class LARCRobot extends AdvancedRobot {
 
 	@Override
 	public void onDeath(DeathEvent event) {
-		EPISODE_COUNTER++;
 		this.agent.agent_end();
 		this.environment.env_cleanup();
 		this.agent.agent_cleanup();
-		
+
 	}
 
 	@Override
 	public void onRobotDeath(RobotDeathEvent event) {
 		this.currentReward = 10;
-		EPISODE_COUNTER++;
 		this.agent.agent_end();
 		this.environment.env_cleanup();
 		this.agent.agent_cleanup();
