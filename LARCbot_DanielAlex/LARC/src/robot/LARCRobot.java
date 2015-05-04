@@ -13,7 +13,7 @@ import environment.LARCEnvironment;
 
 public class LARCRobot extends AdvancedRobot {
 
-	public static final int ROUNDS_TO_LEARN = 1000;
+	public static final int ROUNDS_TO_LEARN = 100000;
 
 	public static final int NO_OF_STATES = 5 * 8 * 36; // GridPos * GegnerPos * GunPos
 	public static final int NO_OF_ACTIONS = 2 * 8 * 2; // Fire * Direction * MoveGun
@@ -38,7 +38,6 @@ public class LARCRobot extends AdvancedRobot {
 	private double gunPostion;
 
 	public LARCRobot() {
-		EPISODE_COUNTER++;
 		System.out.println("EPISODE COUNTER: " + EPISODE_COUNTER);
 		this.enemyX = 0;
 		this.enemyY = 0;
@@ -154,6 +153,7 @@ public class LARCRobot extends AdvancedRobot {
 	public void onScannedRobot(ScannedRobotEvent event) {
 		// point gun towards enemy:
 		// setTurnGunRight(getHeading() - getGunHeading() + event.getBearing());
+
 		// update enemy-related state variables:
 		this.currentGunAngleToEnemy = Math.abs(getHeading() - getGunHeading() + event.getBearing());
 		this.angleToEnemy = event.getBearing();
@@ -167,14 +167,17 @@ public class LARCRobot extends AdvancedRobot {
 
 	@Override
 	public void onDeath(DeathEvent event) {
+		EPISODE_COUNTER++;
 		this.agent.agent_end();
 		this.environment.env_cleanup();
 		this.agent.agent_cleanup();
+		
 	}
 
 	@Override
 	public void onRobotDeath(RobotDeathEvent event) {
 		this.currentReward = 10;
+		EPISODE_COUNTER++;
 		this.agent.agent_end();
 		this.environment.env_cleanup();
 		this.agent.agent_cleanup();

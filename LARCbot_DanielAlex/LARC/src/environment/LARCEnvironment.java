@@ -89,6 +89,7 @@ public class LARCEnvironment implements IEnvironment {
 	}
 
 	public GunToEnemy calculateGunToEnemy() {
+		//TODO delete
 		GunToEnemy gunToEnemy = GunToEnemy.AHEAD;
 		if (this.robot.getHeading() - this.robot.getGunHeading() + this.robot.getAngleToEnemy() > 0.0) {
 			gunToEnemy = GunToEnemy.RIGHT;
