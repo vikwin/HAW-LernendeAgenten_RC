@@ -154,7 +154,6 @@ public class EnvironmentBuilder {
 	 * @return Winkel zum Gegner
 	 */
 	public double getNearestEnemyAngle() {
-		// TODO: schöner realisieren
 		return ((SimpleAttackEnvironment)attackEnv).getNearestEnemyAngle();
 	}
 

@@ -238,7 +238,7 @@ public class LARCbot extends RewardRobot {
 			if (attack == SimpleAttack.NOTHING) {
 				nothing = true;
 			} else {
-				gunTurnDirection = getNearestEnemyBearing() - getGunHeading()/* + attack.getDirection()*/;
+				gunTurnDirection = getNearestEnemyBearing() - getGunHeading() + attack.getDirection();
 				firePower = attack.getPower().toDouble();
 			}
 		}
@@ -246,7 +246,7 @@ public class LARCbot extends RewardRobot {
 		if (nothing)
 			return new NothingAction();
 
-		GunTurnAction gunturn = new GunTurnAction(gunTurnDirection);
+		GunTurnAction gunturn = new GunTurnAction(robocode.util.Utils.normalRelativeAngleDegrees(gunTurnDirection));
 		FireAction fire = new FireAction(firePower);
 
 		return new SerialAction(
