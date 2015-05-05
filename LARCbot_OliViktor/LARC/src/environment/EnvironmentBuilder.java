@@ -149,16 +149,13 @@ public class EnvironmentBuilder {
 	}
 	
 	/**
-	 * Liefert den Gegner, der am nächsten zu einem selbst steht.
-	 * @return der nächste Gegner
+	 * Gibt den Winkel zum nächsten Gegner an. Wobei der Winkel zwischen
+	 * -180 und +180 Grad liegt (-180/180 Süden, -90 Westen, 0 Norden, 90 Osten). 
+	 * @return Winkel zum Gegner
 	 */
-	public Enemy getNearestEnemy() {
-		// wir haben aktuell nur einen Gegner
-		for (String s : enemies.keySet()) {
-			return enemies.get(s);
-		}
-		
-		return null;
+	public double getNearestEnemyAngle() {
+		// TODO: schöner realisieren
+		return ((SimpleAttackEnvironment)attackEnv).getNearestEnemyAngle();
 	}
 
 	/**

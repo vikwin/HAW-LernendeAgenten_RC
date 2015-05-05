@@ -237,4 +237,17 @@ public class SimpleAttackEnvironment implements Environment {
 		return (int) Math
 				.pow(ringCount * Direction.values().length, enemyCount) + 1;
 	}
+	
+	public double getNearestEnemyAngle() {
+		Vector2D nearestEnemy = null, enemyDir = null;
+		for (Vector2D v : enemyVectors.keySet()) {
+			nearestEnemy = v;
+		}
+		
+		if (nearestEnemy == null)
+			return 0.0;
+		
+		enemyDir = nearestEnemy.subtract(selfPosition);
+		return enemyDir.getHeading();
+	}
 }

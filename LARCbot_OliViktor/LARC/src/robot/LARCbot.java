@@ -21,7 +21,6 @@ import utils.Utils;
 import utils.Vector2D;
 import agents.AttackAgent;
 import agents.MoveAgent;
-import environment.Enemy;
 import environment.EnvironmentBuilder;
 
 public class LARCbot extends RewardRobot {
@@ -158,12 +157,9 @@ public class LARCbot extends RewardRobot {
 	}
 	
 	private double getNearestEnemyBearing() {
-		Enemy nearestEnemy = envBuilder.getNearestEnemy();
-		if (nearestEnemy == null) {
-			return 0;
-		} else {
-			return getHeading() + envBuilder.getNearestEnemy().getBearing();
-		}
+		double a = envBuilder.getNearestEnemyAngle();
+		System.out.println("Winkel zum Gegner: " + a);
+		return a;
 	}
 
 	@SuppressWarnings("unused")
@@ -185,7 +181,6 @@ public class LARCbot extends RewardRobot {
 			else
 				destination = getPosition().add(movement.getMoveVector());
 		} else {
-			// TODO: Einbauen, was bei SimpleMoveEnvironment passieren soll
 			SimpleMovement movement = SimpleMovement.byId(movementId);
 
 			if (movement == SimpleMovement.NOTHING)
@@ -238,13 +233,12 @@ public class LARCbot extends RewardRobot {
 				firePower = attack.getPower().toDouble();
 			}
 		} else {
-			// TODO: Einbauen, was bei SimpleAttackEnvironment passieren soll
 			SimpleAttack attack = SimpleAttack.byId(attackId);
 			
 			if (attack == SimpleAttack.NOTHING) {
 				nothing = true;
 			} else {
-				gunTurnDirection = getNearestEnemyBearing() + attack.getDirection();
+				gunTurnDirection = getNearestEnemyBearing() - getGunHeading()/* + attack.getDirection()*/;
 				firePower = attack.getPower().toDouble();
 			}
 		}
@@ -252,7 +246,7 @@ public class LARCbot extends RewardRobot {
 		if (nothing)
 			return new NothingAction();
 
-		GunTurnAction gunturn = new GunTurnAction(robocode.util.Utils.normalRelativeAngleDegrees(gunTurnDirection));
+		GunTurnAction gunturn = new GunTurnAction(gunTurnDirection);
 		FireAction fire = new FireAction(firePower);
 
 		return new SerialAction(
