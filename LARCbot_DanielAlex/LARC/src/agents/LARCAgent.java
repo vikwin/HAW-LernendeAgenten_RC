@@ -19,7 +19,7 @@ public class LARCAgent implements IAgent {
 	public static final double INITIAL_Q_VALUE = 0.0;
 	public static final int LAMBDA_CAPACITY = 15;
 
-	private static final double SARSA_EPSILON = 0.1; // Exploration rate
+	private static final double SARSA_EPSILON = 0.9; // Exploration rate
 	private static final double SARSA_GAMMA = 0.9; // Time Discount factor
 	private static final double SARSA_ALPHA = 0.5; // learning rate (importance of new information)
 	private static final double LAMBDA_VALUE = 0.9; // Abschwächungsfaktor

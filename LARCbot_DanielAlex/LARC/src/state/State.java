@@ -19,11 +19,12 @@ public class State {
 
 	public EdgeState edgeState;
 	public EnemyPosition enemyPosition;
-	public int gunPosition;
+
+	// public int gunPosition;
 
 	public int getStateID() {
-		int state = this.edgeState.ordinal() * 1 + this.enemyPosition.ordinal() * EdgeState.values().length
-				+ this.gunPosition * EnemyPosition.values().length * EdgeState.values().length;
+		int state = this.edgeState.ordinal() * 1 + this.enemyPosition.ordinal() * EdgeState.values().length;
+		// + this.gunPosition * EnemyPosition.values().length * EdgeState.values().length;
 		return state;
 	}
 
@@ -69,12 +70,12 @@ public class State {
 		}
 	}
 
-	public int getGunPos() {
-		return gunPosition;
-	}
-
-	public void setGunPosition(double gunPosition) {
-		gunPosition -= (gunPosition % 10);
-		this.gunPosition = (int) gunPosition / 10;
-	}
+	// public int getGunPos() {
+	// return gunPosition;
+	// }
+	//
+	// public void setGunPosition(double gunPosition) {
+	// gunPosition -= (gunPosition % 10);
+	// this.gunPosition = (int) gunPosition / 10;
+	// }
 }

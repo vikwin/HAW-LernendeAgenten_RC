@@ -37,7 +37,7 @@ public class LARCEnvironment implements IEnvironment {
 		this.currentEnergyRatio = this.robot.getEnergyRatio();
 		this.currentState.setEdgeState(this.robot.getSelfGridPos());
 		this.currentState.setEnemyPosition(this.robot.getAngleToEnemy());
-		this.currentState.setGunPosition(this.robot.getGunPostion());
+		// this.currentState.setGunPosition(this.robot.getGunPostion());
 
 		return this.currentState.getStateID();
 	}
@@ -53,7 +53,7 @@ public class LARCEnvironment implements IEnvironment {
 		this.currentEnergyRatio = this.robot.getEnergyRatio();
 		this.currentState.setEdgeState(this.robot.getSelfGridPos());
 		this.currentState.setEnemyPosition(this.robot.getAngleToEnemy());
-		this.currentState.setGunPosition(this.robot.getGunPostion());
+		// this.currentState.setGunPosition(this.robot.getGunPostion());
 		this.calculateReward();
 
 		this.robot.oldGunAngleToEnemy = this.robot.currentGunAngleToEnemy;
@@ -75,18 +75,14 @@ public class LARCEnvironment implements IEnvironment {
 		if (this.currentEnergyRatio > this.previousEnergyRatio) {
 			this.lastReward = 10;
 		} else if (this.currentEnergyRatio < this.previousEnergyRatio) {
-			this.lastReward = -3;
+			this.lastReward = 0;
 		} else {
 			this.lastReward = 0;
 		}
-		if (this.robot.currentGunAngleToEnemy < this.robot.oldGunAngleToEnemy) {
-			this.lastReward += 3;
-		} else {
-			this.lastReward -= 3;
-		}
+		
 		if (this.robot.getSelfGridPos().getX() == 0 || this.robot.getSelfGridPos().getX() == State.MAXGRIDX - 1
 				|| this.robot.getSelfGridPos().getY() == 0 || this.robot.getSelfGridPos().getY() == State.MAXGRIDY - 1) {
-			this.lastReward -= 5; 
+			this.lastReward -= 5;
 		}
 		this.robot.setCurrentReward(lastReward);
 		return this.lastReward;
