@@ -5,8 +5,9 @@ import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
-import java.util.Arrays;
 import java.util.Date;
+import java.util.HashMap;
+import java.util.Iterator;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
@@ -36,8 +37,9 @@ public abstract class AbstractAgent {
 
 	protected AgentMode mode;
 
-	private int[] lastActionQueue;
-	private int queueEndIndex;
+	private ActionQueue lastActionQueue;
+	
+	private HashMap<Integer, Double> eValues;
 
 	static {
 		if (Config.getBoolValue("StartBattle"))
@@ -51,9 +53,8 @@ public abstract class AbstractAgent {
 	protected AbstractAgent() {
 		mode = AgentMode.LEARNING;
 
-		lastActionQueue = new int[QUEUE_SIZE];
-		Arrays.fill(lastActionQueue, -1);
-		queueEndIndex = 0;
+		eValues = new HashMap<Integer, Double>();
+		lastActionQueue = new ActionQueue(QUEUE_SIZE);
 	}
 
 	public void setMode(AgentMode newMode) {
@@ -61,7 +62,6 @@ public abstract class AbstractAgent {
 	}
 
 	protected abstract Double[] getActionList();
-	protected abstract double[] getEArray();
 	protected abstract int getStateFromId(int id);
 
 	protected static void fillActionList(Double[] values) {
@@ -134,48 +134,73 @@ public abstract class AbstractAgent {
 	}
 
 	protected void addToLastActionQueue(int id) {
-		lastActionQueue[queueEndIndex] = id;
-		queueEndIndex = (queueEndIndex + 1) % QUEUE_SIZE;
+		if (!lastActionQueue.offer(id)) {
+			int polledID = lastActionQueue.poll();
+			if (!lastActionQueue.contains(polledID))
+				eValues.remove(polledID);
+			
+			lastActionQueue.offer(id);
+		}
+		
+		if (!eValues.containsKey(id))
+			eValues.put(id, 0.0);
+	}
+	
+	private double e(int sa) {
+		return eValues.get(sa);
+	}
+	
+	private void setE(int sa, double value) {
+		if (eValues.containsKey(sa))
+			eValues.put(sa, value);
+	}
+	
+	private void sarsa_lambda(double reward, double alpha, double gamma, double lambda) {
+		double delta;
+		int sa, sa_;
+		boolean end = false;
+		
+		if (lastActionQueue.size() <= 2)
+			return;
+
+		// Debug Ausgaben
+		System.out.println(lastActionQueue.toString());
+		System.out.println(eValues.toString());
+		
+		Iterator<Integer> it = lastActionQueue.reverseIterator();
+		Double[] Q = getActionList();
+		
+		sa_ = it.next();
+		sa = it.next();
+		
+		delta = reward + gamma * Q[sa_] - Q[sa];
+		setE(sa, e(sa) + 1);
+		
+		while (!end) {
+			Q[sa] += alpha * delta * e(sa);
+			
+			// replace traces
+			if (sa == sa_)
+				setE(sa, 1 + gamma * lambda + e(sa));
+			else if(getStateFromId(sa) == getStateFromId(sa_))
+				setE(sa, 0);
+			else
+				setE(sa, gamma * lambda + e(sa));
+				
+			// Debug Ausgaben
+			System.out.printf("sa: %d, Q: %f, e: %f, delta: %f\n", sa, Q[sa], e(sa), delta);
+			
+			if (it.hasNext())
+				sa = it.next();
+			else
+				end = true;
+		};
+		
+		System.out.println();
 	}
 
 	protected void addRewardToLastActions(double reward) {
-		int n = (queueEndIndex - 1 + QUEUE_SIZE) % QUEUE_SIZE, i = (n - 1 + QUEUE_SIZE) % QUEUE_SIZE;
-		double delta, val;
-		
-		if (lastActionQueue[n] < 0 || lastActionQueue[i] < 0)
-			return;
-
-		getEArray()[lastActionQueue[i]] += 1;
-		delta = reward + DISCOUNT_RATE * getActionList()[lastActionQueue[n]] - getActionList()[lastActionQueue[i]];
-		
-		if (Double.isInfinite(delta))
-			System.out.printf("FEHLER delta ist Infinity: reward: %s, discount: %s, n: %d, actionListIndex: %d, actionListValue: %s\n", Double.toString(reward), Double.toString(DISCOUNT_RATE), n, lastActionQueue[n], Double.toString(getActionList()[lastActionQueue[n]]));
-		else
-			System.out.println("Delta: " + Double.toString(delta));
-			
-		do {
-
-			if (lastActionQueue[i] < 0) {
-				break;
-			}
-
-			val = LEARN_RATE * delta * getEArray()[lastActionQueue[i]];
-			
-			if (Double.isInfinite(val))
-				System.out.printf("val: %s, n: %d, e: %s, delta: %s, reward: %s\n", Double.toString(val), n, Double.toString(getEArray()[i]), Double.toString(delta), Double.toString(reward));
-				
-			
-			getActionList()[lastActionQueue[i]] += val;
-
-			if (lastActionQueue[n] == lastActionQueue[i])
-				getEArray()[lastActionQueue[i]] = 1 + LAMBDA * DISCOUNT_RATE * getEArray()[lastActionQueue[i]];
-			else if (getStateFromId(lastActionQueue[n]) == getStateFromId(lastActionQueue[i]))
-				getEArray()[lastActionQueue[i]] = 0;
-			else
-				getEArray()[lastActionQueue[i]] *= LAMBDA * DISCOUNT_RATE;
-			
-			i = (i - 1 + QUEUE_SIZE) % QUEUE_SIZE;
-		} while (i != n);
+		sarsa_lambda(reward, LEARN_RATE, DISCOUNT_RATE, LAMBDA);
 	}
 
 	/**
