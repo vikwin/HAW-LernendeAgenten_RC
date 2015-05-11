@@ -34,7 +34,8 @@ public class AttackAgent extends AbstractAgent {
 	}
 	
 	private Random rnd;
-	private int numberOfActions, normalizedSuccessChance;	
+	private int numberOfActions, normalizedSuccessChance;
+	private double[] eAry;
 
 	/**
 	 * @param environmentStateCount Anzahl der Zustände, die die Umwelt annehmen kann
@@ -52,11 +53,24 @@ public class AttackAgent extends AbstractAgent {
 			actionList = new Double[stateCount * numberOfActions];
 			Arrays.fill(actionList, new Double(0.0));
 		}
+		
+		eAry = new double[stateCount * numberOfActions];
+		Arrays.fill(eAry, 0.0);
 	}
 	
 	@Override
 	protected Double[] getActionList() {
 		return actionList;
+	}
+	
+	@Override
+	protected double[] getEArray() {
+		return eAry;
+	}
+
+	@Override
+	protected int getStateFromId(int id) {
+		return id / numberOfActions;
 	}
 
 	private int getActionWithMaxValue(int startID) {
@@ -119,6 +133,7 @@ public class AttackAgent extends AbstractAgent {
 				actionCounter = 0;
 			}
 			
+//			System.out.print("AttackAgent > ");
 			addRewardToLastActions(reward);
 		}
 	}

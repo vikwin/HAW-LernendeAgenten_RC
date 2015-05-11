@@ -36,35 +36,51 @@ public class Config {
 	}
 	
 	public static String getStringValue(String key) {
+		return getStringValue(key, "");
+	}
+	
+	public static String getStringValue(String key, String defaultValue) {
 		if (values.containsKey(key)) {
 			return values.get(key);
 		} else {
-			return "";
+			return defaultValue;
 		}
 	}
 	
 	public static int getIntValue(String key) {
+		return getIntValue(key, 0);
+	}
+	
+	public static int getIntValue(String key, int defaultValue) {
 		
 		if (values.containsKey(key)) {
 			return Integer.parseInt(values.get(key));
 		} else {
-			return 0;
+			return defaultValue;
 		}
 	}
 	
 	public static double getDoubleValue(String key) {
+		return getDoubleValue(key, 0.0);
+	}
+	
+	public static double getDoubleValue(String key, double defaultValue) {
 		if (values.containsKey(key)) {
 			return Double.parseDouble(values.get(key));
 		} else {
-			return 0.0;
+			return defaultValue;
 		}
 	}
 	
 	public static boolean getBoolValue(String key) {
+		return getBoolValue(key, false);
+	}
+	
+	public static boolean getBoolValue(String key, boolean defaultValue) {
 		if (values.containsKey(key)) {
 			return values.get(key).equals("true");
 		} else {
-			return false;
+			return defaultValue;
 		}
 	}
 	

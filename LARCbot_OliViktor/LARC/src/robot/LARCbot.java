@@ -158,7 +158,6 @@ public class LARCbot extends RewardRobot {
 	
 	private double getNearestEnemyBearing() {
 		double a = envBuilder.getNearestEnemyAngle();
-		System.out.println("Winkel zum Gegner: " + a);
 		return a;
 	}
 

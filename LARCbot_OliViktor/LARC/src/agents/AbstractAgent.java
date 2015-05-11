@@ -38,7 +38,6 @@ public abstract class AbstractAgent {
 
 	private int[] lastActionQueue;
 	private int queueEndIndex;
-	private double algo_e;
 
 	static {
 		if (Config.getBoolValue("StartBattle"))
@@ -55,8 +54,6 @@ public abstract class AbstractAgent {
 		lastActionQueue = new int[QUEUE_SIZE];
 		Arrays.fill(lastActionQueue, -1);
 		queueEndIndex = 0;
-
-		algo_e = 0;
 	}
 
 	public void setMode(AgentMode newMode) {
@@ -64,6 +61,8 @@ public abstract class AbstractAgent {
 	}
 
 	protected abstract Double[] getActionList();
+	protected abstract double[] getEArray();
+	protected abstract int getStateFromId(int id);
 
 	protected static void fillActionList(Double[] values) {
 
@@ -140,30 +139,43 @@ public abstract class AbstractAgent {
 	}
 
 	protected void addRewardToLastActions(double reward) {
-		int i = (queueEndIndex - 1 + QUEUE_SIZE) % QUEUE_SIZE, n = i;
-		double delta;
-
-		if (lastActionQueue[i] < 0)
+		int n = (queueEndIndex - 1 + QUEUE_SIZE) % QUEUE_SIZE, i = (n - 1 + QUEUE_SIZE) % QUEUE_SIZE;
+		double delta, val;
+		
+		if (lastActionQueue[n] < 0 || lastActionQueue[i] < 0)
 			return;
 
-		algo_e += 1;
-		delta = reward + DISCOUNT_RATE * getActionList()[lastActionQueue[n]];
-
+		getEArray()[lastActionQueue[i]] += 1;
+		delta = reward + DISCOUNT_RATE * getActionList()[lastActionQueue[n]] - getActionList()[lastActionQueue[i]];
+		
+		if (Double.isInfinite(delta))
+			System.out.printf("FEHLER delta ist Infinity: reward: %s, discount: %s, n: %d, actionListIndex: %d, actionListValue: %s\n", Double.toString(reward), Double.toString(DISCOUNT_RATE), n, lastActionQueue[n], Double.toString(getActionList()[lastActionQueue[n]]));
+		else
+			System.out.println("Delta: " + Double.toString(delta));
+			
 		do {
-			i = (i - 1 + QUEUE_SIZE) % QUEUE_SIZE;
 
 			if (lastActionQueue[i] < 0) {
 				break;
 			}
 
-			getActionList()[lastActionQueue[i]] += LEARN_RATE * delta * algo_e;
+			val = LEARN_RATE * delta * getEArray()[lastActionQueue[i]];
+			
+			if (Double.isInfinite(val))
+				System.out.printf("val: %s, n: %d, e: %s, delta: %s, reward: %s\n", Double.toString(val), n, Double.toString(getEArray()[i]), Double.toString(delta), Double.toString(reward));
+				
+			
+			getActionList()[lastActionQueue[i]] += val;
 
 			if (lastActionQueue[n] == lastActionQueue[i])
-				algo_e = 1;
+				getEArray()[lastActionQueue[i]] = 1 + LAMBDA * DISCOUNT_RATE * getEArray()[lastActionQueue[i]];
+			else if (getStateFromId(lastActionQueue[n]) == getStateFromId(lastActionQueue[i]))
+				getEArray()[lastActionQueue[i]] = 0;
 			else
-				algo_e *= LAMBDA * DISCOUNT_RATE;
+				getEArray()[lastActionQueue[i]] *= LAMBDA * DISCOUNT_RATE;
 			
-		} while (i != queueEndIndex);
+			i = (i - 1 + QUEUE_SIZE) % QUEUE_SIZE;
+		} while (i != n);
 	}
 
 	/**

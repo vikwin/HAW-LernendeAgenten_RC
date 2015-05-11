@@ -35,7 +35,7 @@ public class MoveAgent extends AbstractAgent {
 	
 	private Random rnd;
 	private int actionCount, normalizedSuccessChance;
-	
+	private double[] eAry;
 	
 	/**
 	 * @param environmentStateCount Anzahl der Zustände, die die Umwelt annehmen kann
@@ -52,11 +52,24 @@ public class MoveAgent extends AbstractAgent {
 			actionList = new Double[environmentStateCount * actionCount];
 			Arrays.fill(actionList, new Double(0.0));
 		}
+		
+		eAry = new double[environmentStateCount * actionCount];
+		Arrays.fill(eAry, 0.0);
 	}
 	
 	@Override
 	protected Double[] getActionList() {
 		return actionList;
+	}
+	
+	@Override
+	protected double[] getEArray() {
+		return eAry;
+	}
+
+	@Override
+	protected int getStateFromId(int id) {
+		return id / actionCount;
 	}
 	
 	private int getActionWithMaxValue(int startID) {
@@ -73,6 +86,12 @@ public class MoveAgent extends AbstractAgent {
 				
 				maxIDs.add(i);
 			}
+		}
+		
+		int size = maxIDs.size();
+		if (size <= 0) {
+//			System.out.println("MoveAgent Fehler>> " + size + " bei StartIndex " + startID);
+			size = actionCount;
 		}
 		
 		return maxIDs.get(rnd.nextInt(maxIDs.size()));
@@ -118,6 +137,7 @@ public class MoveAgent extends AbstractAgent {
 				actionCounter = 0;
 			}
 			
+//			System.out.print("MoveAgent > ");
 			addRewardToLastActions(reward);
 		}
 	}
