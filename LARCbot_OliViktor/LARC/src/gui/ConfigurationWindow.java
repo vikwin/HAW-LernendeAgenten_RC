@@ -43,6 +43,14 @@ public class ConfigurationWindow {
 	private JFileChooser fc;
 	private DefaultListModel<String> robot_listModel;
 	private JTextField robocodeHome;
+	private JTextField hitByBulletReward;
+	private JTextField bulletHitBulletReward;
+	private JTextField bulletHitEnemyReward;
+	private JTextField bulletHitWallReward;
+	private JTextField hitRobotReward;
+	private JTextField hitWallReward;
+	private JTextField winningReward;
+	private JTextField loosingReward;
 
 	/**
 	 * Launch the application.
@@ -72,9 +80,7 @@ public class ConfigurationWindow {
 	/**
 	 * Initialize the contents of the frame.
 	 */
-	private void initialize() {
-		int val;
-		
+	private void initialize() {		
 		fc = new JFileChooser(Config.getStringValue("RobocodeHome"));
 		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 		
@@ -97,6 +103,7 @@ public class ConfigurationWindow {
 		JPanel bot_panel = new JPanel();
 		bot_panel.setBackground(Color.WHITE);
 		tabbedPane.addTab("LARCBot", null, bot_panel, null);
+		tabbedPane.setEnabledAt(0, true);
 		bot_panel.setLayout(null);
 		
 		JPanel agent_panel = new JPanel();
@@ -130,8 +137,7 @@ public class ConfigurationWindow {
 		
 		JSpinner succesChance = new JSpinner();
 		panel_7.add(succesChance);
-		val = Config.getIntValue("Agent_SuccesChance");
-		succesChance.setModel(new SpinnerNumberModel(val < 50 ? 50 : val, 50, 100, 1));
+		succesChance.setModel(new SpinnerNumberModel(Config.getIntValue("Agent_SuccesChance", 50), 50, 100, 1));
 		
 		JPanel panel_3 = new JPanel();
 		panel_3.setBackground(Color.WHITE);
@@ -150,8 +156,7 @@ public class ConfigurationWindow {
 		
 		JSpinner saveTimes = new JSpinner();
 		panel_5.add(saveTimes);
-		val = Config.getIntValue("Agent_SaveTimes");
-		saveTimes.setModel(new SpinnerNumberModel(val < 10000 ? 10000 : val, 10000, 10000000, 10000));
+		saveTimes.setModel(new SpinnerNumberModel(Config.getIntValue("Agent_SaveTimes", 10000), 10000, 10000000, 10000));
 		
 		JPanel panel_13 = new JPanel();
 		panel_13.setBackground(Color.WHITE);
@@ -161,8 +166,7 @@ public class ConfigurationWindow {
 		panel_13.add(lblPropagationtiefe);
 		
 		JSpinner propagationDepth = new JSpinner();
-		val = Config.getIntValue("Agent_QueueSize");
-		propagationDepth.setModel(new SpinnerNumberModel(val == 0 ? 1 : val, 1, 100, 1));
+		propagationDepth.setModel(new SpinnerNumberModel(Config.getIntValue("Agent_QueueSize", 1), 1, 100, 1));
 		propagationDepth.setBackground(Color.WHITE);
 		panel_13.add(propagationDepth);
 		
@@ -184,8 +188,7 @@ public class ConfigurationWindow {
 		panel_16.add(lblLambda);
 		
 		JSpinner lambda = new JSpinner();
-		val = Config.getIntValue("Agent_Lambda");
-		lambda.setModel(new SpinnerNumberModel(val, 0, 100, 10));
+		lambda.setModel(new SpinnerNumberModel(Config.getIntValue("Agent_Lambda"), 0, 100, 10));
 		lambda.setBackground(Color.WHITE);
 		panel_16.add(lambda);
 		
@@ -201,8 +204,7 @@ public class ConfigurationWindow {
 		panel_14.add(lblLernrate);
 		
 		JSpinner learnRate = new JSpinner();
-		val = Config.getIntValue("Agent_LearnRate");
-		learnRate.setModel(new SpinnerNumberModel(val, 0, 100, 10));
+		learnRate.setModel(new SpinnerNumberModel(Config.getIntValue("Agent_LearnRate"), 0, 100, 10));
 		learnRate.setBackground(Color.WHITE);
 		panel_14.add(learnRate);
 		
@@ -218,8 +220,7 @@ public class ConfigurationWindow {
 		panel_15.add(lblDiscountrate);
 		
 		JSpinner discountRate = new JSpinner();
-		val = Config.getIntValue("Agent_DiscountRate");
-		discountRate.setModel(new SpinnerNumberModel(val, 0, 100, 10));
+		discountRate.setModel(new SpinnerNumberModel(Config.getIntValue("Agent_DiscountRate"), 0, 100, 10));
 		discountRate.setBackground(Color.WHITE);
 		panel_15.add(discountRate);
 		
@@ -314,8 +315,7 @@ public class ConfigurationWindow {
 		env_panel.add(moveGridSize_panel);
 
 		JSpinner moveGridSize = new JSpinner();
-		val = Config.getIntValue("Env_GridSize");
-		moveGridSize.setModel(new SpinnerNumberModel(val == 0 ? new Integer(40) : val, null, null, new Integer(1)));
+		moveGridSize.setModel(new SpinnerNumberModel(Config.getIntValue("Env_GridSize", 40), null, null, new Integer(1)));
 		moveGridSize.setBackground(Color.WHITE);
 		moveGridSize.setEnabled(Config.getBoolValue("Env_UseExtendedMoveEnv"));
 		moveGridSize_panel.add(moveGridSize);
@@ -323,9 +323,151 @@ public class ConfigurationWindow {
 		JLabel lblNewLabel_1 = new JLabel("Bewegungsgittergröße");
 		moveGridSize_panel.add(lblNewLabel_1);
 		
+		JPanel reward_system = new JPanel();
+		reward_system.setBackground(Color.WHITE);
+		tabbedPane.addTab("Reward", null, reward_system, null);
+		tabbedPane.setEnabledAt(1, simpleReward.isSelected());
+		reward_system.setLayout(null);
+		
+		JPanel bullet_rewards = new JPanel();
+		FlowLayout flowLayout_15 = (FlowLayout) bullet_rewards.getLayout();
+		flowLayout_15.setVgap(0);
+		flowLayout_15.setHgap(0);
+		flowLayout_15.setAlignment(FlowLayout.RIGHT);
+		bullet_rewards.setBackground(Color.WHITE);
+		bullet_rewards.setBorder(new TitledBorder(null, "Belohnungen f\u00FCr Sch\u00FCsse", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		bullet_rewards.setBounds(6, 11, 230, 215);
+		reward_system.add(bullet_rewards);
+		
+		JPanel panel_11 = new JPanel();
+		panel_11.setBackground(Color.WHITE);
+		bullet_rewards.add(panel_11);
+		
+		JLabel lblNewLabel_2 = new JLabel("Von Kugel getroffen:");
+		panel_11.add(lblNewLabel_2);
+		
+		hitByBulletReward = new JTextField();
+		hitByBulletReward.setText(Config.getStringValue("Reward_HitByBullet", "-3.0"));
+		hitByBulletReward.setColumns(5);
+		panel_11.add(hitByBulletReward);
+		
+		JPanel panel_19 = new JPanel();
+		panel_19.setBackground(Color.WHITE);
+		bullet_rewards.add(panel_19);
+		
+		JLabel lblKugelTrifftKugel = new JLabel("Kugel trifft Kugel:");
+		panel_19.add(lblKugelTrifftKugel);
+		
+		bulletHitBulletReward = new JTextField();
+		bulletHitBulletReward.setText(Config.getStringValue("Reward_BulletHitBullet", "3.0"));
+		bulletHitBulletReward.setColumns(5);
+		panel_19.add(bulletHitBulletReward);
+		
+		JPanel panel_20 = new JPanel();
+		panel_20.setBackground(Color.WHITE);
+		bullet_rewards.add(panel_20);
+		
+		JLabel lblKugelTrifftGegner = new JLabel("Kugel trifft Gegner:");
+		panel_20.add(lblKugelTrifftGegner);
+		
+		bulletHitEnemyReward = new JTextField();
+		bulletHitEnemyReward.setText(Config.getStringValue("Reward_BulletHitEnemy", "3.0"));
+		bulletHitEnemyReward.setColumns(5);
+		panel_20.add(bulletHitEnemyReward);
+		
+		JPanel panel_21 = new JPanel();
+		panel_21.setBackground(Color.WHITE);
+		bullet_rewards.add(panel_21);
+		
+		JLabel lblKugelVerfehltGegner = new JLabel("Kugel verfehlt Gegner:");
+		panel_21.add(lblKugelVerfehltGegner);
+		
+		bulletHitWallReward = new JTextField();
+		bulletHitWallReward.setText(Config.getStringValue("Reward_BulletHitWall", "-3.0"));
+		bulletHitWallReward.setColumns(5);
+		panel_21.add(bulletHitWallReward);
+		
+		JPanel panel_22 = new JPanel();
+		panel_22.setBackground(Color.WHITE);
+		bullet_rewards.add(panel_22);
+		
+		JCheckBox multBulletPower = new JCheckBox("Kugelpower verrechnen");
+		multBulletPower.setSelected(Config.getBoolValue("Reward_MultBulletPower", false));
+		multBulletPower.setBackground(Color.WHITE);
+		panel_22.add(multBulletPower);
+		
+		JPanel hit_rewards = new JPanel();
+		FlowLayout flowLayout_16 = (FlowLayout) hit_rewards.getLayout();
+		flowLayout_16.setVgap(0);
+		flowLayout_16.setHgap(0);
+		flowLayout_16.setAlignment(FlowLayout.RIGHT);
+		hit_rewards.setBackground(Color.WHITE);
+		hit_rewards.setBorder(new TitledBorder(null, "Belohnunge f\u00FCr's Rammen", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		hit_rewards.setBounds(242, 11, 224, 105);
+		reward_system.add(hit_rewards);
+		
+		JPanel panel_23 = new JPanel();
+		panel_23.setBackground(Color.WHITE);
+		hit_rewards.add(panel_23);
+		
+		JLabel lblGegnerGerammt = new JLabel("Gegner gerammt:");
+		panel_23.add(lblGegnerGerammt);
+		
+		hitRobotReward = new JTextField();
+		hitRobotReward.setText(Config.getStringValue("Reward_HitRobot", "1.0"));
+		hitRobotReward.setColumns(5);
+		panel_23.add(hitRobotReward);
+		
+		JPanel panel_24 = new JPanel();
+		panel_24.setBackground(Color.WHITE);
+		hit_rewards.add(panel_24);
+		
+		JLabel lblWandGerammt = new JLabel("Wand gerammt:");
+		panel_24.add(lblWandGerammt);
+		
+		hitWallReward = new JTextField();
+		hitWallReward.setText(Config.getStringValue("Reward_HitWall", "-5.0"));
+		hitWallReward.setColumns(5);
+		panel_24.add(hitWallReward);
+		
+		JPanel victory_rewards = new JPanel();
+		FlowLayout flowLayout_17 = (FlowLayout) victory_rewards.getLayout();
+		flowLayout_17.setAlignment(FlowLayout.RIGHT);
+		flowLayout_17.setVgap(0);
+		flowLayout_17.setHgap(0);
+		victory_rewards.setBorder(new TitledBorder(null, "Belohnunge bei Rundenende", TitledBorder.LEADING, TitledBorder.TOP, null, new Color(59, 59, 59)));
+		victory_rewards.setBackground(Color.WHITE);
+		victory_rewards.setBounds(242, 121, 224, 105);
+		reward_system.add(victory_rewards);
+		
+		JPanel panel_26 = new JPanel();
+		panel_26.setBackground(Color.WHITE);
+		victory_rewards.add(panel_26);
+		
+		JLabel lblRundeGewonnen = new JLabel("Runde gewonnen:");
+		panel_26.add(lblRundeGewonnen);
+		
+		winningReward = new JTextField();
+		winningReward.setText(Config.getStringValue("Reward_Winning", "10.0"));
+		winningReward.setColumns(5);
+		panel_26.add(winningReward);
+		
+		JPanel panel_27 = new JPanel();
+		panel_27.setBackground(Color.WHITE);
+		victory_rewards.add(panel_27);
+		
+		JLabel lblRundeVerloren = new JLabel("Runde verloren:");
+		panel_27.add(lblRundeVerloren);
+		
+		loosingReward = new JTextField();
+		loosingReward.setText(Config.getStringValue("Reward_Loosing", "-10.0"));
+		loosingReward.setColumns(5);
+		panel_27.add(loosingReward);
+		
 		JPanel robocode_panel = new JPanel();
 		robocode_panel.setBackground(Color.WHITE);
 		tabbedPane.addTab("Robocode", null, robocode_panel, null);
+		tabbedPane.setEnabledAt(2, true);
 		robocode_panel.setLayout(null);
 
 		JPanel settings_panel = new JPanel();
@@ -368,8 +510,7 @@ public class ConfigurationWindow {
 		settings_panel.add(rounds_panel);
 
 		JSpinner rounds = new JSpinner();
-		val = Config.getIntValue("Rounds");
-		rounds.setModel(new SpinnerNumberModel(val < 10 ? 10 : val, 10, 100000000, 10));
+		rounds.setModel(new SpinnerNumberModel(Config.getIntValue("Rounds", 10), 10, 100000000, 10));
 		rounds_panel.add(rounds);
 
 		JPanel panel_2 = new JPanel();
@@ -471,6 +612,18 @@ public class ConfigurationWindow {
 				Config.setStringValue("EnemyRobot", robot_list.getSelectedValue());
 				Config.setIntValue("FieldWidth", 800);
 				Config.setIntValue("FieldHeight", 600);
+				
+				Config.setDoubleValue("Reward_HitByBullet", Double.parseDouble(hitByBulletReward.getText()));
+				Config.setDoubleValue("Reward_BulletHitBullet", Double.parseDouble(bulletHitBulletReward.getText()));
+				Config.setDoubleValue("Reward_BulletHitEnemy", Double.parseDouble(bulletHitEnemyReward.getText()));
+				Config.setDoubleValue("Reward_BulletHitWall", Double.parseDouble(bulletHitWallReward.getText()));
+				Config.setBoolValue("Reward_MultBulletPower", multBulletPower.isSelected());
+				
+				Config.setDoubleValue("Reward_HitRobot", Double.parseDouble(hitRobotReward.getText()));
+				Config.setDoubleValue("Reward_HitWall", Double.parseDouble(hitWallReward.getText()));
+				
+				Config.setDoubleValue("Reward_Winning", Double.parseDouble(winningReward.getText()));
+				Config.setDoubleValue("Reward_Loosing", Double.parseDouble(loosingReward.getText()));
 
 				start();
 			}
@@ -480,6 +633,12 @@ public class ConfigurationWindow {
 		extendedMoveEnv.addChangeListener(new ChangeListener() {
 			public void stateChanged(ChangeEvent e) {
 				moveGridSize.setEnabled(extendedMoveEnv.isSelected());
+			}
+		});
+		
+		simpleReward.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				tabbedPane.setEnabledAt(1, simpleReward.isSelected());
 			}
 		});
 	}

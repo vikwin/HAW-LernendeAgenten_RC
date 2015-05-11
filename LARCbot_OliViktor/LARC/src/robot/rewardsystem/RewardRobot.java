@@ -8,8 +8,8 @@ import robocode.HitByBulletEvent;
 import robocode.HitRobotEvent;
 import robocode.HitWallEvent;
 import robocode.RobotDeathEvent;
-import robocode.Rules;
 import robot.actionsystem.ActorRobot;
+import utils.Config;
 
 /**
  * Der RewardRobot ist eine abstrakte Robot Klasse. Dieser wertet Events
@@ -23,17 +23,30 @@ import robot.actionsystem.ActorRobot;
  *
  */
 public abstract class RewardRobot extends ActorRobot {
-	private static final double BULLET_REWARD = 3 / Rules.MAX_BULLET_POWER;		// Belohnung / Bestrafung für eine Kugel, wird mit der Power der Kugel multipliziert
-	private static final double HIT_REWARD = 1;			// Belohnung / Bestrafung wenn der Roboter gegen etwas gegen fährt
-	private static final double VICTORY_REWARD = 10;	// Belohnung für dem Sieg, Bestrafung für die Niederlage  
+	private static boolean multiplyBulletPower;
+	private static double hitByBullet, bulletHitBullet, bulletHitEnemy, bulletHitWall;
+	private static double hitRobot, hitWall;
+	private static double winning, loosing;
+	
+	static {
+		hitByBullet = Config.getDoubleValue("Reward_HitByBullet");
+		bulletHitBullet = Config.getDoubleValue("Reward_BulletHitBullet");
+		bulletHitEnemy = Config.getDoubleValue("Reward_BulletHitEnemy");
+		bulletHitWall = Config.getDoubleValue("Reward_BulletHitWall");
+		multiplyBulletPower = Config.getBoolValue("Reward_MultBulletPower");
+		
+		hitRobot = Config.getDoubleValue("Reward_HitRobot");
+		hitWall = Config.getDoubleValue("Reward_HitWall");
+		
+		winning = Config.getDoubleValue("Reward_Winning");
+		loosing = Config.getDoubleValue("Reward_Loosing");
+	}
 	
 	private double reward;
-	private double shotReward;
 	
 	public RewardRobot() {
 		super();
 		reward = 0.0;
-		shotReward = 0.0;
 	}
 	
 	public double getReward() {
@@ -43,64 +56,60 @@ public abstract class RewardRobot extends ActorRobot {
 		return r;
 	}
 	
-	public double[] getReward(boolean extraShotreward) {
-		double[] d;
-		
-		if (!extraShotreward) {
-			d = new double[] {getReward()};
-		} else {
-			d = new double[]{getReward(), shotReward};
-			shotReward = 0.0;
-		}
-		
-		return d;
-	}
-	
 	/* Events mit Kugeln */
 	@Override
 	public void onHitByBullet(HitByBulletEvent event) {
-		reward -= BULLET_REWARD * event.getPower();
+		if (multiplyBulletPower)
+			reward += hitByBullet * event.getPower();
+		else
+			reward += hitByBullet;
 	}
 	
 	@Override
 	public void onBulletHitBullet(BulletHitBulletEvent event) {
-		reward += 2 * BULLET_REWARD;
-		shotReward += 2 * BULLET_REWARD;
+		if (multiplyBulletPower)
+			reward += bulletHitBullet * event.getBullet().getPower();
+		else
+			reward += bulletHitBullet;
 	}
 	
 	@Override
 	public void onBulletHit(BulletHitEvent event) {
-		reward += 2 * BULLET_REWARD * event.getBullet().getPower();
-		shotReward += 2 * BULLET_REWARD * event.getBullet().getPower();
+		if (multiplyBulletPower)
+			reward += bulletHitEnemy * event.getBullet().getPower();
+		else
+			reward += bulletHitEnemy;
 	}
 	
 	@Override
 	public void onBulletMissed(BulletMissedEvent event) {
-		reward -= BULLET_REWARD * event.getBullet().getPower();
-		shotReward -= BULLET_REWARD * event.getBullet().getPower();
+		if (multiplyBulletPower)
+			reward += bulletHitWall * event.getBullet().getPower();
+		else
+			reward += bulletHitWall;
 	}
 	
 	
 	/* Events, wenn etwas gerammt wurde */
 	@Override
 	public void onHitRobot(HitRobotEvent event) {
-		reward += HIT_REWARD;
+		reward += hitRobot;
 	}
 	
 	@Override
 	public void onHitWall(HitWallEvent event) {
-		reward -= 5 * HIT_REWARD;
+		reward += hitWall;
 	}
 	
 	
 	/* Events bei Ende der Runde*/
 	@Override
 	public void onDeath(DeathEvent event) {
-		reward -= VICTORY_REWARD;
+		reward += winning;
 	}
 	
 	@Override
 	public void onRobotDeath(RobotDeathEvent event) {
-		reward += VICTORY_REWARD;
+		reward += loosing;
 	}
 }
