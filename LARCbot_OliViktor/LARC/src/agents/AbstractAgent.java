@@ -130,19 +130,19 @@ public abstract class AbstractAgent {
 	}
 
 	protected void addRewardToLastActions(double reward) {
-		int i = (queueEndIndex - 1 + QUEUE_SIZE) % QUEUE_SIZE;
+		int i = (queueEndIndex - 1 + QUEUE_SIZE) % QUEUE_SIZE, n = i;
 		double delta;
 		
 		if (lastActionQueue[i] < 0)
 			return;
 		
 		algo_e += 1;
-		delta = reward + DISCOUNT_RATE * getActionList()[lastActionQueue[i]];
+		delta = reward + DISCOUNT_RATE * getActionList()[lastActionQueue[n]];
 
 		do {
 			i = (i - 1 + QUEUE_SIZE) % QUEUE_SIZE;
 			
-			if (lastActionQueue[(i + 1) % QUEUE_SIZE] == lastActionQueue[i])
+			if (lastActionQueue[n] == lastActionQueue[i])
 				algo_e = 1;
 
 			if (lastActionQueue[i] < 0) {
