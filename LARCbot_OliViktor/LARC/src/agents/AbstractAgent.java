@@ -19,28 +19,33 @@ import org.json.simple.parser.ParseException;
 import utils.Config;
 
 public abstract class AbstractAgent {
-	private static final double LEARN_RATE = Config.getIntValue("Agent_LearnRate") / 100.0;
-	private static final double DISCOUNT_RATE = Config.getIntValue("Agent_DiscountRate") / 100.0;
+	private static final double LEARN_RATE = Config
+			.getIntValue("Agent_LearnRate") / 100.0;
+	private static final double DISCOUNT_RATE = Config
+			.getIntValue("Agent_DiscountRate") / 100.0;
 	private static final double LAMBDA = Config.getIntValue("Agent_Lambda") / 100.0;
 	private static final int QUEUE_SIZE = Config.getIntValue("Agent_QueueSize");
-//	private static final double REWARD_CAP = 5;
+	// private static final double REWARD_CAP = 5;
 
-	protected static final int SAVE_TIMES = Config.getIntValue("Agent_SaveTimes");
-	protected static final String TIMESTAMP = new SimpleDateFormat("dd_MM_yyyy_HH_mm_ss").format(new Date()), ENEMY;
-	protected static final boolean LOAD_ON_START = Config.getBoolValue("Agent_LoadOnStart");
+	protected static final int SAVE_TIMES = Config
+			.getIntValue("Agent_SaveTimes");
+	protected static final String TIMESTAMP = new SimpleDateFormat(
+			"dd_MM_yyyy_HH_mm_ss").format(new Date()), ENEMY;
+	protected static final boolean LOAD_ON_START = Config
+			.getBoolValue("Agent_LoadOnStart");
 
 	protected AgentMode mode;
 
 	private int[] lastActionQueue;
 	private int queueEndIndex;
 	private double algo_e;
-	
+
 	static {
 		if (Config.getBoolValue("StartBattle"))
 			ENEMY = "_" + Config.getStringValue("EnemyRobot");
 		else
 			ENEMY = "";
-		
+
 		new File("LARCAgents/" + TIMESTAMP).mkdirs();
 	}
 
@@ -50,18 +55,18 @@ public abstract class AbstractAgent {
 		lastActionQueue = new int[QUEUE_SIZE];
 		Arrays.fill(lastActionQueue, -1);
 		queueEndIndex = 0;
-		
+
 		algo_e = 0;
 	}
 
 	public void setMode(AgentMode newMode) {
 		mode = newMode;
 	}
-	
+
 	protected abstract Double[] getActionList();
-	
+
 	protected static void fillActionList(Double[] values) {
-		
+
 	}
 
 	/**
@@ -79,11 +84,13 @@ public abstract class AbstractAgent {
 			public void run() {
 
 				try {
-					ZipOutputStream zos = new ZipOutputStream(new FileOutputStream("LARCAgents\\" + directory + "\\" + filename + ".zip"));
+					ZipOutputStream zos = new ZipOutputStream(
+							new FileOutputStream("LARCAgents\\" + directory
+									+ "\\" + filename + ".zip"));
 					ZipEntry entry = new ZipEntry(filename + ".json");
 
 					zos.putNextEntry(entry);
-					
+
 					StringBuilder actionListString = new StringBuilder("["); // JSONValue.toJSONString(actionList);
 					Double[] actionList = getActionList();
 					for (double d : actionList) {
@@ -107,18 +114,21 @@ public abstract class AbstractAgent {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static void load(String directory, String filename) throws IOException, ParseException {
+	public static void load(String directory, String filename)
+			throws IOException, ParseException {
 		File f = new File("LARCAgents\\" + directory + "\\" + filename + ".zip");
 		if (f.exists() && f.isFile()) {
-			ZipFile zf = new ZipFile("LARCAgents\\" + directory + "\\" + filename + ".zip");
+			ZipFile zf = new ZipFile("LARCAgents\\" + directory + "\\"
+					+ filename + ".zip");
 			ZipEntry ze = zf.getEntry(filename + ".json");
-			
-			InputStreamReader reader = new InputStreamReader(zf.getInputStream(ze));
+
+			InputStreamReader reader = new InputStreamReader(
+					zf.getInputStream(ze));
 			JSONParser parser = new JSONParser();
-	
+
 			List<Double> obj = (List<Double>) ((JSONArray) parser.parse(reader));
 			fillActionList(obj.toArray(new Double[0]));
-			
+
 			reader.close();
 			zf.close();
 		}
@@ -132,37 +142,40 @@ public abstract class AbstractAgent {
 	protected void addRewardToLastActions(double reward) {
 		int i = (queueEndIndex - 1 + QUEUE_SIZE) % QUEUE_SIZE, n = i;
 		double delta;
-		
+
 		if (lastActionQueue[i] < 0)
 			return;
-		
+
 		algo_e += 1;
 		delta = reward + DISCOUNT_RATE * getActionList()[lastActionQueue[n]];
 
 		do {
 			i = (i - 1 + QUEUE_SIZE) % QUEUE_SIZE;
-			
-			if (lastActionQueue[n] == lastActionQueue[i])
-				algo_e = 1;
 
 			if (lastActionQueue[i] < 0) {
 				break;
 			}
-			
+
 			getActionList()[lastActionQueue[i]] += LEARN_RATE * delta * algo_e;
+
+			if (lastActionQueue[n] == lastActionQueue[i])
+				algo_e = 1;
+			else
+				algo_e *= LAMBDA * DISCOUNT_RATE;
 			
-			algo_e *= LAMBDA * DISCOUNT_RATE;
 		} while (i != queueEndIndex);
 	}
 
 	/**
 	 * Gibt die nächste Aktion an
-	 * @param stateID Die ID des aktuellen Zustands der Umwelt
+	 * 
+	 * @param stateID
+	 *            Die ID des aktuellen Zustands der Umwelt
 	 * @return Die ID der nächsten Aktion
 	 */
 	public abstract int getNextAction(int stateID);
-	
+
 	public abstract void addReward(double reward);
-	
+
 	public abstract void saveOnBattleEnd();
 }
