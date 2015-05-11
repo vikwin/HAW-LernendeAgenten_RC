@@ -29,9 +29,9 @@ public class LARCAgent implements IAgent {
 	private int previousStateInt;
 	private int currentActionInt;
 	private int currentStateInt;
-	private MyAction myAction;
-	private boolean policyFrozen = true; // lernen
-	private boolean exploringFrozen = true; // ausprobieren
+	private Action action;
+	private boolean policyFrozen = false; // lernen
+	private boolean exploringFrozen = false; // ausprobieren
 	private LARCRobot myRobot;
 	private double previousStateQValue;
 	private double currentStateQValue;
@@ -40,7 +40,7 @@ public class LARCAgent implements IAgent {
 
 	public LARCAgent(LARCRobot myRobot) {
 		this.myRobot = myRobot;
-		this.myAction = new MyAction(this.myRobot);
+		this.action = new Action(this.myRobot);
 	}
 
 	@Override
@@ -73,8 +73,8 @@ public class LARCAgent implements IAgent {
 
 	@Override
 	public int agent_step(int stateInt) {
-		SpecificAction nextAction = SpecificAction.values()[currentActionInt];
-		this.myRobot.move(this.myAction.getMoveVector(nextAction));
+		this.action.setActionID(currentActionInt);
+		this.myRobot.move(this.action.getMoveVector());
 
 		currentActionInt = egreedy(stateInt);
 		currentStateInt = stateInt;

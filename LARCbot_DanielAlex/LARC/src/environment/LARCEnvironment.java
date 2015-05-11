@@ -37,6 +37,7 @@ public class LARCEnvironment implements IEnvironment {
 		this.currentEnergyRatio = this.robot.getEnergyRatio();
 		this.currentState.setEdgeState(this.robot.getSelfGridPos());
 		this.currentState.setEnemyPosition(this.robot.getAngleToEnemy());
+		this.currentState.setEnemyDirection(this.robot.getEnemyDirection());
 		// this.currentState.setGunPosition(this.robot.getGunPostion());
 
 		return this.currentState.getStateID();
@@ -53,6 +54,8 @@ public class LARCEnvironment implements IEnvironment {
 		this.currentEnergyRatio = this.robot.getEnergyRatio();
 		this.currentState.setEdgeState(this.robot.getSelfGridPos());
 		this.currentState.setEnemyPosition(this.robot.getAngleToEnemy());
+
+		this.currentState.setEnemyDirection(this.robot.getEnemyDirection());
 		// this.currentState.setGunPosition(this.robot.getGunPostion());
 		this.calculateReward();
 
@@ -75,7 +78,7 @@ public class LARCEnvironment implements IEnvironment {
 		if (this.currentEnergyRatio > this.previousEnergyRatio) {
 			this.lastReward = 10;
 		} else if (this.currentEnergyRatio < this.previousEnergyRatio) {
-			this.lastReward = 0;
+			this.lastReward = -1;
 		} else {
 			this.lastReward = 0;
 		}

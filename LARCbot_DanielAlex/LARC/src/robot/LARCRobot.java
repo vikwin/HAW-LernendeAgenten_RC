@@ -13,8 +13,8 @@ import environment.LARCEnvironment;
 
 public class LARCRobot extends AdvancedRobot {
 
-	public static final int NO_OF_STATES = 5 * 8; //my position * enemy position * enemy direction * enemydistance
-	public static final int NO_OF_ACTIONS = 2 * 8 + 4 * 8 * 2; // Fire * Direction * MoveGun + BACK
+	public static final int NO_OF_STATES = 5 * 8 * 8; // my position * enemy position * enemy direction * enemydistance
+	public static final int NO_OF_ACTIONS = 2 * 8 * 9; // Fire * Direction * MoveGun + BACK
 	public static double[][] VALUE_FUNCTION = new double[NO_OF_ACTIONS][NO_OF_STATES];
 	public double currentGunAngleToEnemy;
 	public double oldGunAngleToEnemy = 0;
@@ -32,10 +32,12 @@ public class LARCRobot extends AdvancedRobot {
 	private double energyRatio;
 	private int currentReward;
 	private double gunPostion;
+	private double enemyDirection;
 
 	public LARCRobot() {
 		this.enemyX = 0;
 		this.enemyY = 0;
+		this.enemyDirection = 1; 
 		this.selfGridPos = new Position(1, 1);
 		this.enemyGridPos = new Position(2, 2);
 		this.environment = new LARCEnvironment(this);
@@ -116,6 +118,10 @@ public class LARCRobot extends AdvancedRobot {
 		enemyGridPos.setY(((int) (this.getEnemyY() / LARCEnvironment.TILESIZE)));
 	}
 
+	public double getEnemyDirection() {
+		return enemyDirection;
+	}
+	
 	public double getEnemyX() {
 		return enemyX;
 	}
@@ -159,9 +165,34 @@ public class LARCRobot extends AdvancedRobot {
 	/*************************************************************************************************************************/
 	@Override
 	public void onScannedRobot(ScannedRobotEvent event) {
-		// point gun towards enemy:
-		
-		setTurnGunRight(getHeading() - getGunHeading() + event.getBearing());
+		// calculate enemy direction via oster algorithm:
+		double velocity = event.getVelocity();
+		if (velocity > 0) {
+			enemyDirection = event.getHeading();
+		} else {
+			enemyDirection = event.getHeading() - 180;
+			if (enemyDirection < 0) {
+				enemyDirection += 360;
+			}
+		}
+		System.out.println("Enemy Direction: "+enemyDirection);
+
+		// setTurnGunRight(getHeading() - getGunHeading() + event.getBearing());
+		double x = getHeading() - getGunHeading();
+		if (x > 180) {
+			x -= 360;
+		} else if (x < -180) {
+			x += 360;
+			x *= -1;
+		}
+		x += event.getBearing();
+		if (x > 180) {
+			x -= 360;
+		} else if (x < -180) {
+			x += 360;
+			x *= -1;
+		}
+		setTurnGunRight(x);
 
 		// update enemy-related state variables:
 		this.currentGunAngleToEnemy = Math.abs(getHeading() - getGunHeading() + event.getBearing());
@@ -171,7 +202,7 @@ public class LARCRobot extends AdvancedRobot {
 		this.triangulateEnemyPosition();
 		this.enemyEnergy = event.getEnergy();
 		this.selfEnergy = this.getEnergy();
-		
+
 		this.updateEnergyRatio();
 	}
 

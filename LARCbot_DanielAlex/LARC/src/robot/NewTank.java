@@ -3,7 +3,7 @@ package robot;
 import robocode.AdvancedRobot;
 import robocode.ScannedRobotEvent;
 
-public class NewTank extends AdvancedRobot {
+public class OsterBot extends AdvancedRobot {
 
 	public void run() {
 		while (true) {
