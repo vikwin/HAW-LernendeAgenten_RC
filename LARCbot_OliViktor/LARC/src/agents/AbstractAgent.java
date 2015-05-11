@@ -23,7 +23,7 @@ public abstract class AbstractAgent {
 	private static final double DISCOUNT_RATE = Config.getIntValue("Agent_DiscountRate") / 100.0;
 	private static final double LAMBDA = Config.getIntValue("Agent_Lambda") / 100.0;
 	private static final int QUEUE_SIZE = Config.getIntValue("Agent_QueueSize");
-	private static final double REWARD_CAP = 5;
+//	private static final double REWARD_CAP = 5;
 
 	protected static final int SAVE_TIMES = Config.getIntValue("Agent_SaveTimes");
 	protected static final String TIMESTAMP = new SimpleDateFormat("dd_MM_yyyy_HH_mm_ss").format(new Date()), ENEMY;
@@ -33,6 +33,7 @@ public abstract class AbstractAgent {
 
 	private int[] lastActionQueue;
 	private int queueEndIndex;
+	private double algo_e;
 	
 	static {
 		if (Config.getBoolValue("StartBattle"))
@@ -49,6 +50,8 @@ public abstract class AbstractAgent {
 		lastActionQueue = new int[QUEUE_SIZE];
 		Arrays.fill(lastActionQueue, -1);
 		queueEndIndex = 0;
+		
+		algo_e = 0;
 	}
 
 	public void setMode(AgentMode newMode) {
@@ -127,21 +130,28 @@ public abstract class AbstractAgent {
 	}
 
 	protected void addRewardToLastActions(double reward) {
-		int n = queueEndIndex, i = queueEndIndex + 1;
-		double lambda = 1, val, nextVal;
+		int i = (queueEndIndex - 1 + QUEUE_SIZE) % QUEUE_SIZE;
+		double delta;
+		
+		if (lastActionQueue[i] < 0)
+			return;
+		
+		algo_e += 1;
+		delta = reward + DISCOUNT_RATE * getActionList()[lastActionQueue[i]];
 
 		do {
-			n = (n + 1) % QUEUE_SIZE;
-			i = (i + 1) % QUEUE_SIZE;
+			i = (i - 1 + QUEUE_SIZE) % QUEUE_SIZE;
+			
+			if (lastActionQueue[(i + 1) % QUEUE_SIZE] == lastActionQueue[i])
+				algo_e = 1;
 
-			if (lastActionQueue[i] < 0 || lastActionQueue[n] < 0) {
+			if (lastActionQueue[i] < 0) {
 				break;
 			}
-			val = getActionList()[lastActionQueue[i]];
-			nextVal = getActionList()[lastActionQueue[n]];
-			getActionList()[lastActionQueue[i]] = Math.min(Math.max(val + lambda * (LEARN_RATE * (reward + (DISCOUNT_RATE * nextVal) - val)), -REWARD_CAP), REWARD_CAP);
 			
-			lambda *= LAMBDA;
+			getActionList()[lastActionQueue[i]] += LEARN_RATE * delta * algo_e;
+			
+			algo_e *= LAMBDA * DISCOUNT_RATE;
 		} while (i != queueEndIndex);
 	}
 
