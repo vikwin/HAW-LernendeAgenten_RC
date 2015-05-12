@@ -167,7 +167,7 @@ public abstract class AbstractAgent {
 		System.out.println(lastActionQueue.toString());
 		System.out.println(eValues.toString());
 		
-		Iterator<Integer> it = lastActionQueue.reverseIterator();
+		Iterator<Integer> it = lastActionQueue.iterator();
 		Double[] Q = getActionList();
 		
 		sa_ = it.next();
@@ -181,11 +181,11 @@ public abstract class AbstractAgent {
 			
 			// replace traces
 			if (sa == sa_)
-				setE(sa, 1 + gamma * lambda + e(sa));
+				setE(sa, 1 + gamma * lambda * e(sa));
 			else if(getStateFromId(sa) == getStateFromId(sa_))
 				setE(sa, 0);
 			else
-				setE(sa, gamma * lambda + e(sa));
+				setE(sa, gamma * lambda * e(sa));
 				
 			// Debug Ausgaben
 			System.out.printf("sa: %d, Q: %f, e: %f, delta: %f\n", sa, Q[sa], e(sa), delta);

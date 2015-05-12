@@ -1,10 +1,11 @@
 package agents;
 
 import java.util.Iterator;
+import java.util.LinkedList;
 
 public class ActionQueue {
-	private int[] elements;
-	private int count, endIndex;
+	private int free;
+	private LinkedList<Integer> elements;
 	
 	private class Itr implements Iterator<Integer> {
 		int index, delta;
@@ -16,12 +17,12 @@ public class ActionQueue {
 		
 		@Override
 		public boolean hasNext() {
-			return index >= 0 && index < elements.length;
+			return index >= 0 && index < elements.size();
 		}
 
 		@Override
 		public Integer next() {
-			Integer i = elements[index];
+			Integer i = elements.get(index);
 			index += delta;
 			return i;
 		}
@@ -32,9 +33,8 @@ public class ActionQueue {
 	 * @param capacity die Kapazität
 	 */
 	public ActionQueue(int capacity) {
-		elements = new int[capacity];
-		count = 0;
-		endIndex = -1;
+		elements = new LinkedList<Integer>();
+		free = capacity;
 	}
 	
 	/**
@@ -48,7 +48,7 @@ public class ActionQueue {
 	 * @return Einen Iterator, der vom Ende bis zum Kopf der Queue durchläuft.
 	 */
 	public Iterator<Integer> reverseIterator() {
-		return new Itr(count - 1, -1);
+		return new Itr(elements.size() - 1, -1);
 	}
 	
 	/**
@@ -57,12 +57,11 @@ public class ActionQueue {
 	 * @return false, wenn Queue bereits voll ist, true sonst.
 	 */
 	public boolean offer(Integer elem) {
-		if (count >= elements.length)
+		if (free <= 0)
 			return false;
 		
-		endIndex = (endIndex + 1) % elements.length;
-		elements[endIndex] = elem;
-		count++;
+		elements.add(0, elem);
+		free--;
 		return true;
 	}
 	
@@ -72,18 +71,20 @@ public class ActionQueue {
 	 * @return Das Element am Kopf der Queue.
 	 */
 	public Integer poll() {
-		if (endIndex < 0)
+		if (elements.isEmpty())
 			return null;
 		
-		count--;
-		return elements[endIndex--];
+		free++;
+		int polled = elements.getLast();
+		elements.removeLast();
+		return polled;
 	}
 
 	/**
 	 * @return Anazhl der Elemente in der Queue.
 	 */
 	public int size() {
-		return count;
+		return elements.size();
 	}
 
 	/**
@@ -93,22 +94,20 @@ public class ActionQueue {
 	 * @return true, wenn das Element gefunden wurde, false sonst
 	 */
 	public boolean contains(int elem) {
-		for (int i = 0; i < elements.length; i++) {
-			if (elem == elements[i])
-				return true;
-		}
-		
-		return false;
+		return elements.contains(elem);
 	}
 	
 	@Override
 	public String toString() {
+		if (elements.size() == 0)
+			return "~>";
+		
 		String s = "";
 		
-		for (int i = 0; i < count; i++) {
-			s += ", " + elements[i];
+		for (int i = 0; i < elements.size(); i++) {
+			s += ", " + elements.get(i);
 		}
 		
-		return "~~~" + s.substring(2) + ">";
+		return "~" + s.substring(2) + ">";
 	}
 }
