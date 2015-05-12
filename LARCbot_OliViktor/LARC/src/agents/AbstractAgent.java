@@ -26,7 +26,7 @@ public abstract class AbstractAgent {
 			.getIntValue("Agent_DiscountRate") / 100.0;
 	private static final double LAMBDA = Config.getIntValue("Agent_Lambda") / 100.0;
 	private static final int QUEUE_SIZE = Config.getIntValue("Agent_QueueSize");
-	// private static final double REWARD_CAP = 5;
+	 private static final double REWARD_CAP = 50;
 
 	protected static final int SAVE_TIMES = Config
 			.getIntValue("Agent_SaveTimes");
@@ -177,7 +177,7 @@ public abstract class AbstractAgent {
 		setE(sa, e(sa) + 1);
 		
 		while (!end) {
-			Q[sa] += alpha * delta * e(sa);
+			Q[sa] = Math.max(Math.min(Q[sa] + alpha * delta * e(sa), REWARD_CAP), -REWARD_CAP);
 			
 			// replace traces
 			if (sa == sa_)
