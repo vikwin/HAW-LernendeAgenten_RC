@@ -1,12 +1,10 @@
 package environment;
 
 import robot.LARCRobot;
-import state.GunToEnemy;
 import state.State;
+import state.State.EdgeState;
 
 public class LARCEnvironment implements IEnvironment {
-
-	public static final int TILESIZE = 50;
 
 	private LARCRobot robot;
 	private double currentEnergyRatio;
@@ -29,13 +27,9 @@ public class LARCEnvironment implements IEnvironment {
 	@Override
 	public int env_start() {
 
-		// update Robot grid position
-		this.robot.getSelfGridPosition();
-		this.robot.getEnemyGridPosition();
-
 		// update currentState
 		this.currentEnergyRatio = this.robot.getEnergyRatio();
-		this.currentState.setEdgeState(this.robot.getSelfGridPos());
+		this.currentState.setEdgeState(this.robot.getMyPosition());
 		this.currentState.setEnemyPosition(this.robot.getAngleToEnemy());
 		this.currentState.setEnemyDirection(this.robot.getEnemyDirection());
 		// this.currentState.setGunPosition(this.robot.getGunPostion());
@@ -46,13 +40,9 @@ public class LARCEnvironment implements IEnvironment {
 	@Override
 	public int env_step(int action) {
 
-		// update Robot grid position
-		this.robot.getSelfGridPosition();
-		this.robot.getEnemyGridPosition();
-
 		// update currentStateF
 		this.currentEnergyRatio = this.robot.getEnergyRatio();
-		this.currentState.setEdgeState(this.robot.getSelfGridPos());
+		this.currentState.setEdgeState(this.robot.getMyPosition());
 		this.currentState.setEnemyPosition(this.robot.getAngleToEnemy());
 
 		this.currentState.setEnemyDirection(this.robot.getEnemyDirection());
@@ -75,6 +65,7 @@ public class LARCEnvironment implements IEnvironment {
 	 * @return reward
 	 */
 	private double calculateReward() {
+
 		if (this.currentEnergyRatio > this.previousEnergyRatio) {
 			this.lastReward = 10;
 		} else if (this.currentEnergyRatio < this.previousEnergyRatio) {
@@ -82,23 +73,12 @@ public class LARCEnvironment implements IEnvironment {
 		} else {
 			this.lastReward = 0;
 		}
-		
-		if (this.robot.getSelfGridPos().getX() == 0 || this.robot.getSelfGridPos().getX() == State.MAXGRIDX - 1
-				|| this.robot.getSelfGridPos().getY() == 0 || this.robot.getSelfGridPos().getY() == State.MAXGRIDY - 1) {
+
+		if (this.currentState.getEdgeState() != EdgeState.MID) {
 			this.lastReward -= 5;
 		}
+
 		this.robot.setCurrentReward(lastReward);
 		return this.lastReward;
-	}
-
-	public GunToEnemy calculateGunToEnemy() {
-		// TODO delete
-		GunToEnemy gunToEnemy = GunToEnemy.AHEAD;
-		if (this.robot.getHeading() - this.robot.getGunHeading() + this.robot.getAngleToEnemy() > 0.0) {
-			gunToEnemy = GunToEnemy.RIGHT;
-		} else if ((this.robot.getHeading() - this.robot.getGunHeading() + this.robot.getAngleToEnemy() < 0.0)) {
-			gunToEnemy = GunToEnemy.LEFT;
-		}
-		return gunToEnemy;
 	}
 }

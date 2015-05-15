@@ -30,8 +30,8 @@ public class LARCAgent implements IAgent {
 	private int currentActionInt;
 	private int currentStateInt;
 	private Action action;
-	private boolean policyFrozen = false; // lernen
-	private boolean exploringFrozen = false; // ausprobieren
+	private boolean policyFrozen = true; // lernen
+	private boolean exploringFrozen = true; // ausprobieren
 	private LARCRobot myRobot;
 	private double previousStateQValue;
 	private double currentStateQValue;

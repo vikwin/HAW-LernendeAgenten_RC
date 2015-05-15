@@ -24,22 +24,18 @@ public class LARCRobot extends AdvancedRobot {
 	private double enemyY;
 	private double angleToEnemy;
 	private double distanceToEnemy;
-
-	private Position selfGridPos;
-	private Position enemyGridPos;
 	private double selfEnergy;
 	private double enemyEnergy;
 	private double energyRatio;
 	private int currentReward;
 	private double gunPostion;
 	private double enemyDirection;
+	private Position myPosition;
 
 	public LARCRobot() {
 		this.enemyX = 0;
 		this.enemyY = 0;
-		this.enemyDirection = 1; 
-		this.selfGridPos = new Position(1, 1);
-		this.enemyGridPos = new Position(2, 2);
+		this.enemyDirection = 1;
 		this.environment = new LARCEnvironment(this);
 		this.agent = new LARCAgent(this);
 	}
@@ -51,11 +47,16 @@ public class LARCRobot extends AdvancedRobot {
 		this.setAdjustGunForRobotTurn(true);
 		this.setColors(Color.CYAN, Color.CYAN, Color.CYAN, Color.CYAN, Color.CYAN);
 		// init
+		this.myPosition = new Position(this.getX(), this.getY());
 		this.environment.env_init();
 		this.agent.agent_init();
 		int stateID = this.environment.env_start();
 		int actionID = this.agent.agent_start(stateID);
 		while (true) {
+			this.gunPostion = this.getGunHeading();
+			this.selfEnergy = this.getEnergy();
+			this.myPosition.setX(this.getX());
+			this.myPosition.setY(this.getY());
 			// default actions:
 			setTurnRadarRight(2000);
 			// stepping
@@ -108,34 +109,16 @@ public class LARCRobot extends AdvancedRobot {
 		}
 	}
 
-	public void getSelfGridPosition() {
-		selfGridPos.setX(((int) (this.getX() / LARCEnvironment.TILESIZE)));
-		selfGridPos.setY(((int) (this.getY() / LARCEnvironment.TILESIZE)));
-	}
-
-	public void getEnemyGridPosition() {
-		enemyGridPos.setX(((int) (this.getEnemyX() / LARCEnvironment.TILESIZE)));
-		enemyGridPos.setY(((int) (this.getEnemyY() / LARCEnvironment.TILESIZE)));
-	}
-
 	public double getEnemyDirection() {
 		return enemyDirection;
 	}
-	
+
 	public double getEnemyX() {
 		return enemyX;
 	}
 
 	public double getEnemyY() {
 		return enemyY;
-	}
-
-	public Position getSelfGridPos() {
-		return selfGridPos;
-	}
-
-	public Position getEnemyGridPos() {
-		return enemyGridPos;
 	}
 
 	public int getCurrentReward() {
@@ -161,13 +144,17 @@ public class LARCRobot extends AdvancedRobot {
 	public double getGunPostion() {
 		return gunPostion;
 	}
+	
+	public Position getMyPosition() {
+		return myPosition;
+	}
 
 	/*************************************************************************************************************************/
 	@Override
 	public void onScannedRobot(ScannedRobotEvent event) {
 		// calculate enemy direction via oster algorithm:
 		double velocity = event.getVelocity();
-		if (velocity > 0) {
+		if (velocity >= 0) {
 			enemyDirection = event.getHeading();
 		} else {
 			enemyDirection = event.getHeading() - 180;
@@ -175,7 +162,7 @@ public class LARCRobot extends AdvancedRobot {
 				enemyDirection += 360;
 			}
 		}
-		System.out.println("Enemy Direction: "+enemyDirection);
+		System.out.println("Enemy Direction: " + enemyDirection);
 
 		// setTurnGunRight(getHeading() - getGunHeading() + event.getBearing());
 		double x = getHeading() - getGunHeading();
@@ -198,10 +185,8 @@ public class LARCRobot extends AdvancedRobot {
 		this.currentGunAngleToEnemy = Math.abs(getHeading() - getGunHeading() + event.getBearing());
 		this.angleToEnemy = event.getBearing();
 		this.distanceToEnemy = event.getDistance();
-		this.gunPostion = this.getGunHeading();
 		this.triangulateEnemyPosition();
 		this.enemyEnergy = event.getEnergy();
-		this.selfEnergy = this.getEnergy();
 
 		this.updateEnergyRatio();
 	}
@@ -224,23 +209,22 @@ public class LARCRobot extends AdvancedRobot {
 
 	@Override
 	public void onPaint(Graphics2D g) {
-
 		// Set the paint color to red
-		g.setColor(java.awt.Color.RED);
-
-		// draw grid
-		for (int i = 0; i < this.getBattleFieldWidth(); i += LARCEnvironment.TILESIZE) {
-			for (int j = 0; j < this.getBattleFieldHeight(); j += LARCEnvironment.TILESIZE) {
-
-				g.drawRect(i, j, LARCEnvironment.TILESIZE, LARCEnvironment.TILESIZE);
-			}
-		}
-		g.fillRect(((int) (selfGridPos.getX() * LARCEnvironment.TILESIZE)),
-				((int) (selfGridPos.getY() * LARCEnvironment.TILESIZE)), LARCEnvironment.TILESIZE,
-				LARCEnvironment.TILESIZE);
-		g.fillRect(((int) (enemyGridPos.getX() * LARCEnvironment.TILESIZE)),
-				((int) (enemyGridPos.getY() * LARCEnvironment.TILESIZE)), LARCEnvironment.TILESIZE,
-				LARCEnvironment.TILESIZE);
+		// g.setColor(java.awt.Color.RED);
+		//
+		// // draw grid
+		// for (int i = 0; i < this.getBattleFieldWidth(); i += LARCEnvironment.TILESIZE) {
+		// for (int j = 0; j < this.getBattleFieldHeight(); j += LARCEnvironment.TILESIZE) {
+		//
+		// g.drawRect(i, j, LARCEnvironment.TILESIZE, LARCEnvironment.TILESIZE);
+		// }
+		// }
+		// g.fillRect(((int) (selfGridPos.getX() * LARCEnvironment.TILESIZE)),
+		// ((int) (selfGridPos.getY() * LARCEnvironment.TILESIZE)), LARCEnvironment.TILESIZE,
+		// LARCEnvironment.TILESIZE);
+		// g.fillRect(((int) (enemyGridPos.getX() * LARCEnvironment.TILESIZE)),
+		// ((int) (enemyGridPos.getY() * LARCEnvironment.TILESIZE)), LARCEnvironment.TILESIZE,
+		// LARCEnvironment.TILESIZE);
 	}
 
 }

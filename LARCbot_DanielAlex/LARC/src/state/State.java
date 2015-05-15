@@ -1,13 +1,16 @@
 package state;
 
-import environment.LARCEnvironment;
 import utility.Position;
 
 public class State {
 
-	public static final int MAXGRIDX = 800 / LARCEnvironment.TILESIZE;
+	public static final double MAX_X = 800 * 0.9;
 
-	public static final int MAXGRIDY = 600 / LARCEnvironment.TILESIZE;
+	public static final double MIN_X = 800 * 0.1;
+
+	public static final double MAX_Y = 600 * 0.9;
+
+	public static final double MIN_Y = 600 * 0.1;
 
 	public enum EdgeState {
 		MID, LEFTEDGE, RIGHTEDGE, TOPEDGE, BOTTOMEDGE;
@@ -19,7 +22,7 @@ public class State {
 
 	public EdgeState edgeState;
 	public EnemyPosition enemyPosition;
-	public EnemyPosition enemyDirection = EnemyPosition.NORD;
+	public EnemyPosition enemyDirection;
 
 	// public int gunPosition;
 
@@ -36,13 +39,13 @@ public class State {
 
 	public void setEdgeState(Position position) {
 		this.edgeState = EdgeState.MID;
-		if (position.getX() == 0) {
+		if (position.getX() < MIN_X) {
 			this.edgeState = EdgeState.LEFTEDGE;
-		} else if (position.getX() == MAXGRIDX - 1) {
+		} else if (position.getX() > MAX_X) {
 			this.edgeState = EdgeState.RIGHTEDGE;
-		} else if (position.getY() == 0) {
+		} else if (position.getY() < MIN_Y) {
 			this.edgeState = EdgeState.BOTTOMEDGE;
-		} else if (position.getY() == MAXGRIDY - 1) {
+		} else if (position.getY() > MAX_Y) {
 			this.edgeState = EdgeState.TOPEDGE;
 		}
 	}
@@ -73,23 +76,23 @@ public class State {
 	}
 
 	public void setEnemyDirection(double angleToEnemy) {
-		this.enemyPosition = EnemyPosition.NORD;
+		this.enemyDirection = EnemyPosition.NORD;
 		if (angleToEnemy < -157.5) {
-			this.enemyPosition = EnemyPosition.SUED;
+			this.enemyDirection = EnemyPosition.SUED;
 		} else if (angleToEnemy < -112.5) {
-			this.enemyPosition = EnemyPosition.SUEDWEST;
+			this.enemyDirection = EnemyPosition.SUEDWEST;
 		} else if (angleToEnemy < -67.5) {
-			this.enemyPosition = EnemyPosition.WEST;
+			this.enemyDirection = EnemyPosition.WEST;
 		} else if (angleToEnemy < -22.5) {
-			this.enemyPosition = EnemyPosition.NORDWEST;
+			this.enemyDirection = EnemyPosition.NORDWEST;
 		} else if (angleToEnemy > 157.5) {
-			this.enemyPosition = EnemyPosition.SUED;
+			this.enemyDirection = EnemyPosition.SUED;
 		} else if (angleToEnemy > 112.5) {
-			this.enemyPosition = EnemyPosition.SUEDOST;
+			this.enemyDirection = EnemyPosition.SUEDOST;
 		} else if (angleToEnemy > 67.5) {
-			this.enemyPosition = EnemyPosition.OST;
+			this.enemyDirection = EnemyPosition.OST;
 		} else if (angleToEnemy > 22.5) {
-			this.enemyPosition = EnemyPosition.NORDOST;
+			this.enemyDirection = EnemyPosition.NORDOST;
 		}
 	}
 
