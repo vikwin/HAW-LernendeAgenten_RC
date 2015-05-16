@@ -26,7 +26,7 @@ public abstract class AbstractAgent {
 			.getIntValue("Agent_DiscountRate") / 100.0;
 	private static final double LAMBDA = Config.getIntValue("Agent_Lambda") / 100.0;
 	private static final int QUEUE_SIZE = Config.getIntValue("Agent_QueueSize");
-	 private static final double REWARD_CAP = 50;
+	private static final double REWARD_CAP = 50;
 
 	protected static final int SAVE_TIMES = Config
 			.getIntValue("Agent_SaveTimes");
@@ -38,7 +38,7 @@ public abstract class AbstractAgent {
 	protected AgentMode mode;
 
 	private ActionQueue lastActionQueue;
-	
+
 	private HashMap<Integer, Double> eValues;
 
 	static {
@@ -62,6 +62,7 @@ public abstract class AbstractAgent {
 	}
 
 	protected abstract Double[] getActionList();
+
 	protected abstract int getStateFromId(int id);
 
 	protected static void fillActionList(Double[] values) {
@@ -138,64 +139,67 @@ public abstract class AbstractAgent {
 			int polledID = lastActionQueue.poll();
 			if (!lastActionQueue.contains(polledID))
 				eValues.remove(polledID);
-			
+
 			lastActionQueue.offer(id);
 		}
-		
+
 		if (!eValues.containsKey(id))
 			eValues.put(id, 0.0);
 	}
-	
+
 	private double e(int sa) {
 		return eValues.get(sa);
 	}
-	
+
 	private void setE(int sa, double value) {
 		if (eValues.containsKey(sa))
 			eValues.put(sa, value);
 	}
-	
-	private void sarsa_lambda(double reward, double alpha, double gamma, double lambda) {
+
+	private void sarsa_lambda(double reward, double alpha, double gamma,
+			double lambda) {
 		double delta;
 		int sa, sa_;
 		boolean end = false;
-		
+
 		if (lastActionQueue.size() <= 2)
 			return;
 
 		// Debug Ausgaben
 		System.out.println(lastActionQueue.toString());
 		System.out.println(eValues.toString());
-		
+
 		Iterator<Integer> it = lastActionQueue.iterator();
 		Double[] Q = getActionList();
-		
+
 		sa_ = it.next();
 		sa = it.next();
-		
+
 		delta = reward + gamma * Q[sa_] - Q[sa];
-		setE(sa, e(sa) + 1);
-		
+		setE(sa, 1);
+
 		while (!end) {
-			Q[sa] = Math.max(Math.min(Q[sa] + alpha * delta * e(sa), REWARD_CAP), -REWARD_CAP);
-			
+			Q[sa] = Math.max(
+					Math.min(Q[sa] + alpha * delta * e(sa), REWARD_CAP),
+					-REWARD_CAP);
+
 			// replace traces
-			if (sa == sa_)
-				setE(sa, 1 + gamma * lambda * e(sa));
-			else if(getStateFromId(sa) == getStateFromId(sa_))
-				setE(sa, 0);
+			if (getStateFromId(sa) == getStateFromId(sa_))
+				setE(sa, 1);
 			else
 				setE(sa, gamma * lambda * e(sa));
-				
+
 			// Debug Ausgaben
-			System.out.printf("sa: %d, Q: %f, e: %f, delta: %f\n", sa, Q[sa], e(sa), delta);
-			
+			System.out.printf("sa: %d, Q: %f, e: %f, delta: %f\n", sa, Q[sa],
+					e(sa), delta);
+
 			if (it.hasNext())
 				sa = it.next();
 			else
 				end = true;
-		};
-		
+		}
+		;
+
 		System.out.println();
 	}
 
