@@ -21,15 +21,15 @@ public class SimpleAttack {
 	}
 
 	public static final SimpleAttack NOTHING = new SimpleAttack(null, 0);
-	private static final int MAX_DIRECTION = 30;
-	private static int count = ((MAX_DIRECTION / 10) * 2 + 1) * 3 + 1;
+	private static final int MAX_DIRECTION = 15;
+	private static int count = ((MAX_DIRECTION / 5) * 2 + 1) * 3 + 1;
 	
 	public static SimpleAttack byId(int id) {
 		if (id == count - 1)
 			return NOTHING;
 		
-		int possibleDir = (MAX_DIRECTION / 10) * 2 + 1;
-		return new SimpleAttack(GunPower.values()[(id / possibleDir)], (id % possibleDir) * 10 - MAX_DIRECTION);
+		int possibleDir = (MAX_DIRECTION / 5) * 2 + 1;
+		return new SimpleAttack(GunPower.values()[(id / possibleDir)], (id % possibleDir) * 5 - MAX_DIRECTION);
 	}
 	
 	public static int getActionCount() {
