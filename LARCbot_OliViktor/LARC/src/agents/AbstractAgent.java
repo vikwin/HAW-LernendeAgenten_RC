@@ -26,7 +26,7 @@ public abstract class AbstractAgent {
 			.getIntValue("Agent_DiscountRate") / 100.0;
 	private static final double LAMBDA = Config.getIntValue("Agent_Lambda") / 100.0;
 	private static final int QUEUE_SIZE = Config.getIntValue("Agent_QueueSize");
-	private static final double REWARD_CAP = 50;
+	private static final double REWARD_CAP = Double.MAX_VALUE;
 
 	protected static final int SAVE_TIMES = Config
 			.getIntValue("Agent_SaveTimes");
@@ -158,27 +158,32 @@ public abstract class AbstractAgent {
 
 	private void sarsa_lambda(double reward, double alpha, double gamma,
 			double lambda) {
-		double delta;
+		double delta, q_alt;
 		int sa, sa_;
 		boolean end = false;
 
 		if (lastActionQueue.size() <= 2)
 			return;
 
-		// Debug Ausgaben
-		System.out.println(lastActionQueue.toString());
-		System.out.println(eValues.toString());
-
-		Iterator<Integer> it = lastActionQueue.iterator();
+		Iterator<Integer> it = lastActionQueue.reverseIterator();
 		Double[] Q = getActionList();
 
 		sa_ = it.next();
 		sa = it.next();
 
-		delta = reward + gamma * Q[sa_] - Q[sa];
+		delta = reward /*+ gamma * Q[sa_] - Q[sa]*/;	// TODO: testen!
 		setE(sa, 1);
 
+		// Debug Ausgaben
+		System.out.println(this.getClass().toString());
+		System.out.printf("Q-Wert von %d ist %f\n", sa_, Q[sa_]);
+		System.out.println(lastActionQueue.toString());
+		System.out.println(eValues.toString());
+		System.out.printf("Reward: %f, Delta: %f\n", reward, delta);
+
 		while (!end) {
+			q_alt = Q[sa]; // DEBUG
+
 			Q[sa] = Math.max(
 					Math.min(Q[sa] + alpha * delta * e(sa), REWARD_CAP),
 					-REWARD_CAP);
@@ -190,8 +195,8 @@ public abstract class AbstractAgent {
 				setE(sa, gamma * lambda * e(sa));
 
 			// Debug Ausgaben
-			System.out.printf("sa: %d, Q: %f, e: %f, delta: %f\n", sa, Q[sa],
-					e(sa), delta);
+			System.out.printf("sa: %d, Q_alt: %f, Q_neu: %f, e: %f\n", sa, q_alt,
+					Q[sa], e(sa));
 
 			if (it.hasNext())
 				sa = it.next();

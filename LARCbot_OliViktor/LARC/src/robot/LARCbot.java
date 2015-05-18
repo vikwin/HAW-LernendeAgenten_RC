@@ -217,14 +217,13 @@ public class LARCbot extends RewardRobot {
 	}
 
 	private Action getActionByAttack(int attackId) {
-		boolean nothing = false;
 		double gunTurnDirection = 0, firePower = 0;
 
 		if (COMPLEX_ATTACK_ENV) {
 			ComplexAttack attack = ComplexAttack.byId(attackId);
 
 			if (attack == ComplexAttack.NOTHING) {
-				nothing = true;
+				return new NothingAction();
 			} else {
 				gunTurnDirection = attack.getDirection();
 				firePower = attack.getPower().toDouble();
@@ -233,20 +232,22 @@ public class LARCbot extends RewardRobot {
 			SimpleAttack attack = SimpleAttack.byId(attackId);
 
 			if (attack == SimpleAttack.NOTHING) {
-				nothing = true;
+				return new NothingAction();
 			} else {
-				gunTurnDirection = getNearestEnemyBearing() - getGunHeading()
+				double enemyAngle = getNearestEnemyBearing();
+				gunTurnDirection = enemyAngle - getGunHeading()
 						+ attack.getDirection();
 				firePower = attack.getPower().toDouble();
+				
+				System.out.printf("Gegner ist im Winkel: %f, Schieße mit Offset: %f\n", enemyAngle, attack.getDirection());
 			}
 		}
-
-		if (nothing)
-			return new NothingAction();
-
-		GunTurnAction gunturn = new GunTurnAction(
-				robocode.util.Utils
-						.normalRelativeAngleDegrees(gunTurnDirection));
+			
+		if (gunTurnDirection < 0 || gunTurnDirection > 180)
+			gunTurnDirection = (gunTurnDirection - 360) % 360; 
+		
+		GunTurnAction gunturn = new GunTurnAction(gunTurnDirection);
+		
 		FireAction fire = new FireAction(firePower);
 
 		return new SerialAction(Arrays.asList(new Action[] { gunturn, fire }));

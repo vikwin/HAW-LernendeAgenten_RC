@@ -21,15 +21,15 @@ public class SimpleAttack {
 	}
 
 	public static final SimpleAttack NOTHING = new SimpleAttack(null, 0);
-	private static final int MAX_DIRECTION = 15;
-	private static int count = ((MAX_DIRECTION / 5) * 2 + 1) * 3 + 1;
+	private static final int MAX_DIRECTION = 10, RESOLUTION = 1;
+	private static int count = ((MAX_DIRECTION / RESOLUTION) * 2 + 1) * GunPower.values().length + 1;
 	
 	public static SimpleAttack byId(int id) {
 		if (id == count - 1)
 			return NOTHING;
 		
-		int possibleDir = (MAX_DIRECTION / 5) * 2 + 1;
-		return new SimpleAttack(GunPower.values()[(id / possibleDir)], (id % possibleDir) * 5 - MAX_DIRECTION);
+		int possibleDir = (MAX_DIRECTION / RESOLUTION) * 2 + 1;
+		return new SimpleAttack(GunPower.values()[(id / possibleDir)], (id % possibleDir) * RESOLUTION - MAX_DIRECTION);
 	}
 	
 	public static int getActionCount() {
@@ -56,7 +56,7 @@ public class SimpleAttack {
 
 	/**
 	 * Die Richtung, in die die Kanone gedreht werden soll, abhängig vom Gegner
-	 * @return Die Richtung der Kanone von -30° bis +30°
+	 * @return Die Richtung der Kanone von -MAX_DIRECTION bis +MAX_DIRECTION
 	 */
 	public double getDirection() {
 		return direction;

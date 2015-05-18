@@ -41,14 +41,14 @@ public class ActionQueue {
 	 * @return Einen Iterator, der vom Kopf bis zum Ende der Queue durchläuft.
 	 */
 	public Iterator<Integer> iterator() {
-		return new Itr(0, 1);
+		return new Itr(elements.size() - 1, -1);
 	}
 	
 	/**
 	 * @return Einen Iterator, der vom Ende bis zum Kopf der Queue durchläuft.
 	 */
 	public Iterator<Integer> reverseIterator() {
-		return new Itr(elements.size() - 1, -1);
+		return new Itr(0, 1);
 	}
 	
 	/**
