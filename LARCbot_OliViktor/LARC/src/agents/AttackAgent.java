@@ -137,4 +137,10 @@ public class AttackAgent extends AbstractAgent {
 	public void saveOnBattleEnd() {
 		save("", FILENAME);
 	}
+
+	@Override
+	protected double getMaxQForState(int stateID) {
+		int actionID = getActionWithMaxValue(stateID * numberOfActions);
+		return actionList[stateID * numberOfActions + actionID];
+	}
 }

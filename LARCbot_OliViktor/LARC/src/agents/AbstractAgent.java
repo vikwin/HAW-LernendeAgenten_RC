@@ -64,6 +64,8 @@ public abstract class AbstractAgent {
 	protected abstract Double[] getActionList();
 
 	protected abstract int getStateFromId(int id);
+	
+	protected abstract double getMaxQForState(int stateID);
 
 	protected static void fillActionList(Double[] values) {
 
@@ -155,6 +157,32 @@ public abstract class AbstractAgent {
 		if (eValues.containsKey(sa))
 			eValues.put(sa, value);
 	}
+	
+	// TODO: test von anderem Algorithmus
+	private void simple_reward_algo(double reward, double gamma) {
+		double faktor = 1;
+		Iterator<Integer> it = lastActionQueue.iterator();
+		Double[] Q = getActionList();
+		
+		if (!it.hasNext()) {
+			return;
+		}
+		it.next();
+		
+		while (it.hasNext()) {
+			Q[it.next()] += reward * faktor;
+			faktor *= gamma;
+		}
+		
+	}
+	
+	// Q-Learning
+	private void q_learning(int sa, int s_, double reward, double alpha, double gamma) {
+		Double[] Q = getActionList();
+		double maxQsa_ = getMaxQForState(s_);
+		
+		Q[sa] += alpha * (reward + gamma * maxQsa_ - Q[sa]);
+	}
 
 	private void sarsa_lambda(double reward, double alpha, double gamma,
 			double lambda) {
@@ -209,7 +237,15 @@ public abstract class AbstractAgent {
 	}
 
 	protected void addRewardToLastActions(double reward) {
-		sarsa_lambda(reward, LEARN_RATE, DISCOUNT_RATE, LAMBDA);
+//		sarsa_lambda(reward, LEARN_RATE, DISCOUNT_RATE, LAMBDA);
+		
+		if (lastActionQueue.size() > 1) {
+			Iterator<Integer> it = lastActionQueue.reverseIterator();
+			int s_ = getStateFromId(it.next());
+			int sa = it.next();
+			
+			q_learning(sa, s_, reward, LEARN_RATE, DISCOUNT_RATE);
+		}
 	}
 
 	/**

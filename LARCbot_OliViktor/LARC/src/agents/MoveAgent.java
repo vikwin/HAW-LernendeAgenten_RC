@@ -136,4 +136,10 @@ public class MoveAgent extends AbstractAgent {
 	public void saveOnBattleEnd() {
 		save("", FILENAME);
 	}
+	
+	@Override
+	protected double getMaxQForState(int stateID) {
+		int actionID = getActionWithMaxValue(stateID * actionCount);
+		return actionList[stateID * actionID + actionID];
+	}
 }
