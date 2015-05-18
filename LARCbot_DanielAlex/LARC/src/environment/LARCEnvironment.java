@@ -33,13 +33,13 @@ public class LARCEnvironment implements IEnvironment {
 		this.currentState.setEnemyPosition(this.robot.getAngleToEnemy());
 		this.currentState.setEnemyDirection(this.robot.getEnemyDirection());
 		// this.currentState.setGunPosition(this.robot.getGunPostion());
+		
 
 		return this.currentState.getStateID();
 	}
 
 	@Override
 	public int env_step(int action) {
-
 		// update currentStateF
 		this.currentEnergyRatio = this.robot.getEnergyRatio();
 		this.currentState.setEdgeState(this.robot.getMyPosition());
@@ -49,7 +49,7 @@ public class LARCEnvironment implements IEnvironment {
 		// this.currentState.setGunPosition(this.robot.getGunPostion());
 		this.calculateReward();
 
-		this.robot.oldGunAngleToEnemy = this.robot.currentGunAngleToEnemy;
+		// this.robot.oldGunAngleToEnemy = this.robot.currentGunAngleToEnemy; //??????????
 		this.previousEnergyRatio = this.currentEnergyRatio;
 		return this.currentState.getStateID();
 	}
@@ -65,19 +65,20 @@ public class LARCEnvironment implements IEnvironment {
 	 * @return reward
 	 */
 	private double calculateReward() {
+		this.lastReward = 0;
+		 if (this.currentEnergyRatio > this.previousEnergyRatio) {
+		 this.lastReward = 1;
+		 } else if (this.currentEnergyRatio < this.previousEnergyRatio) {
+		 this.lastReward = -1;
+		 } else {
+		 this.lastReward = 0;
+		 }
+		 if(this.currentState.getEdgeState() == EdgeState.MID){
+			 this.lastReward += 5;
+		 }
 
-		if (this.currentEnergyRatio > this.previousEnergyRatio) {
-			this.lastReward = 10;
-		} else if (this.currentEnergyRatio < this.previousEnergyRatio) {
-			this.lastReward = -1;
-		} else {
-			this.lastReward = 0;
-		}
-
-		if (this.currentState.getEdgeState() != EdgeState.MID) {
-			this.lastReward -= 5;
-		}
-
+		System.out.println(this.currentState.getEdgeState() + ": " + this.lastReward);
+		
 		this.robot.setCurrentReward(lastReward);
 		return this.lastReward;
 	}
