@@ -86,7 +86,8 @@ public class LARCbot extends RewardRobot {
 				}
 			}
 		} catch (ThreadDeath e) {
-			System.out.println("LARCBot stopped because of ThreadDeath Exception");
+			System.out
+					.println("LARCBot stopped because of ThreadDeath Exception");
 		}
 
 	}
@@ -118,17 +119,6 @@ public class LARCbot extends RewardRobot {
 		case SCANFINISHED:
 			envBuilder.create();
 
-			double reward = 0.0;
-			if (USE_SIMPLE_REWARD_SYSTEM)
-				reward = envBuilder.getReward(); // Belohnung für die Agents
-													// anhand der
-													// Energieverändeurng
-			else
-				reward = getReward(); // Belohnung für die Agents anhand
-										// diverser Events
-			moveAgent.addReward(reward);
-			attackAgent.addReward(reward);
-
 			doScan();
 			break;
 		case STOPPED:
@@ -138,24 +128,33 @@ public class LARCbot extends RewardRobot {
 			break;
 		}
 
-		// MoveAgent updaten und neue Action holen
-		if (lastMoveAgentAction == null || lastMoveAgentAction.hasFinished()) {
+		// Agents updaten und neue Actions holen
+		if ((lastMoveAgentAction == null || lastMoveAgentAction.hasFinished())
+				&& (lastAttackAgentAction == null || lastAttackAgentAction
+						.hasFinished())) {
+
+
 			lastMoveAgentAction = getActionByMovement(moveAgent
 					.getNextAction(envBuilder.getMoveEnvId()));
 			this.addAction(lastMoveAgentAction);
-			updateActions();
-		}
-
-		// AttackAgent updaten und neue Action holen
-		if (lastAttackAgentAction == null
-				|| lastAttackAgentAction.hasFinished()) {
 			lastAttackAgentAction = getActionByAttack(attackAgent
 					.getNextAction(envBuilder.getAttackEnvId()));
 			this.addAction(lastAttackAgentAction);
 			updateActions();
+
+			double reward = 0.0;
+			if (USE_SIMPLE_REWARD_SYSTEM)
+				reward = envBuilder.getReward(); // Belohnung für die Agents
+			// anhand der
+			// Energieverändeurng
+			else
+				reward = getReward(); // Belohnung für die Agents anhand
+			// diverser Events
+			moveAgent.addReward(reward);
+			attackAgent.addReward(reward);
 		}
 	}
-	
+
 	private double getNearestEnemyBearing() {
 		double a = envBuilder.getNearestEnemyAngle();
 		return a;
@@ -171,7 +170,7 @@ public class LARCbot extends RewardRobot {
 		TurnAction turn = null;
 		MoveAction move = null;
 		Vector2D destination = null;
-		
+
 		if (COMPLEX_MOVE_ENV) {
 			ComplexMovement movement = ComplexMovement.byId(movementId);
 
@@ -187,11 +186,10 @@ public class LARCbot extends RewardRobot {
 			else
 				destination = getPosition().add(movement.getMoveVector());
 		}
-		
-		
+
 		if (nothing)
 			return new NothingAction();
-		
+
 		double rotationAngle = destination.subtract(getPosition())
 				.getNormalHeading() - Utils.normalizeHeading(getHeading());
 
@@ -214,14 +212,14 @@ public class LARCbot extends RewardRobot {
 			move = new MoveAction(distance);
 		}
 
-//		return new SerialAction(Arrays.asList(new Action[] { turn, move }));
+		// return new SerialAction(Arrays.asList(new Action[] { turn, move }));
 		return new ConcurrentAction(Arrays.asList(new Action[] { turn, move }));
 	}
 
 	private Action getActionByAttack(int attackId) {
 		boolean nothing = false;
 		double gunTurnDirection = 0, firePower = 0;
-		
+
 		if (COMPLEX_ATTACK_ENV) {
 			ComplexAttack attack = ComplexAttack.byId(attackId);
 
@@ -233,23 +231,25 @@ public class LARCbot extends RewardRobot {
 			}
 		} else {
 			SimpleAttack attack = SimpleAttack.byId(attackId);
-			
+
 			if (attack == SimpleAttack.NOTHING) {
 				nothing = true;
 			} else {
-				gunTurnDirection = getNearestEnemyBearing() - getGunHeading() + attack.getDirection();
+				gunTurnDirection = getNearestEnemyBearing() - getGunHeading()
+						+ attack.getDirection();
 				firePower = attack.getPower().toDouble();
 			}
 		}
-		
+
 		if (nothing)
 			return new NothingAction();
 
-		GunTurnAction gunturn = new GunTurnAction(robocode.util.Utils.normalRelativeAngleDegrees(gunTurnDirection));
+		GunTurnAction gunturn = new GunTurnAction(
+				robocode.util.Utils
+						.normalRelativeAngleDegrees(gunTurnDirection));
 		FireAction fire = new FireAction(firePower);
 
-		return new SerialAction(
-				Arrays.asList(new Action[] { gunturn, fire }));
+		return new SerialAction(Arrays.asList(new Action[] { gunturn, fire }));
 	}
 
 	/**
