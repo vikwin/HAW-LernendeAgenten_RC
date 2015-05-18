@@ -13,8 +13,8 @@ import environment.LARCEnvironment;
 
 public class LARCRobot extends AdvancedRobot {
 
-	public static final int NO_OF_STATES = 5 * 8 * 8; // my position * enemy position * enemy direction * enemydistance
-	public static final int NO_OF_ACTIONS = 2 * 8 * 9; // Fire * Direction * MoveGun + BACK
+	public static final int NO_OF_STATES = 5; // my position * enemy position * enemy direction * enemydistance
+	public static final int NO_OF_ACTIONS = 2 * 8 * 9; // Fire * Direction * MoveGun
 	public static double[][] VALUE_FUNCTION = new double[NO_OF_ACTIONS][NO_OF_STATES];
 	public double currentGunAngleToEnemy;
 	public double oldGunAngleToEnemy = 0;
@@ -162,7 +162,7 @@ public class LARCRobot extends AdvancedRobot {
 				enemyDirection += 360;
 			}
 		}
-		System.out.println("Enemy Direction: " + enemyDirection);
+//		System.out.println("Enemy Direction: " + enemyDirection);
 
 		// setTurnGunRight(getHeading() - getGunHeading() + event.getBearing());
 		double x = getHeading() - getGunHeading();
@@ -201,7 +201,7 @@ public class LARCRobot extends AdvancedRobot {
 
 	@Override
 	public void onRobotDeath(RobotDeathEvent event) {
-		this.currentReward = 30;
+//		this.currentReward = 30;
 		this.agent.agent_end();
 		this.environment.env_cleanup();
 		this.agent.agent_cleanup();

@@ -4,13 +4,13 @@ import utility.Position;
 
 public class State {
 
-	public static final double MAX_X = 800 * 0.9;
+	public static final double MAX_X = 740;//800 * 0.9;
 
-	public static final double MIN_X = 800 * 0.1;
+	public static final double MIN_X = 60;//800 * 0.1;
 
-	public static final double MAX_Y = 600 * 0.9;
+	public static final double MAX_Y = 550; //600 * 0.9;
 
-	public static final double MIN_Y = 600 * 0.1;
+	public static final double MIN_Y = 50; //600 * 0.1;
 
 	public enum EdgeState {
 		MID, LEFTEDGE, RIGHTEDGE, TOPEDGE, BOTTOMEDGE;
@@ -27,8 +27,9 @@ public class State {
 	// public int gunPosition;
 
 	public int getStateID() {
-		int state = this.edgeState.ordinal() * 1 + this.enemyPosition.ordinal() * EdgeState.values().length
-				+ this.enemyDirection.ordinal() * EdgeState.values().length * EnemyPosition.values().length;
+		int state = this.edgeState.ordinal() * 1;
+				//+ this.enemyPosition.ordinal() * EdgeState.values().length
+			//	+ this.enemyDirection.ordinal() * EdgeState.values().length * EnemyPosition.values().length;
 		// + this.gunPosition * EnemyPosition.values().length * EdgeState.values().length;
 		return state;
 	}

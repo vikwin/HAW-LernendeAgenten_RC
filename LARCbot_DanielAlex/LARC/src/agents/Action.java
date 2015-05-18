@@ -37,8 +37,8 @@ public class Action {
 	}
 
 	public double[] getMoveVector() {
-		System.out.println("actionID: " + actionID + " Fire: " + getFire() + " Move: " + getMove() + " GunTurn: "
-				+ getTurnGun());
+//		System.out.println("actionID: " + actionID + " Fire: " + getFire() + " Move: " + getMove() + " GunTurn: "
+//				+ getTurnGun());
 		double[] moveVector = new double[4];
 
 		double currentHeading = this.myRobi.getHeading();
