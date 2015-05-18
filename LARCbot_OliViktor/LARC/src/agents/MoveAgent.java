@@ -34,7 +34,7 @@ public class MoveAgent extends AbstractAgent {
 	}
 	
 	private Random rnd;
-	private int actionCount, normalizedSuccessChance;
+	private int actionCount;
 	
 	/**
 	 * @param environmentStateCount Anzahl der Zustände, die die Umwelt annehmen kann
@@ -45,7 +45,6 @@ public class MoveAgent extends AbstractAgent {
 		rnd = new Random();
 		
 		this.actionCount = actionCount;
-		normalizedSuccessChance = SUCCESS_CHANCE - (Math.floorDiv(100 - SUCCESS_CHANCE, actionCount - 1));
 		
 		if (actionList == null) {
 			actionList = new Double[environmentStateCount * actionCount];
@@ -65,7 +64,7 @@ public class MoveAgent extends AbstractAgent {
 	
 	private int getActionWithMaxValue(int startID) {
 		// Action mit dem höchsten Wert suchen
-		double max = -1000000;
+		double max = Double.MIN_VALUE;
 		ArrayList<Integer> maxIDs = new ArrayList<Integer>();
 		
 		for (int i = 0; i < actionCount; i++) {
@@ -100,7 +99,7 @@ public class MoveAgent extends AbstractAgent {
 		case LEARNING:
 			int chance = rnd.nextInt(100);
 			
-			if (chance < normalizedSuccessChance) {
+			if (chance < SUCCESS_CHANCE) {
 				actionID = getActionWithMaxValue(stateID * actionCount);
 			} else {
 				actionID = rnd.nextInt(actionCount);

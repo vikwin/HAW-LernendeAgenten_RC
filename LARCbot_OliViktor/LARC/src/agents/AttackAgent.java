@@ -34,7 +34,7 @@ public class AttackAgent extends AbstractAgent {
 	}
 	
 	private Random rnd;
-	private int numberOfActions, normalizedSuccessChance;
+	private int numberOfActions;
 
 	/**
 	 * @param environmentStateCount Anzahl der Zustände, die die Umwelt annehmen kann
@@ -45,8 +45,6 @@ public class AttackAgent extends AbstractAgent {
 		rnd = new Random();
 
 		numberOfActions = actionCount;
-		normalizedSuccessChance = SUCCESS_CHANCE
-				- (Math.floorDiv(100 - SUCCESS_CHANCE, numberOfActions - 1));
 
 		if (actionList == null) {
 			actionList = new Double[stateCount * numberOfActions];
@@ -66,7 +64,7 @@ public class AttackAgent extends AbstractAgent {
 
 	private int getActionWithMaxValue(int startID) {
 		// Action mit dem höchsten Wert suchen
-		double max = -1000000;
+		double max = Double.MIN_VALUE;
 		ArrayList<Integer> maxIDs = new ArrayList<Integer>();
 
 		for (int i = 0; i < numberOfActions; i++) {
@@ -101,7 +99,7 @@ public class AttackAgent extends AbstractAgent {
 		case LEARNING:
 			int chance = rnd.nextInt(100);
 
-			if (chance < normalizedSuccessChance) {
+			if (chance < SUCCESS_CHANCE) {
 				actionID = getActionWithMaxValue(stateID * numberOfActions);
 			} else {
 				actionID = rnd.nextInt(numberOfActions);
