@@ -6,11 +6,11 @@ import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.io.BufferedReader;
 import java.io.File;
 import java.io.IOException;
-import java.io.InputStreamReader;
+import java.lang.ProcessBuilder.Redirect;
 import java.util.ArrayList;
+import java.util.Arrays;
 
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
@@ -682,6 +682,10 @@ public class ConfigurationWindow {
 
 		Config.save();
 
+		if (robocodeProcess  != null && robocodeProcess.isAlive())
+			return;
+			
+			
 		if (!Config.getBoolValue("ShowRobocodeGUI")) {
 			robocodeArgs += "-nodisplay ";
 		}
@@ -691,31 +695,26 @@ public class ConfigurationWindow {
 			robocodeArgs += "-battle " + battle + " ";
 		}
 
+		
+		
+		ArrayList<String> commands = new ArrayList<>();
+		commands.add("java");
+		commands.addAll(Arrays.asList(vmArgs.split(" ")));
+		commands.add("-cp");
+		commands.add(String.join(";", classpath));
+		commands.add("robocode.Robocode");
+		commands.addAll(Arrays.asList(robocodeArgs.split(" ")));
+		
+		ProcessBuilder pBuilder = new ProcessBuilder(commands);
+		pBuilder.directory(new File(rHome));
+		pBuilder.redirectOutput(Redirect.INHERIT);
+		pBuilder.redirectError(Redirect.INHERIT);
+		
 		try {
-			robocodeProcess = Runtime.getRuntime().exec(
-					"java " + vmArgs + " -cp " + String.join(";", classpath)
-							+ " robocode.Robocode " + robocodeArgs, null,
-					new File(rHome));
-			
-			new Thread(new Runnable() {
-				@Override
-				public void run() {
-					String s = "";
-					BufferedReader reader = new BufferedReader(new InputStreamReader(robocodeProcess.getInputStream()));
-					try {
-						while ((s = reader.readLine()) != null) {
-							System.out.println(s);
-						}
-					} catch (IOException e) {
-						e.printStackTrace();
-					}
-				}
-			}).start();
-//			System.out.println(robocodeProcess.waitFor());
-		} catch (IOException e) {
-			e.printStackTrace();
-//		} catch (InterruptedException e) {
-//			e.printStackTrace();
+			robocodeProcess = pBuilder.start();
+		} catch (IOException ex) {
+			ex.printStackTrace();
 		}
+				
 	}
 }

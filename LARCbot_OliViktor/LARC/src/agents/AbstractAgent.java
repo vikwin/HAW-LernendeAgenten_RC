@@ -199,7 +199,7 @@ public abstract class AbstractAgent {
 		sa_ = it.next();
 		sa = it.next();
 
-		delta = reward /*+ gamma * Q[sa_] - Q[sa]*/;	// TODO: testen!
+		delta = reward + gamma * Q[sa_] - Q[sa];
 		setE(sa, 1);
 
 		// Debug Ausgaben
@@ -237,15 +237,15 @@ public abstract class AbstractAgent {
 	}
 
 	protected void addRewardToLastActions(double reward) {
-//		sarsa_lambda(reward, LEARN_RATE, DISCOUNT_RATE, LAMBDA);
+		sarsa_lambda(reward, LEARN_RATE, DISCOUNT_RATE, LAMBDA);
 		
-		if (lastActionQueue.size() > 1) {
-			Iterator<Integer> it = lastActionQueue.reverseIterator();
-			int s_ = getStateFromId(it.next());
-			int sa = it.next();
-			
-			q_learning(sa, s_, reward, LEARN_RATE, DISCOUNT_RATE);
-		}
+//		if (lastActionQueue.size() > 1) {
+//			Iterator<Integer> it = lastActionQueue.reverseIterator();
+//			int s_ = getStateFromId(it.next());
+//			int sa = it.next();
+//			
+//			q_learning(sa, s_, reward, LEARN_RATE, DISCOUNT_RATE);
+//		}
 	}
 
 	/**
