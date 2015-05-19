@@ -52,11 +52,17 @@ public class ActionQueue {
 	}
 	
 	/**
-	 * Fügt das angegebene Element der Queue hinzu,
-	 * sofern diese noch nicht voll ist.
+	 * Fügt das angegebene Element der Queue hinzu, sofern diese noch nicht voll ist.
+	 * Wenn das Element schon enthalten ist, wird der alte Wert gelöscht und
+	 * das Element als neustes Element in der Queue hinzugefügt.
+	 * 
 	 * @return false, wenn Queue bereits voll ist, true sonst.
 	 */
 	public boolean offer(Integer elem) {
+		if (contains(elem)) {
+			delete(elements.indexOf(elem));
+		}
+		
 		if (free <= 0)
 			return false;
 		
@@ -71,12 +77,16 @@ public class ActionQueue {
 	 * @return Das Element am Kopf der Queue.
 	 */
 	public Integer poll() {
+		return delete(size() - 1);
+	}
+	
+	private Integer delete(int index) {
 		if (elements.isEmpty())
 			return null;
 		
 		free++;
-		int polled = elements.getLast();
-		elements.removeLast();
+		int polled = elements.get(index);
+		elements.remove(index);
 		return polled;
 	}
 
