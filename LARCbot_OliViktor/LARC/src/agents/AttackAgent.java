@@ -15,7 +15,7 @@ public class AttackAgent extends AbstractAgent {
 	private static Double[] actionList = null;
 	private static int actionCounter = 0, fileCounter = 0;
 	
-	private static final String FILENAME = "attack_agent" + ENEMY;
+	private static final String FILENAME = "attack_agent" + FILE_SUFFIX;
 	
 	protected static void fillActionList(Double[] values) {
 		actionList = values;		
@@ -124,7 +124,7 @@ public class AttackAgent extends AbstractAgent {
 //		System.out.println("AttackAgent gets reward: " + reward);
 		if (mode != AgentMode.FIGHTING) {
 			if (++actionCounter >= SAVE_TIMES) {
-				save(TIMESTAMP, "attack_agent_" + fileCounter++);
+				save(TIMESTAMP + FILE_SUFFIX, "attack_agent_" + fileCounter++);
 				actionCounter = 0;
 			}
 			

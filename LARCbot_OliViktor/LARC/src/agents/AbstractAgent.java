@@ -26,12 +26,13 @@ public abstract class AbstractAgent {
 			.getIntValue("Agent_DiscountRate") / 100.0;
 	private static final double LAMBDA = Config.getIntValue("Agent_Lambda") / 100.0;
 	private static final int QUEUE_SIZE = Config.getIntValue("Agent_QueueSize");
-	private static final double REWARD_CAP = Double.MAX_VALUE;
+	private static final String ALGORITHM = Config
+			.getStringValue("Agent_Algorithm");
 
 	protected static final int SAVE_TIMES = Config
 			.getIntValue("Agent_SaveTimes");
 	protected static final String TIMESTAMP = new SimpleDateFormat(
-			"dd_MM_yyyy_HH_mm_ss").format(new Date()), ENEMY;
+			"yyyy_MM_dd_HH-mm").format(new Date()), FILE_SUFFIX;
 	protected static final boolean LOAD_ON_START = Config
 			.getBoolValue("Agent_LoadOnStart");
 
@@ -42,12 +43,16 @@ public abstract class AbstractAgent {
 	private HashMap<Integer, Double> eValues;
 
 	static {
+		String enemy = "", algo = "";
 		if (Config.getBoolValue("StartBattle"))
-			ENEMY = "_" + Config.getStringValue("EnemyRobot");
-		else
-			ENEMY = "";
+			enemy = "_" + Config.getStringValue("EnemyRobot");
 
-		new File("LARCAgents/" + TIMESTAMP).mkdirs();
+		if (ALGORITHM.length() > 0)
+			algo = "_" + ALGORITHM.charAt(0);
+
+		FILE_SUFFIX = enemy + algo;
+
+		new File("LARCAgents/" + TIMESTAMP + FILE_SUFFIX).mkdirs();
 	}
 
 	protected AbstractAgent() {
@@ -64,7 +69,7 @@ public abstract class AbstractAgent {
 	protected abstract Double[] getActionList();
 
 	protected abstract int getStateFromId(int id);
-	
+
 	protected abstract double getMaxQForState(int stateID);
 
 	protected static void fillActionList(Double[] values) {
@@ -157,30 +162,12 @@ public abstract class AbstractAgent {
 		if (eValues.containsKey(sa))
 			eValues.put(sa, value);
 	}
-	
-	// TODO: test von anderem Algorithmus
-	private void simple_reward_algo(double reward, double gamma) {
-		double faktor = 1;
-		Iterator<Integer> it = lastActionQueue.iterator();
-		Double[] Q = getActionList();
-		
-		if (!it.hasNext()) {
-			return;
-		}
-		it.next();
-		
-		while (it.hasNext()) {
-			Q[it.next()] += reward * faktor;
-			faktor *= gamma;
-		}
-		
-	}
-	
-	// Q-Learning
-	private void q_learning(int sa, int s_, double reward, double alpha, double gamma) {
+
+	private void q_learning(int sa, int s_, double reward, double alpha,
+			double gamma) {
 		Double[] Q = getActionList();
 		double maxQsa_ = getMaxQForState(s_);
-		
+
 		Q[sa] += alpha * (reward + gamma * maxQsa_ - Q[sa]);
 	}
 
@@ -212,9 +199,7 @@ public abstract class AbstractAgent {
 		while (!end) {
 			q_alt = Q[sa]; // DEBUG
 
-			Q[sa] = Math.max(
-					Math.min(Q[sa] + alpha * delta * e(sa), REWARD_CAP),
-					-REWARD_CAP);
+			Q[sa] = Q[sa] + alpha * delta * e(sa);
 
 			// replace traces
 			if (getStateFromId(sa) == getStateFromId(sa_))
@@ -223,8 +208,8 @@ public abstract class AbstractAgent {
 				setE(sa, gamma * lambda * e(sa));
 
 			// Debug Ausgaben
-			System.out.printf("sa: %d, Q_alt: %f, Q_neu: %f, e: %f\n", sa, q_alt,
-					Q[sa], e(sa));
+			System.out.printf("sa: %d, Q_alt: %f, Q_neu: %f, e: %f\n", sa,
+					q_alt, Q[sa], e(sa));
 
 			if (it.hasNext())
 				sa = it.next();
@@ -237,15 +222,21 @@ public abstract class AbstractAgent {
 	}
 
 	protected void addRewardToLastActions(double reward) {
-		sarsa_lambda(reward, LEARN_RATE, DISCOUNT_RATE, LAMBDA);
-		
-//		if (lastActionQueue.size() > 1) {
-//			Iterator<Integer> it = lastActionQueue.reverseIterator();
-//			int s_ = getStateFromId(it.next());
-//			int sa = it.next();
-//			
-//			q_learning(sa, s_, reward, LEARN_RATE, DISCOUNT_RATE);
-//		}
+		switch (ALGORITHM) {
+		case "SARSA-Lambda":
+			sarsa_lambda(reward, LEARN_RATE, DISCOUNT_RATE, LAMBDA);
+			break;
+
+		case "Q-Learning":
+			if (lastActionQueue.size() > 1) {
+				Iterator<Integer> it = lastActionQueue.reverseIterator();
+				int s_ = getStateFromId(it.next());
+				int sa = it.next();
+
+				q_learning(sa, s_, reward, LEARN_RATE, DISCOUNT_RATE);
+			}
+			break;
+		}
 	}
 
 	/**
