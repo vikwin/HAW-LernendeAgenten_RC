@@ -23,7 +23,6 @@ import utils.Config;
  *
  */
 public abstract class RewardRobot extends ActorRobot {
-	// TODO: Kugelpower prozentual einberechnen
 	private static boolean multiplyBulletPower;
 	private static double hitByBullet, bulletHitBullet, bulletHitEnemy, bulletHitWall;
 	private static double hitByEnemy, hitRobot, hitWall;
@@ -62,7 +61,7 @@ public abstract class RewardRobot extends ActorRobot {
 	@Override
 	public void onHitByBullet(HitByBulletEvent event) {
 		if (multiplyBulletPower)
-			reward += hitByBullet * event.getPower();
+			reward += hitByBullet * event.getPower() / robocode.Rules.MAX_BULLET_POWER;
 		else
 			reward += hitByBullet;
 	}
@@ -70,7 +69,7 @@ public abstract class RewardRobot extends ActorRobot {
 	@Override
 	public void onBulletHitBullet(BulletHitBulletEvent event) {
 		if (multiplyBulletPower)
-			reward += bulletHitBullet * event.getBullet().getPower();
+			reward += bulletHitBullet * event.getBullet().getPower() / robocode.Rules.MAX_BULLET_POWER;
 		else
 			reward += bulletHitBullet;
 	}
@@ -78,7 +77,7 @@ public abstract class RewardRobot extends ActorRobot {
 	@Override
 	public void onBulletHit(BulletHitEvent event) {
 		if (multiplyBulletPower)
-			reward += bulletHitEnemy * event.getBullet().getPower();
+			reward += bulletHitEnemy * event.getBullet().getPower() / robocode.Rules.MAX_BULLET_POWER;
 		else
 			reward += bulletHitEnemy;
 	}
@@ -86,7 +85,7 @@ public abstract class RewardRobot extends ActorRobot {
 	@Override
 	public void onBulletMissed(BulletMissedEvent event) {
 		if (multiplyBulletPower)
-			reward += bulletHitWall * event.getBullet().getPower();
+			reward += bulletHitWall * event.getBullet().getPower() / robocode.Rules.MAX_BULLET_POWER;
 		else
 			reward += bulletHitWall;
 	}
