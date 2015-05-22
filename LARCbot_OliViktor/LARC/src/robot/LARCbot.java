@@ -35,21 +35,21 @@ public class LARCbot extends RewardRobot {
 	private static final boolean COMPLEX_MOVE_ENV = Config
 			.getBoolValue("Robot_UseExtendedMoveEnv");
 
-	private enum RadarState {
-		STOPPED, SCANNING, SCANFINISHED;
-	}
+	private double enemyBearing = 0.0;
+	private boolean lastRadarTurnRight = false;	// Flag für die letzte Bewegungsrichtung des Radars
+	private boolean scanning;
 
 	private EnvironmentBuilder envBuilder;
 
 	private MoveAgent moveAgent;
 	private AttackAgent attackAgent;
 
-	private RadarState radarState;
-
 	private Action lastMoveAgentAction = null, lastAttackAgentAction = null;
 
 	public LARCbot() {
-		this.radarState = RadarState.STOPPED;
+		enemyBearing = 0.0;
+		lastRadarTurnRight = false;
+		scanning = false;
 	}
 
 	@Override
@@ -93,7 +93,6 @@ public class LARCbot extends RewardRobot {
 	}
 
 	private void createEvents() {
-
 		// Radar Conditions
 		RadarTurnCompleteCondition radCond = new RadarTurnCompleteCondition(
 				this);
@@ -107,32 +106,20 @@ public class LARCbot extends RewardRobot {
 
 		switch (name) {
 		case "radarturn_completed":
-			radarState = RadarState.SCANFINISHED;
+			scanning = false;
 			break;
 		}
-
 	}
 
 	private void act() {
 		// Radar updaten
-		switch (radarState) {
-		case SCANFINISHED:
-			envBuilder.create();
-
+		if (!scanning)
 			doScan();
-			break;
-		case STOPPED:
-			doScan();
-			break;
-		default:
-			break;
-		}
 
 		// Agents updaten und neue Actions holen
 		if ((lastMoveAgentAction == null || lastMoveAgentAction.hasFinished())
 				&& (lastAttackAgentAction == null || lastAttackAgentAction
 						.hasFinished())) {
-
 
 			lastMoveAgentAction = getActionByMovement(moveAgent
 					.getNextAction(envBuilder.getMoveEnvId()));
@@ -156,8 +143,7 @@ public class LARCbot extends RewardRobot {
 	}
 
 	private double getNearestEnemyBearing() {
-		double a = envBuilder.getNearestEnemyAngle();
-		return a;
+		return envBuilder.getNearestEnemyAngle();
 	}
 
 	@SuppressWarnings("unused")
@@ -263,13 +249,42 @@ public class LARCbot extends RewardRobot {
 	}
 
 	private void doScan() {
-		setTurnRadarRight(360);
-		radarState = RadarState.SCANNING;
+		double turn;
+		if (Math.abs(enemyBearing) > 0.0) {
+			turn = enemyBearing - getRadarHeading();
+			if (lastRadarTurnRight) {
+				turn -= 10;
+				lastRadarTurnRight = false;
+				enemyBearing = 0;
+			} else {
+				turn += 10;
+				lastRadarTurnRight = true;
+			}
+		} else {
+			// Bisher noch kein Gegner gefunden, weiter rundum scannen
+			turn = lastRadarTurnRight ? -10 : 10;
+		}
+		
+		// turn normalisieren
+		if (turn > 180)
+			turn -= 360;
+		else if (turn < -180)
+			turn += 360;
+		
+		setTurnRadarRight(turn);
+		scanning = true;
 	}
 
 	@Override
 	public void onScannedRobot(ScannedRobotEvent event) {
+		// Scannevent verarbeiten
 		envBuilder.computeScannedRobotEvent(event);
+		
+		// Umwelt aktualisieren
+		envBuilder.create();
+		
+		// Position des Gegner (nur fürs Radar!) aktualisieren
+		enemyBearing = getHeading() + event.getBearing();
 	}
 
 	@Override
