@@ -23,9 +23,10 @@ import utils.Config;
  *
  */
 public abstract class RewardRobot extends ActorRobot {
+	// TODO: Kugelpower prozentual einberechnen
 	private static boolean multiplyBulletPower;
 	private static double hitByBullet, bulletHitBullet, bulletHitEnemy, bulletHitWall;
-	private static double hitRobot, hitWall;
+	private static double hitByEnemy, hitRobot, hitWall;
 	private static double winning, loosing;
 	
 	static {
@@ -35,6 +36,7 @@ public abstract class RewardRobot extends ActorRobot {
 		bulletHitWall = Config.getDoubleValue("Reward_BulletHitWall");
 		multiplyBulletPower = Config.getBoolValue("Reward_MultBulletPower");
 		
+		hitByEnemy = Config.getDoubleValue("Reward_HitByEnemy");
 		hitRobot = Config.getDoubleValue("Reward_HitRobot");
 		hitWall = Config.getDoubleValue("Reward_HitWall");
 		
@@ -93,7 +95,10 @@ public abstract class RewardRobot extends ActorRobot {
 	/* Events, wenn etwas gerammt wurde */
 	@Override
 	public void onHitRobot(HitRobotEvent event) {
-		reward += hitRobot;
+		if (event.isMyFault())
+			reward += hitRobot;
+		else
+			reward += hitByEnemy;
 	}
 	
 	@Override

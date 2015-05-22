@@ -55,6 +55,7 @@ public class ConfigurationWindow {
 	private JTextField hitWallReward;
 	private JTextField winningReward;
 	private JTextField loosingReward;
+	private JTextField hitByEnemy;
 
 	/**
 	 * Launch the application.
@@ -435,10 +436,12 @@ public class ConfigurationWindow {
 		flowLayout_15.setAlignment(FlowLayout.RIGHT);
 		bullet_rewards.setBackground(Color.WHITE);
 		bullet_rewards.setBorder(new TitledBorder(null, "Belohnungen f\u00FCr Sch\u00FCsse", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		bullet_rewards.setBounds(6, 11, 230, 215);
+		bullet_rewards.setBounds(6, 11, 230, 255);
 		reward_system.add(bullet_rewards);
 		
 		JPanel panel_11 = new JPanel();
+		FlowLayout flowLayout_28 = (FlowLayout) panel_11.getLayout();
+		flowLayout_28.setVgap(8);
 		panel_11.setBackground(Color.WHITE);
 		bullet_rewards.add(panel_11);
 		
@@ -451,6 +454,8 @@ public class ConfigurationWindow {
 		panel_11.add(hitByBulletReward);
 		
 		JPanel panel_19 = new JPanel();
+		FlowLayout flowLayout_29 = (FlowLayout) panel_19.getLayout();
+		flowLayout_29.setVgap(8);
 		panel_19.setBackground(Color.WHITE);
 		bullet_rewards.add(panel_19);
 		
@@ -463,6 +468,8 @@ public class ConfigurationWindow {
 		panel_19.add(bulletHitBulletReward);
 		
 		JPanel panel_20 = new JPanel();
+		FlowLayout flowLayout_27 = (FlowLayout) panel_20.getLayout();
+		flowLayout_27.setVgap(8);
 		panel_20.setBackground(Color.WHITE);
 		bullet_rewards.add(panel_20);
 		
@@ -475,6 +482,8 @@ public class ConfigurationWindow {
 		panel_20.add(bulletHitEnemyReward);
 		
 		JPanel panel_21 = new JPanel();
+		FlowLayout flowLayout_24 = (FlowLayout) panel_21.getLayout();
+		flowLayout_24.setVgap(8);
 		panel_21.setBackground(Color.WHITE);
 		bullet_rewards.add(panel_21);
 		
@@ -487,6 +496,8 @@ public class ConfigurationWindow {
 		panel_21.add(bulletHitWallReward);
 		
 		JPanel panel_22 = new JPanel();
+		FlowLayout flowLayout_8 = (FlowLayout) panel_22.getLayout();
+		flowLayout_8.setVgap(8);
 		panel_22.setBackground(Color.WHITE);
 		bullet_rewards.add(panel_22);
 		
@@ -502,8 +513,20 @@ public class ConfigurationWindow {
 		flowLayout_16.setAlignment(FlowLayout.RIGHT);
 		hit_rewards.setBackground(Color.WHITE);
 		hit_rewards.setBorder(new TitledBorder(null, "Belohnunge f\u00FCr's Rammen", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		hit_rewards.setBounds(242, 11, 224, 105);
+		hit_rewards.setBounds(242, 11, 224, 145);
 		reward_system.add(hit_rewards);
+		
+		JPanel panel_32 = new JPanel();
+		panel_32.setBackground(Color.WHITE);
+		hit_rewards.add(panel_32);
+		
+		JLabel lblVonGegnerGerammt = new JLabel("Von Gegner gerammt:");
+		panel_32.add(lblVonGegnerGerammt);
+		
+		hitByEnemy = new JTextField();
+		hitByEnemy.setText(Config.getStringValue("Reward_HitByEnemy", "1.0"));
+		hitByEnemy.setColumns(5);
+		panel_32.add(hitByEnemy);
 		
 		JPanel panel_23 = new JPanel();
 		panel_23.setBackground(Color.WHITE);
@@ -536,7 +559,7 @@ public class ConfigurationWindow {
 		flowLayout_17.setHgap(0);
 		victory_rewards.setBorder(new TitledBorder(null, "Belohnunge bei Rundenende", TitledBorder.LEADING, TitledBorder.TOP, null, Color.BLACK));
 		victory_rewards.setBackground(Color.WHITE);
-		victory_rewards.setBounds(242, 121, 224, 105);
+		victory_rewards.setBounds(242, 161, 224, 105);
 		reward_system.add(victory_rewards);
 		
 		JPanel panel_26 = new JPanel();
@@ -736,6 +759,7 @@ public class ConfigurationWindow {
 				Config.setDoubleValue("Reward_BulletHitWall", Double.parseDouble(bulletHitWallReward.getText()));
 				Config.setBoolValue("Reward_MultBulletPower", multBulletPower.isSelected());
 				
+				Config.setDoubleValue("Reward_HitByEnemy", Double.parseDouble(hitByEnemy.getText()));
 				Config.setDoubleValue("Reward_HitRobot", Double.parseDouble(hitRobotReward.getText()));
 				Config.setDoubleValue("Reward_HitWall", Double.parseDouble(hitWallReward.getText()));
 				
