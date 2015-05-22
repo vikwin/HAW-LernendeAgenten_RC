@@ -36,7 +36,8 @@ public class LARCbot extends RewardRobot {
 			.getBoolValue("Robot_UseExtendedMoveEnv");
 
 	private double enemyBearing = 0.0;
-	private boolean lastRadarTurnRight = false;	// Flag für die letzte Bewegungsrichtung des Radars
+	private boolean lastRadarTurnRight = false; // Flag für die letzte
+												// Bewegungsrichtung des Radars
 	private boolean scanning;
 
 	private EnvironmentBuilder envBuilder;
@@ -224,16 +225,20 @@ public class LARCbot extends RewardRobot {
 				gunTurnDirection = enemyAngle - getGunHeading()
 						+ attack.getDirection();
 				firePower = attack.getPower().toDouble();
-				
-				System.out.printf("Gegner ist im Winkel: %f, Schieße mit Offset: %f\n", enemyAngle, attack.getDirection());
+
+				System.out.printf(
+						"Gegner ist im Winkel: %f, Schieße mit Offset: %f\n",
+						enemyAngle, attack.getDirection());
 			}
 		}
-			
-		if (gunTurnDirection < 0 || gunTurnDirection > 180)
-			gunTurnDirection = (gunTurnDirection - 360) % 360; 
+
+		if (gunTurnDirection > 180)
+			gunTurnDirection -= 360;
+		else if (gunTurnDirection < -180)
+			gunTurnDirection += 360;
 		
 		GunTurnAction gunturn = new GunTurnAction(gunTurnDirection);
-		
+
 		FireAction fire = new FireAction(firePower);
 
 		return new SerialAction(Arrays.asList(new Action[] { gunturn, fire }));
@@ -264,13 +269,13 @@ public class LARCbot extends RewardRobot {
 			// Bisher noch kein Gegner gefunden, weiter rundum scannen
 			turn = lastRadarTurnRight ? -10 : 10;
 		}
-		
+
 		// turn normalisieren
 		if (turn > 180)
 			turn -= 360;
 		else if (turn < -180)
 			turn += 360;
-		
+
 		setTurnRadarRight(turn);
 		scanning = true;
 	}
@@ -279,10 +284,10 @@ public class LARCbot extends RewardRobot {
 	public void onScannedRobot(ScannedRobotEvent event) {
 		// Scannevent verarbeiten
 		envBuilder.computeScannedRobotEvent(event);
-		
+
 		// Umwelt aktualisieren
 		envBuilder.create();
-		
+
 		// Position des Gegner (nur fürs Radar!) aktualisieren
 		enemyBearing = getHeading() + event.getBearing();
 	}
