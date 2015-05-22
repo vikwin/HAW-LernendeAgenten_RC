@@ -177,13 +177,13 @@ public abstract class AbstractAgent {
 		int sa, sa_;
 		boolean end = false;
 
-		if (lastActionQueue.size() <= 2)
+		if (lastActionQueue.size() < 1)
 			return;
 
 		Iterator<Integer> it = lastActionQueue.reverseIterator();
 		Double[] Q = getActionList();
 
-		sa_ = it.next();
+		sa_ = lastActionQueue.getNewestElement();
 		sa = it.next();
 
 		delta = reward + gamma * Q[sa_] - Q[sa];

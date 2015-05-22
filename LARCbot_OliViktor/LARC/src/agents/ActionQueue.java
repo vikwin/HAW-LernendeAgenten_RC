@@ -5,6 +5,7 @@ import java.util.LinkedList;
 
 public class ActionQueue {
 	private int free;
+	private Integer newestItem;
 	private LinkedList<Integer> elements;
 	
 	private class Itr implements Iterator<Integer> {
@@ -35,6 +36,7 @@ public class ActionQueue {
 	public ActionQueue(int capacity) {
 		elements = new LinkedList<Integer>();
 		free = capacity;
+		newestItem = null;
 	}
 	
 	/**
@@ -59,15 +61,21 @@ public class ActionQueue {
 	 * @return false, wenn Queue bereits voll ist, true sonst.
 	 */
 	public boolean offer(Integer elem) {
-		if (contains(elem)) {
-			delete(elements.indexOf(elem));
+		if (newestItem == null) {
+			newestItem = elem;
+			return true;
+		}
+		
+		if (contains(newestItem)) {
+			delete(elements.indexOf(newestItem));
 		}
 		
 		if (free <= 0)
 			return false;
 		
-		elements.add(0, elem);
+		elements.add(0, newestItem);
 		free--;
+		newestItem = elem;
 		return true;
 	}
 	
@@ -105,6 +113,14 @@ public class ActionQueue {
 	 */
 	public boolean contains(int elem) {
 		return elements.contains(elem);
+	}
+	
+	/**
+	 * Gibt das Element zurück, was als letztes erfolgreich der Queue angeboten wurde. (siehe offer)
+	 * @return das neuste Element
+	 */
+	public Integer getNewestElement() {
+		return newestItem;
 	}
 	
 	@Override
