@@ -190,11 +190,11 @@ public abstract class AbstractAgent {
 		setE(sa, 1);
 
 		// Debug Ausgaben
-		System.out.println(this.getClass().toString());
+		/*System.out.println(this.getClass().toString());
 		System.out.printf("Q-Wert von %d ist %f\n", sa_, Q[sa_]);
 		System.out.println(lastActionQueue.toString());
 		System.out.println(eValues.toString());
-		System.out.printf("Reward: %f, Delta: %f\n", reward, delta);
+		System.out.printf("Reward: %f, Delta: %f\n", reward, delta);*/
 
 		while (!end) {
 			q_alt = Q[sa]; // DEBUG
@@ -208,8 +208,8 @@ public abstract class AbstractAgent {
 				setE(sa, gamma * lambda * e(sa));
 
 			// Debug Ausgaben
-			System.out.printf("sa: %d, Q_alt: %f, Q_neu: %f, e: %f\n", sa,
-					q_alt, Q[sa], e(sa));
+			/*System.out.printf("sa: %d, Q_alt: %f, Q_neu: %f, e: %f\n", sa,
+					q_alt, Q[sa], e(sa));*/
 
 			if (it.hasNext())
 				sa = it.next();

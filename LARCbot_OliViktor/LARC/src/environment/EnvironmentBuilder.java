@@ -58,7 +58,7 @@ public class EnvironmentBuilder {
 					bot.getGunHeading(), (int) selfBot.getBattleFieldWidth(),
 					(int) selfBot.getBattleFieldHeight());
 		else
-			attackEnv = new SimpleAttackEnvironment(10, ROBOT_SIZE, 
+			attackEnv = new SimpleAttackEnvironment(15, ROBOT_SIZE, 
 					(int) selfBot.getBattleFieldWidth(),
 					(int) selfBot.getBattleFieldHeight()); 
 	}
