@@ -13,7 +13,7 @@ import environment.LARCEnvironment;
 
 public class LARCRobot extends AdvancedRobot {
 
-	public static final int NO_OF_STATES = 5; // my position * enemy position * enemy direction * enemydistance
+	public static final int NO_OF_STATES = 5 * 8 * 8 * 3; // my position * enemy position * enemy direction * enemydistance
 	public static final int NO_OF_ACTIONS = 2 * 8 * 9; // Fire * Direction * MoveGun
 	public static double[][] VALUE_FUNCTION = new double[NO_OF_ACTIONS][NO_OF_STATES];
 	public double currentGunAngleToEnemy;
@@ -28,9 +28,14 @@ public class LARCRobot extends AdvancedRobot {
 	private double enemyEnergy;
 	private double energyRatio;
 	private int currentReward;
+	private int previousReward;
 	private double gunPostion;
 	private double enemyDirection;
 	private Position myPosition;
+	private double currentDistance;
+	private double currentEnemyDistance;
+	private double currentHeading;
+	
 
 	public LARCRobot() {
 		this.enemyX = 0;
@@ -60,7 +65,12 @@ public class LARCRobot extends AdvancedRobot {
 			// default actions:
 			setTurnRadarRight(2000);
 			// stepping
-			if (this.getVelocity() == 0) {
+			if (this.getTurnRemaining() == 0 && this.currentDistance != 0) {
+				setAhead(this.currentDistance);
+				this.currentDistance = 0;
+			}
+			if (this.getDistanceRemaining() == 0 && this.getTurnRemaining() == 0) {
+				updateHeading();
 				stateID = this.environment.env_step(actionID);
 				actionID = this.agent.agent_step(stateID);
 			}
@@ -81,6 +91,10 @@ public class LARCRobot extends AdvancedRobot {
 		}
 	}
 
+	public void updateHeading() {
+		this.currentHeading = this.getHeading();
+	}
+
 	private void updateEnergyRatio() {
 		if (this.enemyEnergy > 0) {
 			this.energyRatio = this.selfEnergy / this.enemyEnergy; // Energy ratio: self/enemy
@@ -98,14 +112,14 @@ public class LARCRobot extends AdvancedRobot {
 
 	private void backOrAhead(double turnDegrees, double distance) {
 		if (turnDegrees > 90) {
-			setAhead(-distance);
-			setTurnLeft(turnDegrees - 180);
+			currentDistance = -distance;
+			turnRight(turnDegrees - 180);
 		} else if (turnDegrees < -90) {
-			setAhead(-distance);
-			setTurnLeft(turnDegrees + 180);
+			currentDistance = -distance;
+			turnRight(turnDegrees + 180);
 		} else {
-			setAhead(distance);
-			setTurnLeft(turnDegrees);
+			this.currentDistance = distance;
+			turnRight(turnDegrees);
 		}
 	}
 
@@ -144,9 +158,29 @@ public class LARCRobot extends AdvancedRobot {
 	public double getGunPostion() {
 		return gunPostion;
 	}
-	
+
 	public Position getMyPosition() {
 		return myPosition;
+	}
+
+	public int getPreviousReward() {
+		return previousReward;
+	}
+
+	public void setPreviousReward(int previousReward) {
+		this.previousReward = previousReward;
+	}
+
+	public double getCurrentHeading() {
+		return currentHeading;
+	}
+	
+	public double getCurrentEnemyDistance() {
+		return currentEnemyDistance;
+	}
+	
+	public void setCurrentEnemyDistance(double currentEnemyDistance) {
+		this.currentEnemyDistance = currentEnemyDistance;
 	}
 
 	/*************************************************************************************************************************/
@@ -162,7 +196,7 @@ public class LARCRobot extends AdvancedRobot {
 				enemyDirection += 360;
 			}
 		}
-//		System.out.println("Enemy Direction: " + enemyDirection);
+		// System.out.println("Enemy Direction: " + enemyDirection);
 
 		// setTurnGunRight(getHeading() - getGunHeading() + event.getBearing());
 		double x = getHeading() - getGunHeading();
@@ -187,6 +221,7 @@ public class LARCRobot extends AdvancedRobot {
 		this.distanceToEnemy = event.getDistance();
 		this.triangulateEnemyPosition();
 		this.enemyEnergy = event.getEnergy();
+		this.currentEnemyDistance = event.getDistance();
 
 		this.updateEnergyRatio();
 	}
@@ -201,7 +236,7 @@ public class LARCRobot extends AdvancedRobot {
 
 	@Override
 	public void onRobotDeath(RobotDeathEvent event) {
-//		this.currentReward = 30;
+		// this.currentReward = 30;
 		this.agent.agent_end();
 		this.environment.env_cleanup();
 		this.agent.agent_cleanup();

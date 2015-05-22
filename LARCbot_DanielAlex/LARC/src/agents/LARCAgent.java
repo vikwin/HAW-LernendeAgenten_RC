@@ -19,7 +19,7 @@ public class LARCAgent implements IAgent {
 	public static final double INITIAL_Q_VALUE = 0.0;
 	public static final int LAMBDA_CAPACITY = 1;
 
-	private static final double SARSA_EPSILON = 0.6; // Exploration rate
+	private static final double SARSA_EPSILON = 0.5; // Exploration rate
 	private static final double SARSA_GAMMA = 0.9; // Time Discount factor
 	private static final double SARSA_ALPHA = 0.9; // learning rate (importance of new information)
 	private static final double LAMBDA_VALUE = 0.9; // Abschwächungsfaktor
@@ -30,8 +30,8 @@ public class LARCAgent implements IAgent {
 	private int currentActionInt;
 	private int currentStateInt;
 	private Action action;
-	private boolean policyFrozen = true; // lernen
-	private boolean exploringFrozen = true; // ausprobieren
+	private boolean policyFrozen = false; // lernen
+	private boolean exploringFrozen = false; // ausprobieren
 	private LARCRobot myRobot;
 	private double previousStateQValue;
 	private double currentStateQValue;
@@ -75,13 +75,14 @@ public class LARCAgent implements IAgent {
 	public int agent_step(int stateInt) {
 		this.action.setActionID(currentActionInt);
 		this.myRobot.move(this.action.getMoveVector());
-		
+
 		currentActionInt = egreedy(stateInt);
 		currentStateInt = stateInt;
-		
+
 		if (!policyFrozen) {
-//			this.doTheSilenceOfTheLambda(); // zuweisen des neu gelernten q-wertes
-			this.SARSA_onPolicy();
+			// this.doTheSilenceOfTheLambda(); // zuweisen des neu gelernten q-wertes
+//			this.SARSA_onPolicy();
+			this.QLearning();
 		}
 
 		previousActionInt = currentActionInt;
@@ -96,8 +97,9 @@ public class LARCAgent implements IAgent {
 	public void agent_end() {
 
 		if (!policyFrozen) {
-//			this.doTheSilenceOfTheLambda(); // zuweisen des neu gelernten q-wertes
-			this.SARSA_onPolicy();
+			// this.doTheSilenceOfTheLambda(); // zuweisen des neu gelernten q-wertes
+//			this.SARSA_onPolicy();
+			this.QLearning();
 		}
 
 		if (this.myRobot.getNumRounds() - 1 == this.myRobot.getRoundNum() && !policyFrozen) {
@@ -118,11 +120,13 @@ public class LARCAgent implements IAgent {
 
 	/********************************************************************************************************************/
 	public void SARSA_onPolicy() {
-		LARCRobot.VALUE_FUNCTION[this.previousActionInt][this.previousStateInt] += SARSA_ALPHA * (this.myRobot.getCurrentReward() + SARSA_GAMMA * LARCRobot.VALUE_FUNCTION[this.currentActionInt][this.currentStateInt] - LARCRobot.VALUE_FUNCTION[this.previousActionInt][this.previousStateInt]);
-//		this.previousActionInt = this.currentActionInt;
-//		this.previousStateInt = this.currentStateInt;
+		LARCRobot.VALUE_FUNCTION[this.previousActionInt][this.previousStateInt] += SARSA_ALPHA
+				* (this.myRobot.getCurrentReward() + SARSA_GAMMA
+						* LARCRobot.VALUE_FUNCTION[this.currentActionInt][this.currentStateInt] - LARCRobot.VALUE_FUNCTION[this.previousActionInt][this.previousStateInt]);
+		// this.previousActionInt = this.currentActionInt;
+		// this.previousStateInt = this.currentStateInt;
 	}
-	
+
 	public void doTheSilenceOfTheLambda() {
 		this.computeQDelta();
 		E_TRACE_FUNCTION[previousActionInt][previousStateInt]++;
@@ -137,11 +141,16 @@ public class LARCAgent implements IAgent {
 					* LAMBDA_VALUE;
 		}
 	}
+	
+	public void QLearning(){
+		computeQDelta();
+		LARCRobot.VALUE_FUNCTION[this.previousActionInt][this.previousStateInt] += SARSA_ALPHA * this.currentQDeltaValue;
+	}
 
 	public void computeQDelta() {
 		this.previousStateQValue = LARCRobot.VALUE_FUNCTION[previousActionInt][previousStateInt];
-		this.currentStateQValue = LARCRobot.VALUE_FUNCTION[currentActionInt][currentStateInt];
-		this.currentQDeltaValue = myRobot.getCurrentReward() + SARSA_GAMMA * this.currentStateQValue
+		this.currentStateQValue = LARCRobot.VALUE_FUNCTION[fetchMaxActionint(currentStateInt)][currentStateInt];
+		this.currentQDeltaValue = myRobot.getPreviousReward() + SARSA_GAMMA * this.currentStateQValue
 				- this.previousStateQValue;
 	}
 
@@ -166,6 +175,10 @@ public class LARCAgent implements IAgent {
 		}
 
 		/* otherwise choose the greedy action */
+		return fetchMaxActionint(theState);
+	}
+
+	private int fetchMaxActionint(int theState) {
 		int maxIndex = 0;
 		for (int a = 1; a < LARCRobot.NO_OF_ACTIONS; a++) {
 			if (LARCRobot.VALUE_FUNCTION[a][theState] > LARCRobot.VALUE_FUNCTION[maxIndex][theState]) {

@@ -10,7 +10,8 @@ public class LARCEnvironment implements IEnvironment {
 	private double currentEnergyRatio;
 	private double previousEnergyRatio;
 	private State currentState;
-	private int lastReward;
+	private int previousReward;
+	private int currentReward;
 
 	public LARCEnvironment(LARCRobot robot) {
 		this.robot = robot;
@@ -20,7 +21,7 @@ public class LARCEnvironment implements IEnvironment {
 	@Override
 	public void env_init() {
 		this.currentEnergyRatio = 1;
-		this.lastReward = 0;
+		this.previousReward = 0;
 
 	}
 
@@ -32,6 +33,7 @@ public class LARCEnvironment implements IEnvironment {
 		this.currentState.setEdgeState(this.robot.getMyPosition());
 		this.currentState.setEnemyPosition(this.robot.getAngleToEnemy());
 		this.currentState.setEnemyDirection(this.robot.getEnemyDirection());
+		this.currentState.setEnemyDistance(this.robot.getCurrentEnemyDistance());
 		// this.currentState.setGunPosition(this.robot.getGunPostion());
 		
 
@@ -46,6 +48,7 @@ public class LARCEnvironment implements IEnvironment {
 		this.currentState.setEnemyPosition(this.robot.getAngleToEnemy());
 
 		this.currentState.setEnemyDirection(this.robot.getEnemyDirection());
+		this.currentState.setEnemyDistance(this.robot.getCurrentEnemyDistance());
 		// this.currentState.setGunPosition(this.robot.getGunPostion());
 		this.calculateReward();
 
@@ -64,22 +67,25 @@ public class LARCEnvironment implements IEnvironment {
 	 * 
 	 * @return reward
 	 */
-	private double calculateReward() {
-		this.lastReward = 0;
+	private void calculateReward() {
+		 this.previousReward = currentReward;
+		 this.currentReward = 0;
 		 if (this.currentEnergyRatio > this.previousEnergyRatio) {
-		 this.lastReward = 1;
+		 this.currentReward = 0;
 		 } else if (this.currentEnergyRatio < this.previousEnergyRatio) {
-		 this.lastReward = -1;
+		 this.currentReward = 0;
 		 } else {
-		 this.lastReward = 0;
+		 this.currentReward = 0;
 		 }
-		 if(this.currentState.getEdgeState() == EdgeState.MID){
-			 this.lastReward += 5;
+		 if(this.currentState.getEdgeState() != EdgeState.MID){
+			 System.out.println("EdgeStage: " + this.currentState.getEdgeState());
+			 this.currentReward -= 5;
 		 }
+		 System.out.println("Reward: " + this.currentReward);
 
-		System.out.println(this.currentState.getEdgeState() + ": " + this.lastReward);
+//		System.out.println(this.currentState.getEdgeState() + ": " + this.currentReward);
 		
-		this.robot.setCurrentReward(lastReward);
-		return this.lastReward;
+		this.robot.setCurrentReward(currentReward);
+		this.robot.setPreviousReward(previousReward);
 	}
 }

@@ -37,44 +37,75 @@ public class Action {
 	}
 
 	public double[] getMoveVector() {
-//		System.out.println("actionID: " + actionID + " Fire: " + getFire() + " Move: " + getMove() + " GunTurn: "
-//				+ getTurnGun());
+		System.out.println(" Move: " + getMove());
 		double[] moveVector = new double[4];
 
-		double currentHeading = this.myRobi.getHeading();
+		double currentHeading = this.myRobi.getCurrentHeading();
 		double normHeading = Position.normalizeDegrees(currentHeading);
 		switch (getMove()) {
 		case 0:
 			moveVector[0] = this.SHORTDIST;
+			System.out.println("Norm Input: " + normHeading);
+			System.out.println("Osterrechnung: " + (0 - normHeading));
 			moveVector[1] = Position.normalizeDegrees(0 - normHeading);
+			System.out.println("New Norm: " + moveVector[1]);
+			System.out.println();
 			break;
 		case 1:
 			moveVector[0] = this.LONGDIST;
+			System.out.println("Norm Input: " + normHeading);
+			System.out.println("Osterrechnung: " + (45 - normHeading));
 			moveVector[1] = Position.normalizeDegrees(45 - normHeading);
+			System.out.println("New Norm: " + moveVector[1]);
+			System.out.println();
 			break;
 		case 2:
 			moveVector[0] = this.SHORTDIST;
+			System.out.println("Norm Input: " + normHeading);
+			System.out.println("Osterrechnung: " + (90 - normHeading));
 			moveVector[1] = Position.normalizeDegrees(90 - normHeading);
+			System.out.println("New Norm: " + moveVector[1]);
+			System.out.println();
 			break;
 		case 3:
 			moveVector[0] = this.LONGDIST;
+			System.out.println("Norm Input: " + normHeading);
+			System.out.println("Osterrechnung: " + (135 - normHeading));
 			moveVector[1] = Position.normalizeDegrees(135 - normHeading);
+			System.out.println("New Norm: " + moveVector[1]);
+			System.out.println();
 			break;
 		case 4:
 			moveVector[0] = this.SHORTDIST;
+			System.out.println("Norm Input: " + normHeading);
+			System.out.println("Osterrechnung: " + (180 - normHeading));
 			moveVector[1] = Position.normalizeDegrees(180 - normHeading);
+			System.out.println("New Norm: " + moveVector[1]);
+			System.out.println();
 			break;
 		case 5:
 			moveVector[0] = this.LONGDIST;
+			System.out.println("Norm Input: " + normHeading);
+			System.out.println("Osterrechnung: " + (-135 - normHeading));
 			moveVector[1] = Position.normalizeDegrees(-135 - normHeading);
+			System.out.println("New Norm: " + moveVector[1]);
+			System.out.println();
 			break;
 		case 6:
 			moveVector[0] = this.SHORTDIST;
+			System.out.println("Norm Input: " + normHeading);
+			System.out.println("Osterrechnung: " + (-90 - normHeading));
 			moveVector[1] = Position.normalizeDegrees(-90 - normHeading);
+			System.out.println("New Norm: " + moveVector[1]);
+			System.out.println();
 			break;
 		case 7:
 			moveVector[0] = this.LONGDIST;
+			System.out.println("Norm Input: " + normHeading);
+			System.out.println("Osterrechnung: " + (-45 - normHeading));
 			moveVector[1] = Position.normalizeDegrees(-45 - normHeading);
+			System.out.println("New Norm: " + moveVector[1]);
+			System.out.println();
 			break;
 		default:
 			break;

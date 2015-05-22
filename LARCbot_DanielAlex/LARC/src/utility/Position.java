@@ -26,6 +26,7 @@ public class Position {
 		this.y = y;
 	}
 
+	//TESTED TO PERFECTION:
 	public static double normalizeDegrees(double degrees) {
 		while (degrees > 180)
 			degrees -= 360;
