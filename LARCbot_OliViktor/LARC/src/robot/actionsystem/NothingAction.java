@@ -6,7 +6,7 @@ package robot.actionsystem;
  *
  */
 public class NothingAction extends Action {
-	private static final int WAITING_TICKS = 10;
+	private static final int WAITING_TICKS = 15;
 
 	private int waitingTicks, ticksCounter;
 

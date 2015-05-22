@@ -25,7 +25,7 @@ import utils.Vector2D;
  */
 public class SimpleMoveEnvironment implements Environment {
 
-	private static final double WALL_DISTANCE = 60; // Abstand, unter dem eine
+	private static final double WALL_DISTANCE = 40; // Abstand, unter dem eine
 													// Wand als nah eingestuft
 													// wird
 
