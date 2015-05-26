@@ -6,7 +6,9 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.util.ArrayList;
 import java.util.LinkedList;
+import java.util.List;
 import java.util.Random;
 
 import robot.LARCRobot;
@@ -19,7 +21,7 @@ public class LARCAgent implements IAgent {
 	public static final double INITIAL_Q_VALUE = 0.0;
 	public static final int LAMBDA_CAPACITY = 1;
 
-	private static final double SARSA_EPSILON = 0.5; // Exploration rate
+	private static final double SARSA_EPSILON = 0.1; // Exploration rate
 	private static final double SARSA_GAMMA = 0.9; // Time Discount factor
 	private static final double SARSA_ALPHA = 0.9; // learning rate (importance of new information)
 	private static final double LAMBDA_VALUE = 0.9; // Abschwächungsfaktor
@@ -81,7 +83,7 @@ public class LARCAgent implements IAgent {
 
 		if (!policyFrozen) {
 			// this.doTheSilenceOfTheLambda(); // zuweisen des neu gelernten q-wertes
-//			this.SARSA_onPolicy();
+			// this.SARSA_onPolicy();
 			this.QLearning();
 		}
 
@@ -98,7 +100,7 @@ public class LARCAgent implements IAgent {
 
 		if (!policyFrozen) {
 			// this.doTheSilenceOfTheLambda(); // zuweisen des neu gelernten q-wertes
-//			this.SARSA_onPolicy();
+			// this.SARSA_onPolicy();
 			this.QLearning();
 		}
 
@@ -141,10 +143,11 @@ public class LARCAgent implements IAgent {
 					* LAMBDA_VALUE;
 		}
 	}
-	
-	public void QLearning(){
+
+	public void QLearning() {
 		computeQDelta();
-		LARCRobot.VALUE_FUNCTION[this.previousActionInt][this.previousStateInt] += SARSA_ALPHA * this.currentQDeltaValue;
+		LARCRobot.VALUE_FUNCTION[this.previousActionInt][this.previousStateInt] += SARSA_ALPHA
+				* this.currentQDeltaValue;
 	}
 
 	public void computeQDelta() {
@@ -180,12 +183,18 @@ public class LARCAgent implements IAgent {
 
 	private int fetchMaxActionint(int theState) {
 		int maxIndex = 0;
+		List<Integer> actionIntList = new ArrayList<Integer>();
+		actionIntList.add(0);
 		for (int a = 1; a < LARCRobot.NO_OF_ACTIONS; a++) {
 			if (LARCRobot.VALUE_FUNCTION[a][theState] > LARCRobot.VALUE_FUNCTION[maxIndex][theState]) {
+				actionIntList.clear();
 				maxIndex = a;
+				actionIntList.add(a);
+			} else if (LARCRobot.VALUE_FUNCTION[a][theState] == LARCRobot.VALUE_FUNCTION[maxIndex][theState]) {
+				actionIntList.add(a);
 			}
 		}
-		return maxIndex;
+		return actionIntList.get(new Random().nextInt(actionIntList.size()));
 	}
 
 	/**

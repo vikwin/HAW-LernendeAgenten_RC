@@ -9,7 +9,7 @@ public class LARCEnvironment implements IEnvironment {
 	private LARCRobot robot;
 	private double currentEnergyRatio;
 	private double previousEnergyRatio;
-	private State currentState;
+	public State currentState;
 	private int previousReward;
 	private int currentReward;
 
@@ -71,17 +71,15 @@ public class LARCEnvironment implements IEnvironment {
 		 this.previousReward = currentReward;
 		 this.currentReward = 0;
 		 if (this.currentEnergyRatio > this.previousEnergyRatio) {
-		 this.currentReward = 0;
+		 this.currentReward += 1;
 		 } else if (this.currentEnergyRatio < this.previousEnergyRatio) {
-		 this.currentReward = 0;
-		 } else {
-		 this.currentReward = 0;
-		 }
+		 this.currentReward -= 0;
+		 } 
 		 if(this.currentState.getEdgeState() != EdgeState.MID){
-			 System.out.println("EdgeStage: " + this.currentState.getEdgeState());
-			 this.currentReward -= 5;
+//			 System.out.println("EdgeStage: " + this.currentState.getEdgeState());
+			 this.currentReward -= 1;
 		 }
-		 System.out.println("Reward: " + this.currentReward);
+//		 System.out.println("Reward: " + this.currentReward);
 
 //		System.out.println(this.currentState.getEdgeState() + ": " + this.currentReward);
 		

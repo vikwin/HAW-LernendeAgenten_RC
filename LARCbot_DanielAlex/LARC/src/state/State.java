@@ -32,10 +32,10 @@ public class State {
 	// public int gunPosition;
 
 	public int getStateID() {
-		int state = this.edgeState.ordinal() * 1 + this.enemyPosition.ordinal() * EdgeState.values().length
-				+ this.enemyDirection.ordinal() * EdgeState.values().length * EnemyPosition.values().length +
-				this.enemyDistance.ordinal() * EdgeState.values().length * EnemyPosition.values().length * EnemyPosition.values().length;
-		// + this.gunPosition * EnemyPosition.values().length * EdgeState.values().length;
+		int state = this.edgeState.ordinal() * 1 
+				+ this.enemyPosition.ordinal() * EdgeState.values().length
+				+ this.enemyDirection.ordinal() * EdgeState.values().length * EnemyPosition.values().length 
+				+ this.enemyDistance.ordinal() * EdgeState.values().length * EnemyPosition.values().length * EnemyPosition.values().length;
 		return state;
 	}
 
@@ -118,13 +118,4 @@ public class State {
 			this.enemyDirection = EnemyPosition.NORDOST;
 		}
 	}
-
-	// public int getGunPos() {
-	// return gunPosition;
-	// }
-	//
-	// public void setGunPosition(double gunPosition) {
-	// gunPosition -= (gunPosition % 10);
-	// this.gunPosition = (int) gunPosition / 10;
-	// }
 }
