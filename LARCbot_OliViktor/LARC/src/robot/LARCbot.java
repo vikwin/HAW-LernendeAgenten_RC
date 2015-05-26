@@ -21,6 +21,7 @@ import utils.Utils;
 import utils.Vector2D;
 import agents.AttackAgent;
 import agents.MoveAgent;
+import environment.Enemy;
 import environment.EnvironmentBuilder;
 
 public class LARCbot extends RewardRobot {
@@ -143,15 +144,6 @@ public class LARCbot extends RewardRobot {
 		}
 	}
 
-	private double getNearestEnemyBearing() {
-		return envBuilder.getNearestEnemyAngle();
-	}
-
-	@SuppressWarnings("unused")
-	private void aimAtEnemy() {
-		this.addAction(new GunTurnAction(getNearestEnemyBearing()));
-	}
-
 	private Action getActionByMovement(int movementId) {
 		boolean nothing = false;
 		TurnAction turn = null;
@@ -218,17 +210,19 @@ public class LARCbot extends RewardRobot {
 		} else {
 			SimpleAttack attack = SimpleAttack.byId(attackId);
 
-			if (attack == SimpleAttack.NOTHING) {
+			Enemy enemy = envBuilder.getEnemy();
+
+			if (attack == SimpleAttack.NOTHING || enemy == null) {
 				return new NothingAction();
 			} else {
-				double enemyAngle = getNearestEnemyBearing();
-				gunTurnDirection = enemyAngle - getGunHeading()
-						+ attack.getDirection();
 				firePower = attack.getPower().toDouble();
+				Vector2D vectorToTarget = addOffsetToEnemyPosition(enemy,
+						attack.getDeviation()).subtract(getPosition());
 
-				System.out.printf(
-						"Gegner ist im Winkel: %f, Schieße mit Offset: %f\n",
-						enemyAngle, attack.getDirection());
+				System.out.printf("Vector to target bei %s mit Offset %f\n ",
+						vectorToTarget.toString(), attack.getDeviation());
+				double enemyAngle = vectorToTarget.getHeading();
+				gunTurnDirection = enemyAngle - getGunHeading();
 			}
 		}
 
@@ -236,12 +230,24 @@ public class LARCbot extends RewardRobot {
 			gunTurnDirection -= 360;
 		else if (gunTurnDirection < -180)
 			gunTurnDirection += 360;
-		
+
 		GunTurnAction gunturn = new GunTurnAction(gunTurnDirection);
 
 		FireAction fire = new FireAction(firePower);
 
 		return new SerialAction(Arrays.asList(new Action[] { gunturn, fire }));
+	}
+
+	private Vector2D addOffsetToEnemyPosition(Enemy enemy, double offset) {
+		Vector2D tmp = new Vector2D(0, getWidth() / 2 + offset);
+		tmp = tmp.rotate(enemy.getHeading());
+
+		tmp = enemy.getPosition().add(tmp);
+
+		System.out.printf("Gegner bei %s, mit Offset %f bei %s\n", enemy
+				.getPosition().toString(), offset, tmp.toString());
+
+		return tmp;
 	}
 
 	/**

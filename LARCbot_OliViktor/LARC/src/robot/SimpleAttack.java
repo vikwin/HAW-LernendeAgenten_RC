@@ -21,15 +21,15 @@ public class SimpleAttack {
 	}
 
 	public static final SimpleAttack NOTHING = new SimpleAttack(null, 0);
-	private static final int MAX_DIRECTION = 10, RESOLUTION = 1;
-	private static int count = ((MAX_DIRECTION / RESOLUTION) * 2 + 1) * GunPower.values().length + 1;
+	private static final int MAX_DEVIATION = 100, RESOLUTION = 10;
+	private static int count = ((MAX_DEVIATION / RESOLUTION) * 2 + 1) * GunPower.values().length + 1;
 	
 	public static SimpleAttack byId(int id) {
 		if (id == count - 1)
 			return NOTHING;
 		
-		int possibleDir = (MAX_DIRECTION / RESOLUTION) * 2 + 1;
-		return new SimpleAttack(GunPower.values()[(id / possibleDir)], (id % possibleDir) * RESOLUTION - MAX_DIRECTION);
+		int possibleDir = (MAX_DEVIATION / RESOLUTION) * 2 + 1;
+		return new SimpleAttack(GunPower.values()[(id / possibleDir)], (id % possibleDir) * RESOLUTION - MAX_DEVIATION);
 	}
 	
 	public static int getActionCount() {
@@ -37,17 +37,17 @@ public class SimpleAttack {
 	}
 	
 	private GunPower power;
-	private double direction;
+	private double deviation;
 	
-	public SimpleAttack(GunPower power, double direction) {
+	public SimpleAttack(GunPower power, double offset) {
 		this.power = power;
 		
-		if (direction > MAX_DIRECTION)
-			this.direction = MAX_DIRECTION;
-		else if (direction < -MAX_DIRECTION)
-			this.direction = -MAX_DIRECTION;
+		if (deviation > MAX_DEVIATION)
+			this.deviation = MAX_DEVIATION;
+		else if (deviation < -MAX_DEVIATION)
+			this.deviation = -MAX_DEVIATION;
 		else			
-			this.direction = direction;
+			this.deviation = offset;
 	}
 
 	public GunPower getPower() {
@@ -56,9 +56,9 @@ public class SimpleAttack {
 
 	/**
 	 * Die Richtung, in die die Kanone gedreht werden soll, abhängig vom Gegner
-	 * @return Die Richtung der Kanone von -MAX_DIRECTION bis +MAX_DIRECTION
+	 * @return Die Richtung der Kanone von -MAX_DEVIATION bis +MAX_DEVIATION
 	 */
-	public double getDirection() {
-		return direction;
+	public double getDeviation() {
+		return deviation;
 	}
 }

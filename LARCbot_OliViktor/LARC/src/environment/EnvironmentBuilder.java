@@ -147,16 +147,19 @@ public class EnvironmentBuilder {
 	public int getMoveEnvStateCount() {
 		return moveEnv.getStateCount();
 	}
-	
-	/**
-	 * Gibt den Winkel zum nächsten Gegner an. Wobei der Winkel zwischen
-	 * -180 und +180 Grad liegt (-180/180 Süden, -90 Westen, 0 Norden, 90 Osten). 
-	 * @return Winkel zum Gegner
-	 */
-	public double getNearestEnemyAngle() {
-		return ((SimpleAttackEnvironment)attackEnv).getNearestEnemyAngle();
-	}
 
+	/**
+	 * Gibt einen beliebigen Gegner zurück. Wird null, falls kein Gegner vorhanden.
+	 * @return Gegner
+	 */
+	public Enemy getEnemy() {
+		Enemy enemy = null;
+		for (Enemy e : enemies.values())
+			enemy = e;
+		
+		return enemy;
+	}
+	
 	/**
 	 * Liefert eine Zahl für die Belohnung der Aktionen des Bots.
 	 * 
