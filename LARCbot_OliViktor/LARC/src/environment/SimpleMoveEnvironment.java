@@ -13,12 +13,13 @@ import utils.Vector2D;
  * Konkrete Klasse zur Abbildung der Umwelt für den MoveAgent. Hierbei wird die
  * Welt in einer Ringstruktur abgebildet, die den Abstand zum Gegner darstellt.
  * Außerdem gibt es für jede der 4 Wände ein Flag, das zeigt ob sich der Bot
- * nahe an dieser befindet.
+ * nahe an dieser befindet. Um festzustellen, in wo der Gegner sich gerade
+ * befindet wird darüber hinaus seine Himmelsrichtung festgehalten.
  * 
  * Bei z. B. 10 Ringen würde sich somit folgende Anzahl möglicher Zustände
  * ergeben:
  * 
- * 10 * 2 * 2 * 2 * 2 = 160 Zustände
+ * 10 * 2 * 2 * 2 * 2 * 8 = 1280 Zustände
  * 
  * @author Viktor Winkelmann
  *
@@ -35,6 +36,7 @@ public class SimpleMoveEnvironment implements Environment {
 
 	private Vector2D selfPosition;
 
+	private Direction[] directions;
 	private boolean[] nearWalls, rings;
 
 	/**
@@ -91,6 +93,7 @@ public class SimpleMoveEnvironment implements Environment {
 
 		this.nearWalls = new boolean[4];
 		this.rings = new boolean[ringCount];
+		this.directions = new Direction[enemyCount];
 
 		clearEnv();
 	}
@@ -101,6 +104,10 @@ public class SimpleMoveEnvironment implements Environment {
 
 		for (int i = 0; i < rings.length; i++)
 			rings[i] = false;
+
+		for (int i = 0; i < directions.length; i++)
+			directions[i] = Direction.NORTH;
+
 	}
 
 	@Override
@@ -109,7 +116,7 @@ public class SimpleMoveEnvironment implements Environment {
 
 		selfPosition = Utils.getBotCoordinates(selfBot);
 
-		int ringNr;
+		int ringNr, enemyIndex = 0;
 		for (Enemy enemy : enemies) {
 			ringNr = (int) ((enemy.getDistance() - botPadding) / ringThickness);
 
@@ -117,6 +124,9 @@ public class SimpleMoveEnvironment implements Environment {
 				ringNr = ringCount - 1;
 
 			rings[ringNr] = true;
+
+			directions[enemyIndex] = Direction.byHeading(robocode.util.Utils
+					.normalAbsoluteAngleDegrees(enemy.getBearing() + selfBot.getHeading()));
 		}
 
 		// Linke, Obere, Rechte, Untere Wand nahe?
@@ -152,9 +162,21 @@ public class SimpleMoveEnvironment implements Environment {
 						(int) circleSize, (int) circleSize, 0, 360);
 		}
 
+		// Zeichne die Himmelsrichtung des Gegners in cyan ein
+		g.setColor(new Color(0x00, 0xff, 0xcc, 0x80));
+		g.setStroke(new BasicStroke());
+		int arcWidth = 360 / Direction.values().length;
+		circleSize = robotSize + ringThickness + ringCount * ringThickness * 2;
+
+		for (Direction d : directions) {
+			int arcStart = (int) d.getHeading() - arcWidth / 2;
+			g.fillArc((int) (selfPosition.getX() - circleSize / 2),
+					(int) (selfPosition.getY() - circleSize / 2),
+					(int) circleSize, (int) circleSize, arcStart, arcWidth);
+		}
+
 		// Zeichne nahe Wände in blau ein
 		g.setColor(new Color(0x00, 0x00, 0xff, 0x80));
-		g.setStroke(new BasicStroke());
 
 		if (nearWalls[0]) {
 			// linke Wand
@@ -197,16 +219,15 @@ public class SimpleMoveEnvironment implements Environment {
 			if (nearWalls[i])
 				wallState += Math.pow(2, i);
 
-		return ringState * 16 + wallState;
+		return ringState * 16 * Direction.values().length + wallState
+				* Direction.values().length + directions[0].ordinal();
 	}
 
 	@Override
 	public int getStateCount() {
-		return (int) Math.pow(16 * (ringCount + 1), enemyCount); // + 1, weil es
-																	// sein kann
-																	// dass kein
-																	// Gegner da
-																	// ist
+		// + 1, weil es sein kann dass kein Gegner da ist
+		return (int) Math.pow(16 * (ringCount + 1) * Direction.values().length,
+				enemyCount);
 	}
 
 }
