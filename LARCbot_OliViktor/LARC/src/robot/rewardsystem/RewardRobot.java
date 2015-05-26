@@ -1,5 +1,7 @@
 package robot.rewardsystem;
 
+import java.util.Arrays;
+
 import robocode.BulletHitBulletEvent;
 import robocode.BulletHitEvent;
 import robocode.BulletMissedEvent;
@@ -43,51 +45,58 @@ public abstract class RewardRobot extends ActorRobot {
 		loosing = Config.getDoubleValue("Reward_Loosing");
 	}
 	
-	private double reward;
+	private double[] reward;
 	
 	public RewardRobot() {
 		super();
-		reward = 0.0;
+		reward = new double[2];
+		Arrays.fill(reward, 0.0);
 	}
 	
-	public double getReward() {
-		double r = reward;
-		reward = 0;
+	public double getReward(int index) {
+		double r = reward[index];
+		reward[index] = 0;
 		
 		return r;
+	}
+	
+	private void addReward(double value) {
+		for (int i = 0; i < reward.length; i++) {
+			reward[i] += value;
+		}
 	}
 	
 	/* Events mit Kugeln */
 	@Override
 	public void onHitByBullet(HitByBulletEvent event) {
 		if (multiplyBulletPower)
-			reward += hitByBullet * event.getPower() / robocode.Rules.MAX_BULLET_POWER;
+			addReward(hitByBullet * event.getPower() / robocode.Rules.MAX_BULLET_POWER);
 		else
-			reward += hitByBullet;
+			addReward(hitByBullet);
 	}
 	
 	@Override
 	public void onBulletHitBullet(BulletHitBulletEvent event) {
 		if (multiplyBulletPower)
-			reward += bulletHitBullet * event.getBullet().getPower() / robocode.Rules.MAX_BULLET_POWER;
+			addReward(bulletHitBullet * event.getBullet().getPower() / robocode.Rules.MAX_BULLET_POWER);
 		else
-			reward += bulletHitBullet;
+			addReward(bulletHitBullet);
 	}
 	
 	@Override
 	public void onBulletHit(BulletHitEvent event) {
 		if (multiplyBulletPower)
-			reward += bulletHitEnemy * event.getBullet().getPower() / robocode.Rules.MAX_BULLET_POWER;
+			addReward(bulletHitEnemy * event.getBullet().getPower() / robocode.Rules.MAX_BULLET_POWER);
 		else
-			reward += bulletHitEnemy;
+			addReward(bulletHitEnemy);
 	}
 	
 	@Override
 	public void onBulletMissed(BulletMissedEvent event) {
 		if (multiplyBulletPower)
-			reward += bulletHitWall * event.getBullet().getPower() / robocode.Rules.MAX_BULLET_POWER;
+			addReward(bulletHitWall * event.getBullet().getPower() / robocode.Rules.MAX_BULLET_POWER);
 		else
-			reward += bulletHitWall;
+			addReward(bulletHitWall);
 	}
 	
 	
@@ -95,25 +104,25 @@ public abstract class RewardRobot extends ActorRobot {
 	@Override
 	public void onHitRobot(HitRobotEvent event) {
 		if (event.isMyFault())
-			reward += hitRobot;
+			addReward(hitRobot);
 		else
-			reward += hitByEnemy;
+			addReward(hitByEnemy);
 	}
 	
 	@Override
 	public void onHitWall(HitWallEvent event) {
-		reward += hitWall;
+		addReward(hitWall);
 	}
 	
 	
 	/* Events bei Ende der Runde*/
 	@Override
 	public void onDeath(DeathEvent event) {
-		reward += winning;
+		addReward(winning);
 	}
 	
 	@Override
 	public void onRobotDeath(RobotDeathEvent event) {
-		reward += loosing;
+		addReward(loosing);
 	}
 }

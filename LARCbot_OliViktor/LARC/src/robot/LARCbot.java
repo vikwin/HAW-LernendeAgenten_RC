@@ -119,28 +119,46 @@ public class LARCbot extends RewardRobot {
 			doScan();
 
 		// Agents updaten und neue Actions holen
-		if ((lastMoveAgentAction == null || lastMoveAgentAction.hasFinished())
-				&& (lastAttackAgentAction == null || lastAttackAgentAction
-						.hasFinished())) {
+		if (USE_SIMPLE_REWARD_SYSTEM) {
+			if ((lastMoveAgentAction == null || lastMoveAgentAction
+					.hasFinished())
+					&& (lastAttackAgentAction == null || lastAttackAgentAction
+							.hasFinished())) {
 
-			lastMoveAgentAction = getActionByMovement(moveAgent
-					.getNextAction(envBuilder.getMoveEnvId()));
-			this.addAction(lastMoveAgentAction);
-			lastAttackAgentAction = getActionByAttack(attackAgent
-					.getNextAction(envBuilder.getAttackEnvId()));
-			this.addAction(lastAttackAgentAction);
-			updateActions();
+				lastMoveAgentAction = getActionByMovement(moveAgent
+						.getNextAction(envBuilder.getMoveEnvId()));
+				this.addAction(lastMoveAgentAction);
+				lastAttackAgentAction = getActionByAttack(attackAgent
+						.getNextAction(envBuilder.getAttackEnvId()));
+				this.addAction(lastAttackAgentAction);
 
-			double reward = 0.0;
-			if (USE_SIMPLE_REWARD_SYSTEM)
+				double reward = 0.0;
 				reward = envBuilder.getReward(); // Belohnung für die Agents
-			// anhand der
-			// Energieverändeurng
-			else
-				reward = getReward(); // Belohnung für die Agents anhand
-			// diverser Events
-			moveAgent.addReward(reward);
-			attackAgent.addReward(reward);
+				// anhand der
+				// Energieverändeurng
+				moveAgent.addReward(reward);
+				attackAgent.addReward(reward);
+			}
+		} else {
+			if (lastMoveAgentAction == null
+					|| lastMoveAgentAction.hasFinished()) {
+
+				lastMoveAgentAction = getActionByMovement(moveAgent
+						.getNextAction(envBuilder.getMoveEnvId()));
+				this.addAction(lastMoveAgentAction);
+
+				moveAgent.addReward(getReward(0));
+			}
+
+			if (lastAttackAgentAction == null
+					|| lastAttackAgentAction.hasFinished()) {
+				
+				lastAttackAgentAction = getActionByAttack(attackAgent
+						.getNextAction(envBuilder.getAttackEnvId()));
+				this.addAction(lastAttackAgentAction);
+				
+				attackAgent.addReward(getReward(1));
+			}
 		}
 	}
 
