@@ -22,7 +22,7 @@ public class LARCEnvironment implements IEnvironment {
 	public void env_init() {
 		this.currentEnergyRatio = 1;
 		this.previousReward = 0;
-
+		this.currentReward = 0;
 	}
 
 	@Override
@@ -35,7 +35,6 @@ public class LARCEnvironment implements IEnvironment {
 		this.currentState.setEnemyDirection(this.robot.getEnemyDirection());
 		this.currentState.setEnemyDistance(this.robot.getCurrentEnemyDistance());
 		// this.currentState.setGunPosition(this.robot.getGunPostion());
-		
 
 		return this.currentState.getStateID();
 	}
@@ -43,6 +42,7 @@ public class LARCEnvironment implements IEnvironment {
 	@Override
 	public int env_step(int action) {
 		// update currentStateF
+		this.previousEnergyRatio = this.currentEnergyRatio;
 		this.currentEnergyRatio = this.robot.getEnergyRatio();
 		this.currentState.setEdgeState(this.robot.getMyPosition());
 		this.currentState.setEnemyPosition(this.robot.getAngleToEnemy());
@@ -53,7 +53,6 @@ public class LARCEnvironment implements IEnvironment {
 		this.calculateReward();
 
 		// this.robot.oldGunAngleToEnemy = this.robot.currentGunAngleToEnemy; //??????????
-		this.previousEnergyRatio = this.currentEnergyRatio;
 		return this.currentState.getStateID();
 	}
 
@@ -68,21 +67,21 @@ public class LARCEnvironment implements IEnvironment {
 	 * @return reward
 	 */
 	private void calculateReward() {
-		 this.previousReward = currentReward;
-		 this.currentReward = 0;
-		 if (this.currentEnergyRatio > this.previousEnergyRatio) {
-		 this.currentReward += 1;
-		 } else if (this.currentEnergyRatio < this.previousEnergyRatio) {
-		 this.currentReward -= 0;
-		 } 
-		 if(this.currentState.getEdgeState() != EdgeState.MID){
-//			 System.out.println("EdgeStage: " + this.currentState.getEdgeState());
-			 this.currentReward -= 1;
-		 }
-//		 System.out.println("Reward: " + this.currentReward);
+		this.previousReward = currentReward;
+		this.currentReward = 0;
+		if (this.currentEnergyRatio > this.previousEnergyRatio) {
+			this.currentReward += 1;
+		} else if (this.currentEnergyRatio < this.previousEnergyRatio) {
+			this.currentReward -= 1;
+		}
+		if (this.currentState.getEdgeState() != EdgeState.MID) {
+			// System.out.println("EdgeStage: " + this.currentState.getEdgeState());
+			this.currentReward -= 2;
+		}
+		// System.out.println("Reward: " + this.currentReward);
 
-//		System.out.println(this.currentState.getEdgeState() + ": " + this.currentReward);
-		
+		// System.out.println(this.currentState.getEdgeState() + ": " + this.currentReward);
+
 		this.robot.setCurrentReward(currentReward);
 		this.robot.setPreviousReward(previousReward);
 	}

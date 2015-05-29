@@ -7,6 +7,7 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
+import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -19,11 +20,11 @@ public class LARCAgent implements IAgent {
 
 	public static double[][] E_TRACE_FUNCTION;
 	public static final double INITIAL_Q_VALUE = 0.0;
-	public static final int LAMBDA_CAPACITY = 1;
+	public static final int LAMBDA_CAPACITY = 16;
 
-	private static final double SARSA_EPSILON = 0.1; // Exploration rate
+	private static final double SARSA_EPSILON = 0.2; // Exploration rate
 	private static final double SARSA_GAMMA = 0.9; // Time Discount factor
-	private static final double SARSA_ALPHA = 0.9; // learning rate (importance of new information)
+	private static final double SARSA_ALPHA = 0.5; // learning rate (importance of new information)
 	private static final double LAMBDA_VALUE = 0.9; // Abschwächungsfaktor
 
 	private Random randGenerator = new Random();
@@ -38,7 +39,10 @@ public class LARCAgent implements IAgent {
 	private double previousStateQValue;
 	private double currentStateQValue;
 	private LinkedList<int[]> lastStatesForLambda;
+	private Iterator<int[]> descendingIterator;
 	private double currentQDeltaValue;
+	private double currentSARSADeltaValue;
+	private double oldE;
 
 	public LARCAgent(LARCRobot myRobot) {
 		this.myRobot = myRobot;
@@ -58,6 +62,7 @@ public class LARCAgent implements IAgent {
 				e.printStackTrace();
 			}
 		}
+		oldE = 0;
 	}
 
 	@Override
@@ -68,7 +73,7 @@ public class LARCAgent implements IAgent {
 		previousActionInt = currentActionInt;
 		previousStateInt = stateInt;
 
-		this.add(new int[] { previousActionInt, previousStateInt });
+		this.addToSarsaLambdaList(new int[] { previousActionInt, previousStateInt });
 
 		return currentActionInt;
 	}
@@ -82,15 +87,15 @@ public class LARCAgent implements IAgent {
 		currentStateInt = stateInt;
 
 		if (!policyFrozen) {
-			// this.doTheSilenceOfTheLambda(); // zuweisen des neu gelernten q-wertes
+			this.eisgekuehlterSarsaLambda();
 			// this.SARSA_onPolicy();
-			this.QLearning();
+			// this.QLearning();
 		}
 
 		previousActionInt = currentActionInt;
 		previousStateInt = currentStateInt;
 
-		this.add(new int[] { previousActionInt, previousStateInt });
+		this.addToSarsaLambdaList(new int[] { previousActionInt, previousStateInt });
 
 		return currentActionInt;
 	}
@@ -99,9 +104,9 @@ public class LARCAgent implements IAgent {
 	public void agent_end() {
 
 		if (!policyFrozen) {
-			// this.doTheSilenceOfTheLambda(); // zuweisen des neu gelernten q-wertes
+			this.eisgekuehlterSarsaLambda(); // zuweisen des neu gelernten q-wertes
 			// this.SARSA_onPolicy();
-			this.QLearning();
+			// this.QLearning();
 		}
 
 		if (this.myRobot.getNumRounds() - 1 == this.myRobot.getRoundNum() && !policyFrozen) {
@@ -115,6 +120,7 @@ public class LARCAgent implements IAgent {
 
 	@Override
 	public void agent_cleanup() {
+		System.out.println("***** NUMBER OF TIMES MY ROBOT HIT THE WALL:  " + this.myRobot.wallHitCounter);
 		this.lastStatesForLambda.clear();
 		this.previousActionInt = 0;
 		this.previousStateInt = 0;
@@ -122,42 +128,82 @@ public class LARCAgent implements IAgent {
 
 	/********************************************************************************************************************/
 	public void SARSA_onPolicy() {
-		LARCRobot.VALUE_FUNCTION[this.previousActionInt][this.previousStateInt] += SARSA_ALPHA
-				* (this.myRobot.getCurrentReward() + SARSA_GAMMA
-						* LARCRobot.VALUE_FUNCTION[this.currentActionInt][this.currentStateInt] - LARCRobot.VALUE_FUNCTION[this.previousActionInt][this.previousStateInt]);
+		// LARCRobot.VALUE_FUNCTION[this.previousActionInt][this.previousStateInt] += SARSA_ALPHA
+		// * (this.myRobot.getCurrentReward() + SARSA_GAMMA * LARCRobot.VALUE_FUNCTION[this.currentActionInt][this.currentStateInt] -
+		// LARCRobot.VALUE_FUNCTION[this.previousActionInt][this.previousStateInt]);
 		// this.previousActionInt = this.currentActionInt;
 		// this.previousStateInt = this.currentStateInt;
 	}
 
-	public void doTheSilenceOfTheLambda() {
-		this.computeQDelta();
+	private void eisgekuehlterSarsaLambda() {
+		computeSARSADelta();
+
 		E_TRACE_FUNCTION[previousActionInt][previousStateInt]++;
+
+		// LinkedList iterator that descends LIFO over the values:
+		// this.descendingIterator = this.lastStatesForLambda.descendingIterator();
+
+		// while (this.descendingIterator.hasNext()) {
+		// int[] coordinates = this.descendingIterator.next();
+		// LARCRobot.VALUE_FUNCTION[coordinates[0]][coordinates[1]] += SARSA_ALPHA * this.currentSARSADeltaValue
+		// * E_TRACE_FUNCTION[coordinates[0]][coordinates[1]];
+		//
+		// E_TRACE_FUNCTION[coordinates[0]][coordinates[1]] *= SARSA_GAMMA * LAMBDA_VALUE;
+		// }
 
 		// Q(a,s) += alpha*delta*etrace(a,s)
 		// etrace(a,s) *= gamme * lambda
-		for (int i = lastStatesForLambda.size() - 1; i >= 0; i--) {
-			LARCRobot.VALUE_FUNCTION[this.lastStatesForLambda.get(i)[0]][this.lastStatesForLambda.get(i)[1]] += SARSA_ALPHA
-					* currentQDeltaValue
-					* E_TRACE_FUNCTION[this.lastStatesForLambda.get(i)[0]][this.lastStatesForLambda.get(i)[1]];
-			E_TRACE_FUNCTION[this.lastStatesForLambda.get(i)[0]][this.lastStatesForLambda.get(i)[1]] *= SARSA_GAMMA
-					* LAMBDA_VALUE;
+
+		for (int t = lastStatesForLambda.size() - 1; t >= 1; t--) {
+
+			LARCRobot.VALUE_FUNCTION[this.lastStatesForLambda.get(t)[0]][this.lastStatesForLambda.get(t)[1]] += SARSA_ALPHA
+					* currentSARSADeltaValue
+					* E_TRACE_FUNCTION[this.lastStatesForLambda.get(t)[0]][this.lastStatesForLambda.get(t)[1]];
+
+			// replacing traces
+			if (this.previousStateInt == this.lastStatesForLambda.get(t)[1]) {
+				E_TRACE_FUNCTION[this.lastStatesForLambda.get(t)[0]][this.lastStatesForLambda.get(t)[1]] = 1;
+			} else {
+				E_TRACE_FUNCTION[this.lastStatesForLambda.get(t)[0]][this.lastStatesForLambda.get(t)[1]] *= SARSA_GAMMA
+						* LAMBDA_VALUE;
+			}
+
+			// 1996 Sutton Singh
+			// if (this.previousStateInt == this.lastStatesForLambda.get(t)[1]
+			// && this.previousActionInt == this.lastStatesForLambda.get(t)[0]) {
+			// E_TRACE_FUNCTION[this.lastStatesForLambda.get(t)[0]][this.lastStatesForLambda.get(t)[1]] = 1
+			// + SARSA_GAMMA * LAMBDA_VALUE * oldE;
+			// } else if (this.previousStateInt == this.lastStatesForLambda.get(t)[1]
+			// && this.previousActionInt != this.lastStatesForLambda.get(t)[0]) {
+			// E_TRACE_FUNCTION[this.lastStatesForLambda.get(t)[0]][this.lastStatesForLambda.get(t)[1]] = 0;
+			// } else {
+			// E_TRACE_FUNCTION[this.lastStatesForLambda.get(t)[0]][this.lastStatesForLambda.get(t)[1]] = SARSA_GAMMA
+			// * LAMBDA_VALUE * oldE;
+			// }
 		}
 	}
 
-	public void QLearning() {
+	private void computeSARSADelta() {
+		this.previousStateQValue = LARCRobot.VALUE_FUNCTION[previousActionInt][previousStateInt];
+		this.currentStateQValue = LARCRobot.VALUE_FUNCTION[currentActionInt][currentStateInt];
+		this.currentSARSADeltaValue = myRobot.getPreviousReward() + SARSA_GAMMA * this.currentStateQValue
+				- this.previousStateQValue;
+	}
+
+	private void QLearning() {
 		computeQDelta();
 		LARCRobot.VALUE_FUNCTION[this.previousActionInt][this.previousStateInt] += SARSA_ALPHA
 				* this.currentQDeltaValue;
 	}
 
-	public void computeQDelta() {
+	private void computeQDelta() {
 		this.previousStateQValue = LARCRobot.VALUE_FUNCTION[previousActionInt][previousStateInt];
 		this.currentStateQValue = LARCRobot.VALUE_FUNCTION[fetchMaxActionint(currentStateInt)][currentStateInt];
 		this.currentQDeltaValue = myRobot.getPreviousReward() + SARSA_GAMMA * this.currentStateQValue
 				- this.previousStateQValue;
 	}
 
-	public void add(int[] indexPair) {
+	public void addToSarsaLambdaList(int[] indexPair) {
 		if (lastStatesForLambda.size() >= LAMBDA_CAPACITY) {
 			this.lastStatesForLambda.poll();
 		}

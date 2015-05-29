@@ -12,6 +12,9 @@ import utility.Position;
 import agents.LARCAgent;
 import environment.LARCEnvironment;
 
+// Runtime VM Arguments:
+// -Xmx512M -DNOSECURITY=true -Dsun.io.useCanonCaches=false
+
 public class LARCRobot extends AdvancedRobot {
 // (2*8*5)*(1*8*8*3+4*5*8*3) //Ohne unerreichbare states = 53760 States/Actions
 	public static final int NO_OF_STATES = 5 * 8 * 8* 3 ; // my position * enemyErection * enemyPosition * enemyDistance
@@ -39,11 +42,13 @@ public class LARCRobot extends AdvancedRobot {
 	private double currentHeading;
 	private int scanDirection;
 	private double gunTurnToEnemy;
+	public int wallHitCounter;
 	
 
 	public LARCRobot() {
 		this.enemyX = 0;
 		this.enemyY = 0;
+		this.wallHitCounter = 0;
 		this.enemyDirection = 1;
 		this.environment = new LARCEnvironment(this);
 		this.agent = new LARCAgent(this);
@@ -229,6 +234,11 @@ public class LARCRobot extends AdvancedRobot {
 	public void onBulletHit(BulletHitEvent event) {
 		this.currentReward += 1;
 	}
+	
+	@Override
+	public void onHitWall(robocode.HitWallEvent event) {
+		this.wallHitCounter++;
+	};
 
 	@Override
 	public void onDeath(DeathEvent event) {
