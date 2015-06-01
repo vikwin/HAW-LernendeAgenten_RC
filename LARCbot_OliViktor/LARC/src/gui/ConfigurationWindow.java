@@ -2,6 +2,7 @@ package gui;
 
 import java.awt.BorderLayout;
 import java.awt.Color;
+import java.awt.Component;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
@@ -27,6 +28,7 @@ import javax.swing.JRadioButton;
 import javax.swing.JScrollPane;
 import javax.swing.JSpinner;
 import javax.swing.JTabbedPane;
+import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.ListSelectionModel;
 import javax.swing.SpinnerNumberModel;
@@ -42,20 +44,17 @@ import utils.Config;
 
 public class ConfigurationWindow {
 
-	private Process robocodeProcess;
+	private ArrayList<Process> robocodeProcesses = new ArrayList<Process>();
+	private JTabbedPane tabbedPane;
 	private JFrame frmLarcbotExperimentKonfigurator;
 	private JFileChooser fc;
 	private DefaultListModel<String> robot_listModel;
 	private JTextField robocodeHome;
-	private JTextField hitByBulletReward;
-	private JTextField bulletHitBulletReward;
-	private JTextField bulletHitEnemyReward;
-	private JTextField bulletHitWallReward;
-	private JTextField hitRobotReward;
-	private JTextField hitWallReward;
-	private JTextField winningReward;
-	private JTextField loosingReward;
-	private JTextField hitByEnemy;
+	private JPanel processPanel;
+	private JPanel processSelectionPanel;
+	private ButtonGroup processSelectionBtnGrp;
+	
+	private Console redirectConsole;
 
 	/**
 	 * Launch the application.
@@ -79,6 +78,14 @@ public class ConfigurationWindow {
 	 * Create the application.
 	 */
 	public ConfigurationWindow() {
+		redirectConsole = new Console() {
+			@Override
+			public void onStreamEnd(int id) {
+				removeObjectsForProcess(id);
+			}
+		};
+		
+		
 		initialize();
 	}
 
@@ -101,7 +108,7 @@ public class ConfigurationWindow {
 		frmLarcbotExperimentKonfigurator.getContentPane().setLayout(
 				new BorderLayout(0, 0));
 
-		JTabbedPane tabbedPane = new JTabbedPane(JTabbedPane.TOP);
+		tabbedPane = new JTabbedPane(JTabbedPane.TOP);
 		tabbedPane.setBackground(Color.WHITE);
 		frmLarcbotExperimentKonfigurator.getContentPane().add(tabbedPane);
 
@@ -448,7 +455,7 @@ public class ConfigurationWindow {
 		JLabel lblNewLabel_2 = new JLabel("Von Kugel getroffen:");
 		panel_11.add(lblNewLabel_2);
 		
-		hitByBulletReward = new JTextField();
+		JTextField hitByBulletReward = new JTextField();
 		hitByBulletReward.setText(Config.getStringValue("Reward_HitByBullet", "-3.0"));
 		hitByBulletReward.setColumns(5);
 		panel_11.add(hitByBulletReward);
@@ -462,7 +469,7 @@ public class ConfigurationWindow {
 		JLabel lblKugelTrifftKugel = new JLabel("Kugel trifft Kugel:");
 		panel_19.add(lblKugelTrifftKugel);
 		
-		bulletHitBulletReward = new JTextField();
+		JTextField bulletHitBulletReward = new JTextField();
 		bulletHitBulletReward.setText(Config.getStringValue("Reward_BulletHitBullet", "3.0"));
 		bulletHitBulletReward.setColumns(5);
 		panel_19.add(bulletHitBulletReward);
@@ -476,7 +483,7 @@ public class ConfigurationWindow {
 		JLabel lblKugelTrifftGegner = new JLabel("Kugel trifft Gegner:");
 		panel_20.add(lblKugelTrifftGegner);
 		
-		bulletHitEnemyReward = new JTextField();
+		JTextField bulletHitEnemyReward = new JTextField();
 		bulletHitEnemyReward.setText(Config.getStringValue("Reward_BulletHitEnemy", "3.0"));
 		bulletHitEnemyReward.setColumns(5);
 		panel_20.add(bulletHitEnemyReward);
@@ -490,7 +497,7 @@ public class ConfigurationWindow {
 		JLabel lblKugelVerfehltGegner = new JLabel("Kugel verfehlt Gegner:");
 		panel_21.add(lblKugelVerfehltGegner);
 		
-		bulletHitWallReward = new JTextField();
+		JTextField bulletHitWallReward = new JTextField();
 		bulletHitWallReward.setText(Config.getStringValue("Reward_BulletHitWall", "-3.0"));
 		bulletHitWallReward.setColumns(5);
 		panel_21.add(bulletHitWallReward);
@@ -523,7 +530,7 @@ public class ConfigurationWindow {
 		JLabel lblVonGegnerGerammt = new JLabel("Von Gegner gerammt:");
 		panel_32.add(lblVonGegnerGerammt);
 		
-		hitByEnemy = new JTextField();
+		JTextField hitByEnemy = new JTextField();
 		hitByEnemy.setText(Config.getStringValue("Reward_HitByEnemy", "1.0"));
 		hitByEnemy.setColumns(5);
 		panel_32.add(hitByEnemy);
@@ -535,7 +542,7 @@ public class ConfigurationWindow {
 		JLabel lblGegnerGerammt = new JLabel("Gegner gerammt:");
 		panel_23.add(lblGegnerGerammt);
 		
-		hitRobotReward = new JTextField();
+		JTextField hitRobotReward = new JTextField();
 		hitRobotReward.setText(Config.getStringValue("Reward_HitRobot", "1.0"));
 		hitRobotReward.setColumns(5);
 		panel_23.add(hitRobotReward);
@@ -547,7 +554,7 @@ public class ConfigurationWindow {
 		JLabel lblWandGerammt = new JLabel("Wand gerammt:");
 		panel_24.add(lblWandGerammt);
 		
-		hitWallReward = new JTextField();
+		JTextField hitWallReward = new JTextField();
 		hitWallReward.setText(Config.getStringValue("Reward_HitWall", "-5.0"));
 		hitWallReward.setColumns(5);
 		panel_24.add(hitWallReward);
@@ -569,7 +576,7 @@ public class ConfigurationWindow {
 		JLabel lblRundeGewonnen = new JLabel("Runde gewonnen:");
 		panel_26.add(lblRundeGewonnen);
 		
-		winningReward = new JTextField();
+		JTextField winningReward = new JTextField();
 		winningReward.setText(Config.getStringValue("Reward_Winning", "10.0"));
 		winningReward.setColumns(5);
 		panel_26.add(winningReward);
@@ -581,7 +588,7 @@ public class ConfigurationWindow {
 		JLabel lblRundeVerloren = new JLabel("Runde verloren:");
 		panel_27.add(lblRundeVerloren);
 		
-		loosingReward = new JTextField();
+		JTextField loosingReward = new JTextField();
 		loosingReward.setText(Config.getStringValue("Reward_Loosing", "-10.0"));
 		loosingReward.setColumns(5);
 		panel_27.add(loosingReward);
@@ -699,6 +706,20 @@ public class ConfigurationWindow {
 		});
 		button.setBackground(Color.WHITE);
 		panel_12.add(button);
+		
+		processPanel = new JPanel();
+		processPanel.setBackground(Color.WHITE);
+		tabbedPane.addTab("Prozesse", null, processPanel, null);
+		tabbedPane.setEnabledAt(4, false);
+		processPanel.setLayout(null);
+		
+		processSelectionPanel = new JPanel();
+		processSelectionPanel.setBounds(6, 6, 129, 285);
+		processPanel.add(processSelectionPanel);
+		processSelectionPanel.setBackground(Color.WHITE);
+		processSelectionPanel.setLayout(new FlowLayout(FlowLayout.LEFT, 5, 5));
+		
+		processSelectionBtnGrp = new ButtonGroup();
 
 		JPanel button_panel = new JPanel();
 		button_panel.setBackground(Color.WHITE);
@@ -782,6 +803,12 @@ public class ConfigurationWindow {
 				tabbedPane.setEnabledAt(2, simpleReward.isSelected());
 			}
 		});
+		
+		simpleReward.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				tabbedPane.setEnabledAt(2, simpleReward.isSelected());
+			}
+		});
 	}
 
 	private void loadRobots() {
@@ -823,9 +850,6 @@ public class ConfigurationWindow {
 
 		Config.save();
 
-		if (robocodeProcess != null && robocodeProcess.isAlive())
-			return;
-			
 		if (!Config.getBoolValue("ShowRobocodeGUI")) {
 			robocodeArgs += "-nodisplay ";
 		}
@@ -845,13 +869,122 @@ public class ConfigurationWindow {
 		
 		ProcessBuilder pBuilder = new ProcessBuilder(commands);
 		pBuilder.directory(new File(rHome));
-		pBuilder.redirectOutput(Redirect.INHERIT);
-		pBuilder.redirectError(Redirect.INHERIT);
+		pBuilder.redirectOutput(Redirect.PIPE);
+		pBuilder.redirectError(Redirect.PIPE);
 		
 		try {
-			robocodeProcess = pBuilder.start();
+			Process rcp = pBuilder.start();
+			
+			robocodeProcesses.add(rcp);
+			tabbedPane.setEnabledAt(4, true);
+			
+			createObjectsForNewProcess(Config.getStringValue("EnemyRobot"), rcp);
 		} catch (IOException ex) {
 			ex.printStackTrace();
+		}
+	}
+	
+	private void createObjectsForNewProcess(String radioBtnName, Process rcp) {
+		int index = processSelectionBtnGrp.getButtonCount();
+		
+		// TextContainer für die Ausgabe erstellen	
+		JPanel rightPanel = new JPanel();
+		rightPanel.setBackground(Color.WHITE);
+		rightPanel.setBounds(147, 6, 319, 279);
+		rightPanel.setName("panel_" + index);
+		processPanel.add(rightPanel);
+		rightPanel.setLayout(new BorderLayout(0, 0));
+		
+		JTextArea loggingPanel = new JTextArea();
+		loggingPanel.setWrapStyleWord(true);
+		loggingPanel.setLineWrap(true);
+		loggingPanel.setEditable(false);
+		loggingPanel.setBackground(Color.WHITE);
+		
+		JScrollPane scrollPane = new JScrollPane(loggingPanel);
+		rightPanel.add(scrollPane, BorderLayout.CENTER);
+		
+		JPanel roundsPanel = new JPanel();
+		FlowLayout flowLayout_30 = (FlowLayout) roundsPanel.getLayout();
+		flowLayout_30.setVgap(2);
+		flowLayout_30.setAlignment(FlowLayout.LEFT);
+		roundsPanel.setBackground(Color.WHITE);
+		rightPanel.add(roundsPanel, BorderLayout.NORTH);
+		
+		roundsPanel.add(new JLabel("Runde"));
+		
+		JLabel roundLabel = new JLabel("0");
+		roundsPanel.add(roundLabel);
+		
+		// RadioButton erstellen
+		JRadioButton rdbtn = new JRadioButton(radioBtnName);
+		rdbtn.setName("btn_" + index);
+		processSelectionBtnGrp.add(rdbtn);
+		processSelectionPanel.add(rdbtn);
+		
+		rdbtn.addChangeListener(new ChangeListener() {
+			@Override
+			public void stateChanged(ChangeEvent e) {
+				JRadioButton btn = (JRadioButton)e.getSource();
+				
+				if (!btn.isSelected())
+					return;
+				
+				String name = "panel" + btn.getName().substring(btn.getName().indexOf('_'));				
+				
+				for (Component c : processPanel.getComponents()) {
+					if (c instanceof JPanel && c.getName() != null && c.getName().startsWith("panel")) {
+						if (c.getName().equals(name)) {
+							c.setVisible(true);
+						} else {
+							c.setVisible(false);
+						}
+					}
+				}
+			}
+		});
+		
+		rdbtn.doClick();
+		
+		// Output redirekten
+		redirectConsole.redirectOutput(loggingPanel, roundLabel, rcp.getInputStream(), rcp.getErrorStream(), index);
+	}
+	
+	private void removeObjectsForProcess(int index) {
+		boolean wasSelected = false;
+		
+		for (Component c : processPanel.getComponents()) {
+			if (c instanceof JPanel && c.getName() != null && c.getName().equals("panel_" + index)) {
+				processPanel.remove(c);
+				break;
+			}
+		}
+		
+		Enumeration<AbstractButton> btns = processSelectionBtnGrp.getElements();
+		AbstractButton btn;
+		while (btns.hasMoreElements()) {
+			btn = btns.nextElement();
+			if (btn.getName() != null && btn.getName().equals("btn_" + index)) {
+				processSelectionBtnGrp.remove(btn);
+				if (btn.isSelected()) {
+					wasSelected = true;
+				}
+				
+				break;
+			}
+		}
+		
+		for (Component c : processSelectionPanel.getComponents()) {
+			if (c instanceof JRadioButton && c.getName() != null && c.getName().equals("btn_" + index)) {				
+				processSelectionPanel.remove(c);
+				break;
+			}
+		}
+		
+		if (wasSelected) {
+			btns = processSelectionBtnGrp.getElements();
+			if (btns.hasMoreElements())
+				btns.nextElement().doClick();
 		}
 	}
 }
