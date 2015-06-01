@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 
 import robocode.AdvancedRobot;
+import robocode.BulletHitEvent;
 import robocode.DeathEvent;
 import robocode.RobotDeathEvent;
 import robocode.ScannedRobotEvent;
@@ -11,14 +12,18 @@ import utility.Position;
 import agents.LARCAgent;
 import environment.LARCEnvironment;
 
-public class LARCRobot extends AdvancedRobot {
+// Runtime VM Arguments:
+// -Xmx512M -DNOSECURITY=true -Dsun.io.useCanonCaches=false
 
-	public static final int NO_OF_STATES = 5 * 8 * 8 * 3; // my position * enemy position * enemy direction * enemydistance
-	public static final int NO_OF_ACTIONS = 2 * 8 * 9; // Fire * Direction * MoveGun
+public class LARCRobot extends AdvancedRobot {
+// (2*8*5)*(1*8*8*3+4*5*8*3) //Ohne unerreichbare states = 53760 States/Actions
+	public static final int NO_OF_STATES = 5 * 8 * 8* 3 ; // my position * enemyErection * enemyPosition * enemyDistance
+	public static final int NO_OF_ACTIONS = 2 * 8 * 5; // Fire * DriveDirection * GunOffset
+	public static final int BULLETPOWER = 500; //
 	public static double[][] VALUE_FUNCTION = new double[NO_OF_ACTIONS][NO_OF_STATES];
 	public double currentGunAngleToEnemy;
 	public double oldGunAngleToEnemy = 0;
-	private LARCEnvironment environment;
+	public LARCEnvironment environment;
 	private LARCAgent agent;
 	private double enemyX;
 	private double enemyY;
@@ -35,14 +40,19 @@ public class LARCRobot extends AdvancedRobot {
 	private double currentDistance;
 	private double currentEnemyDistance;
 	private double currentHeading;
+	private int scanDirection;
+	private double gunTurnToEnemy;
+	public int wallHitCounter;
 	
 
 	public LARCRobot() {
 		this.enemyX = 0;
 		this.enemyY = 0;
+		this.wallHitCounter = 0;
 		this.enemyDirection = 1;
 		this.environment = new LARCEnvironment(this);
 		this.agent = new LARCAgent(this);
+		this.scanDirection = 1;
 	}
 
 	@Override
@@ -50,25 +60,24 @@ public class LARCRobot extends AdvancedRobot {
 		this.execute();
 		this.setAdjustRadarForGunTurn(true);
 		this.setAdjustGunForRobotTurn(true);
-		this.setColors(Color.CYAN, Color.CYAN, Color.CYAN, Color.CYAN, Color.CYAN);
+		this.setColors(Color.CYAN, Color.RED, Color.GREEN, Color.MAGENTA, Color.YELLOW);
 		// init
 		this.myPosition = new Position(this.getX(), this.getY());
 		this.environment.env_init();
 		this.agent.agent_init();
 		int stateID = this.environment.env_start();
 		int actionID = this.agent.agent_start(stateID);
+		setTurnRadarRight(2000);
 		while (true) {
 			this.gunPostion = this.getGunHeading();
 			this.selfEnergy = this.getEnergy();
 			this.myPosition.setX(this.getX());
 			this.myPosition.setY(this.getY());
+			
 			// default actions:
-			setTurnRadarRight(2000);
+//			setTurnRadarRight(2000);
+			
 			// stepping
-			if (this.getTurnRemaining() == 0 && this.currentDistance != 0) {
-				setAhead(this.currentDistance);
-				this.currentDistance = 0;
-			}
 			if (this.getDistanceRemaining() == 0 && this.getTurnRemaining() == 0) {
 				updateHeading();
 				stateID = this.environment.env_step(actionID);
@@ -85,9 +94,14 @@ public class LARCRobot extends AdvancedRobot {
 		// Panzer Fahren!:
 		backOrAhead(instructions[1], instructions[0]);
 
+		if(getGunTurnRemaining() == 0){
+			this.setTurnGunRight(gunTurnToEnemy + instructions[3]);
+		}
+		
 		// Schießen:
 		if (instructions[2] == 1.0) {
-			setFire(this.getEnergy() * 0.2);
+			double firePower = Math.min(BULLETPOWER / this.distanceToEnemy, 3); // 3 ist max möglicher wert für firepower
+			setFire(firePower);
 		}
 	}
 
@@ -113,14 +127,15 @@ public class LARCRobot extends AdvancedRobot {
 	private void backOrAhead(double turnDegrees, double distance) {
 		if (turnDegrees > 90) {
 			currentDistance = -distance;
-			turnRight(turnDegrees - 180);
+			setTurnRight(turnDegrees - 180);
 		} else if (turnDegrees < -90) {
 			currentDistance = -distance;
-			turnRight(turnDegrees + 180);
+			setTurnRight(turnDegrees + 180);
 		} else {
 			this.currentDistance = distance;
-			turnRight(turnDegrees);
+			setTurnRight(turnDegrees);
 		}
+		setAhead(this.currentDistance);
 	}
 
 	public double getEnemyDirection() {
@@ -186,6 +201,9 @@ public class LARCRobot extends AdvancedRobot {
 	/*************************************************************************************************************************/
 	@Override
 	public void onScannedRobot(ScannedRobotEvent event) {
+		scanDirection *= -1; // changes value from 1 to -1
+		setTurnRadarRight(360 * scanDirection);
+		
 		// calculate enemy direction via oster algorithm:
 		double velocity = event.getVelocity();
 		if (velocity >= 0) {
@@ -197,23 +215,9 @@ public class LARCRobot extends AdvancedRobot {
 			}
 		}
 		// System.out.println("Enemy Direction: " + enemyDirection);
-
-		// setTurnGunRight(getHeading() - getGunHeading() + event.getBearing());
-		double x = getHeading() - getGunHeading();
-		if (x > 180) {
-			x -= 360;
-		} else if (x < -180) {
-			x += 360;
-			x *= -1;
-		}
-		x += event.getBearing();
-		if (x > 180) {
-			x -= 360;
-		} else if (x < -180) {
-			x += 360;
-			x *= -1;
-		}
-		setTurnGunRight(x);
+		gunTurnToEnemy = Position.normalizeDegrees(getHeading() - getGunHeading() + event.getBearing());
+		//setTurnGunRight(Position.normalizeDegrees(getHeading() - getGunHeading() + event.getBearing()));
+	
 
 		// update enemy-related state variables:
 		this.currentGunAngleToEnemy = Math.abs(getHeading() - getGunHeading() + event.getBearing());
@@ -225,6 +229,16 @@ public class LARCRobot extends AdvancedRobot {
 
 		this.updateEnergyRatio();
 	}
+	
+	@Override
+	public void onBulletHit(BulletHitEvent event) {
+		this.currentReward += 1;
+	}
+	
+	@Override
+	public void onHitWall(robocode.HitWallEvent event) {
+		this.wallHitCounter++;
+	};
 
 	@Override
 	public void onDeath(DeathEvent event) {
@@ -236,7 +250,7 @@ public class LARCRobot extends AdvancedRobot {
 
 	@Override
 	public void onRobotDeath(RobotDeathEvent event) {
-		// this.currentReward = 30;
+		this.previousReward += 3;
 		this.agent.agent_end();
 		this.environment.env_cleanup();
 		this.agent.agent_cleanup();
