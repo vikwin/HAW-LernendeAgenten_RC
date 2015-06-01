@@ -244,8 +244,6 @@ public class LARCbot extends RewardRobot {
 						.addOffsetToEnemyPosition(enemy, this,
 								attack.getDeviation()).subtract(getPosition());
 
-				System.out.printf("Vector to target bei %s mit Offset %f\n ",
-						vectorToTarget.toString(), attack.getDeviation());
 				double enemyAngle = vectorToTarget.getHeading();
 				gunTurnDirection = enemyAngle - getGunHeading();
 			}
