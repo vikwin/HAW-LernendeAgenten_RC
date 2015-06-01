@@ -10,8 +10,7 @@ public class LARCEnvironment implements IEnvironment {
 	private double currentEnergyRatio;
 	private double previousEnergyRatio;
 	public State currentState;
-	private int previousReward;
-	private int currentReward;
+	private double currentReward;
 
 	public LARCEnvironment(LARCRobot robot) {
 		this.robot = robot;
@@ -21,7 +20,6 @@ public class LARCEnvironment implements IEnvironment {
 	@Override
 	public void env_init() {
 		this.currentEnergyRatio = 1;
-		this.previousReward = 0;
 		this.currentReward = 0;
 	}
 
@@ -67,22 +65,23 @@ public class LARCEnvironment implements IEnvironment {
 	 * @return reward
 	 */
 	private void calculateReward() {
-		this.previousReward = currentReward;
-		this.currentReward = 0;
-		if (this.currentEnergyRatio > this.previousEnergyRatio) {
-			this.currentReward += 1;
-		} else if (this.currentEnergyRatio < this.previousEnergyRatio) {
-			this.currentReward -= 1;
-		}
-		if (this.currentState.getEdgeState() != EdgeState.MID) {
-			// System.out.println("EdgeStage: " + this.currentState.getEdgeState());
-			this.currentReward -= 2;
-		}
+		// this.previousReward = currentReward;
+		// this.currentReward = 0;
+		// if (this.currentEnergyRatio > this.previousEnergyRatio) {
+		// this.currentReward += 1;
+		// } else if (this.currentEnergyRatio < this.previousEnergyRatio) {
+		// this.currentReward -= 1;
+		// }
+		// if (this.currentState.getEdgeState() != EdgeState.MID) {
+		// // System.out.println("EdgeStage: " + this.currentState.getEdgeState());
+		// this.currentReward -= 2;
+		// }
 		// System.out.println("Reward: " + this.currentReward);
 
 		// System.out.println(this.currentState.getEdgeState() + ": " + this.currentReward);
 
+		this.robot.setPreviousReward(currentReward);
+		this.currentReward = this.robot.getReward();
 		this.robot.setCurrentReward(currentReward);
-		this.robot.setPreviousReward(previousReward);
 	}
 }
