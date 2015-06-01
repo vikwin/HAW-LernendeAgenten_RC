@@ -4,13 +4,13 @@ import utility.Position;
 
 public class State {
 
-	public static final double MAX_X = 720;// 800 * 0.9;
+	public static final double MAX_X = 740;// 800 * 0.9;
 
-	public static final double MIN_X = 80;// 800 * 0.1;
+	public static final double MIN_X = 60;// 800 * 0.1;
 
-	public static final double MAX_Y = 520; // 600 * 0.9;
+	public static final double MAX_Y = 540; // 600 * 0.9;
 
-	public static final double MIN_Y = 80; // 600 * 0.1;
+	public static final double MIN_Y = 60; // 600 * 0.1;
 
 	public enum EdgeState {
 		MID, LEFTEDGE, RIGHTEDGE, TOPEDGE, BOTTOMEDGE;
@@ -32,9 +32,10 @@ public class State {
 	// public int gunPosition;
 
 	public int getStateID() {
-		int state = this.edgeState.ordinal() * 1 
+		int state = 
+				  this.edgeState.ordinal()
 				+ this.enemyPosition.ordinal() * EdgeState.values().length
-				+ this.enemyDirection.ordinal() * EdgeState.values().length * EnemyPosition.values().length 
+				+ this.enemyDirection.ordinal() * EdgeState.values().length * EnemyPosition.values().length
 				+ this.enemyDistance.ordinal() * EdgeState.values().length * EnemyPosition.values().length * EnemyPosition.values().length;
 		return state;
 	}
@@ -42,20 +43,20 @@ public class State {
 	public EdgeState getEdgeState() {
 		return edgeState;
 	}
-	
+
 	public EnemyPosition getEnemyDirection() {
 		return enemyDirection;
 	}
-	
+
 	public EnemyDistance getEnemyDistance() {
 		return enemyDistance;
 	}
-	
+
 	public void setEnemyDistance(double distance) {
 		this.enemyDistance = EnemyDistance.CLOSE;
 		if (distance >= 400) {
 			this.enemyDistance = EnemyDistance.FAR;
-		}else if (distance >=200) {
+		} else if (distance >= 200) {
 			this.enemyDistance = EnemyDistance.INBETWEEN;
 		}
 	}

@@ -43,35 +43,43 @@ public class Action {
 		double normHeading = Position.normalizeDegrees(currentHeading);
 		switch (getMove()) {
 		case 0:
+			Position.printdebug("NORD");
 			moveVector[0] = this.SHORTDIST;
 			moveVector[1] = Position.normalizeDegrees(0 - normHeading);
 			break;
 		case 1:
+			Position.printdebug("NORDOST");
 			moveVector[0] = this.LONGDIST;
 			moveVector[1] = Position.normalizeDegrees(45 - normHeading);
 
 			break;
 		case 2:
+			Position.printdebug("OST");
 			moveVector[0] = this.SHORTDIST;
 			moveVector[1] = Position.normalizeDegrees(90 - normHeading);
 			break;
 		case 3:
+			Position.printdebug("SÜDOST");
 			moveVector[0] = this.LONGDIST;
 			moveVector[1] = Position.normalizeDegrees(135 - normHeading);
 			break;
 		case 4:
+			Position.printdebug("SÜD");
 			moveVector[0] = this.SHORTDIST;
 			moveVector[1] = Position.normalizeDegrees(180 - normHeading);
 			break;
 		case 5:
+			Position.printdebug("SÜDWEST");
 			moveVector[0] = this.LONGDIST;
 			moveVector[1] = Position.normalizeDegrees(-135 - normHeading);
 			break;
 		case 6:
+			Position.printdebug("WEST");
 			moveVector[0] = this.SHORTDIST;
 			moveVector[1] = Position.normalizeDegrees(-90 - normHeading);
 			break;
 		case 7:
+			Position.printdebug("NORDWEST");
 			moveVector[0] = this.LONGDIST;
 			moveVector[1] = Position.normalizeDegrees(-45 - normHeading);
 			break;
@@ -87,6 +95,7 @@ public class Action {
 		} else {
 			moveVector[3] = turnGun * GUN_TURN_STEP;
 		}
+		Position.printdebug("Gunturn: " + moveVector[3]);
 		return moveVector;
 	}
 }

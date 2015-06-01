@@ -1,5 +1,7 @@
 package utility;
 
+import agents.LARCAgent;
+
 public class Position {
 
 	private double x;
@@ -26,7 +28,13 @@ public class Position {
 		this.y = y;
 	}
 
-	//TESTED TO PERFECTION:
+	public static void printdebug(String toPrint) {
+		if (LARCAgent.DEBUG) {
+			System.out.println(toPrint);
+		}
+	}
+
+	// TESTED TO PERFECTION:
 	public static double normalizeDegrees(double degrees) {
 		while (degrees > 180)
 			degrees -= 360;
