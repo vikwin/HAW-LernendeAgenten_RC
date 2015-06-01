@@ -21,7 +21,7 @@ public class SimpleAttack {
 	}
 
 	public static final SimpleAttack NOTHING = new SimpleAttack(null, 0);
-	private static final int MAX_DEVIATION = 200, RESOLUTION = 20;
+	public static final int MAX_DEVIATION = 300, RESOLUTION = 30;
 	private static int count = ((MAX_DEVIATION / RESOLUTION) * 2 + 1) * GunPower.values().length + 1;
 	
 	public static SimpleAttack byId(int id) {

@@ -1,5 +1,6 @@
 package robot;
 
+import java.awt.Color;
 import java.awt.Graphics2D;
 import java.util.Arrays;
 
@@ -57,6 +58,11 @@ public class LARCbot extends RewardRobot {
 	@Override
 	public void run() {
 		super.run();
+
+		setBodyColor(Color.ORANGE);
+		setBulletColor(Color.RED);
+		setGunColor(Color.RED);
+		getName();
 
 		createEvents();
 		// Der Environmentbuilder muss aus der run Methode heraus initialisiert
@@ -234,8 +240,9 @@ public class LARCbot extends RewardRobot {
 				return new NothingAction();
 			} else {
 				firePower = attack.getPower().toDouble();
-				Vector2D vectorToTarget = addOffsetToEnemyPosition(enemy,
-						attack.getDeviation()).subtract(getPosition());
+				Vector2D vectorToTarget = EnvironmentBuilder
+						.addOffsetToEnemyPosition(enemy, this,
+								attack.getDeviation()).subtract(getPosition());
 
 				System.out.printf("Vector to target bei %s mit Offset %f\n ",
 						vectorToTarget.toString(), attack.getDeviation());
@@ -254,27 +261,6 @@ public class LARCbot extends RewardRobot {
 		FireAction fire = new FireAction(firePower);
 
 		return new SerialAction(Arrays.asList(new Action[] { gunturn, fire }));
-	}
-
-	private Vector2D addOffsetToEnemyPosition(Enemy enemy, double offset) {
-		// Faktor für Einberechnung des Offsets festlegen nach Distanz /
-		// Maxdistanz und in
-		// Offset einberechnen
-		double maxDistance = Math.sqrt(getBattleFieldHeight()
-				* getBattleFieldHeight() + getBattleFieldWidth()
-				* getBattleFieldWidth()); // Diagonale des Spielfelds
-		double factor = getPosition().distanceTo(enemy.getPosition())
-				/ maxDistance;
-
-		Vector2D tmp = new Vector2D(0, getWidth() / 2 + offset * factor);
-		tmp = tmp.rotate(enemy.getHeading());
-
-		tmp = enemy.getPosition().add(tmp);
-
-		System.out.printf("Gegner bei %s, mit Offset %f und Faktor %f bei %s\n", enemy
-				.getPosition().toString(), offset, factor, tmp.toString());
-
-		return tmp;
 	}
 
 	/**

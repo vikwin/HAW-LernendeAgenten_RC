@@ -5,8 +5,10 @@ import java.util.HashMap;
 
 import robocode.AdvancedRobot;
 import robocode.ScannedRobotEvent;
+import robot.LARCbot;
 import utils.Config;
 import utils.Utils;
+import utils.Vector2D;
 
 /**
  * Diese Klasse sammelt Informationen über Gegner und nutzt diese um daraus die
@@ -39,7 +41,8 @@ public class EnvironmentBuilder {
 
 	private Environment moveEnv, attackEnv;
 
-	public EnvironmentBuilder(AdvancedRobot bot, boolean useComplexMoveEnv, boolean useComplexAttackEnv) {
+	public EnvironmentBuilder(AdvancedRobot bot, boolean useComplexMoveEnv,
+			boolean useComplexAttackEnv) {
 		selfBot = bot;
 		selfBotLastEnergy = selfBot.getEnergy();
 
@@ -48,19 +51,19 @@ public class EnvironmentBuilder {
 					(int) selfBot.getBattleFieldWidth(),
 					(int) selfBot.getBattleFieldHeight());
 		else
-			moveEnv = new SimpleMoveEnvironment(10, ROBOT_SIZE, 
+			moveEnv = new SimpleMoveEnvironment(10, ROBOT_SIZE,
 					(int) selfBot.getBattleFieldWidth(),
-					(int) selfBot.getBattleFieldHeight()); 
-		
+					(int) selfBot.getBattleFieldHeight());
+
 		if (useComplexAttackEnv)
 			attackEnv = new ComplexAttackEnvironment(ROBOT_SIZE * 2,
 					ROBOT_SIZE, Utils.getBotCoordinates(bot),
 					bot.getGunHeading(), (int) selfBot.getBattleFieldWidth(),
 					(int) selfBot.getBattleFieldHeight());
 		else
-			attackEnv = new SimpleAttackEnvironment(15, ROBOT_SIZE, 
+			attackEnv = new SimpleAttackEnvironment(15, ROBOT_SIZE,
 					(int) selfBot.getBattleFieldWidth(),
-					(int) selfBot.getBattleFieldHeight()); 
+					(int) selfBot.getBattleFieldHeight());
 	}
 
 	/**
@@ -138,7 +141,7 @@ public class EnvironmentBuilder {
 	public int getAttackEnvStateCount() {
 		return attackEnv.getStateCount();
 	}
-	
+
 	/**
 	 * Liefert die Gesamtzahl möglicher Zustände in der MoveEnvironment.
 	 * 
@@ -149,17 +152,19 @@ public class EnvironmentBuilder {
 	}
 
 	/**
-	 * Gibt einen beliebigen Gegner zurück. Wird null, falls kein Gegner vorhanden.
+	 * Gibt einen beliebigen Gegner zurück. Wird null, falls kein Gegner
+	 * vorhanden.
+	 * 
 	 * @return Gegner
 	 */
 	public Enemy getEnemy() {
 		Enemy enemy = null;
 		for (Enemy e : enemies.values())
 			enemy = e;
-		
+
 		return enemy;
 	}
-	
+
 	/**
 	 * Liefert eine Zahl für die Belohnung der Aktionen des Bots.
 	 * 
@@ -174,5 +179,34 @@ public class EnvironmentBuilder {
 		}
 
 		return reward;
+	}
+
+	/**
+	 * Diese Methode berechnet die neue Position eines Gegners nach Aufrechnung eines
+	 * Offsets in Blickrichtung des Gegners. 
+	 * @param enemy Der Gegner
+	 * @param selfBot Der eigene Bot
+	 * @param offset Das aufzurechnende Offset
+	 * @return Die neue Position
+	 */
+	public static Vector2D addOffsetToEnemyPosition(Enemy enemy,
+			AdvancedRobot selfBot, double offset) {
+		double battleFieldDiagonal = Math
+				.sqrt(selfBot.getBattleFieldHeight()
+						* selfBot.getBattleFieldHeight()
+						+ selfBot.getBattleFieldWidth()
+						* selfBot.getBattleFieldWidth());
+
+		// Faktor für Einberechnung des Offsets festlegen nach Distanz /
+		// Maxdistanz (= Diagonale)
+		double factor = ((LARCbot)selfBot).getPosition().distanceTo(enemy.getPosition())
+				/ battleFieldDiagonal;
+
+		Vector2D tmp = new Vector2D(0, offset * factor);
+		tmp = tmp.rotate(enemy.getHeading());
+
+		tmp = enemy.getPosition().add(tmp);
+
+		return tmp;
 	}
 }

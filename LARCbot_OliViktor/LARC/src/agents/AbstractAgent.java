@@ -117,6 +117,7 @@ public abstract class AbstractAgent {
 			}
 		});
 
+		t.setName("LARCbot Save Thread");
 		t.start();
 	}
 

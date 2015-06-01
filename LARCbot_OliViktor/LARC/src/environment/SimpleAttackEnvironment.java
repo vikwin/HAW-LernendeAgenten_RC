@@ -5,10 +5,12 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.AffineTransform;
 import java.awt.geom.GeneralPath;
+import java.util.ArrayList;
 import java.util.Collection;
 import java.util.HashMap;
 
 import robocode.AdvancedRobot;
+import robot.SimpleAttack;
 import utils.Utils;
 import utils.Vector2D;
 
@@ -29,11 +31,14 @@ import utils.Vector2D;
 public class SimpleAttackEnvironment implements Environment {
 
 	private final int ringCount, enemyCount, robotSize;
-	private final double ringThickness, botPadding;
+	private final double ringThickness, botPadding, battleFieldDiagonal;
 
 	private Vector2D selfPosition;
 
 	private boolean[] rings;
+
+	private AdvancedRobot selfBot;
+	private Collection<Enemy> enemies;
 	private HashMap<Vector2D, Direction> enemyVectors; // Ortsvektor und
 														// Blickrichtung
 														// der Gegner
@@ -86,11 +91,12 @@ public class SimpleAttackEnvironment implements Environment {
 
 		this.botPadding = Math.sqrt(2.0) * robotSize / 2;
 
-		double battleFieldDiagonal = Math.sqrt(battleFieldHeight
-				* battleFieldHeight + battleFieldWidth * battleFieldWidth);
+		battleFieldDiagonal = Math.sqrt(battleFieldHeight * battleFieldHeight
+				+ battleFieldWidth * battleFieldWidth);
 		this.ringThickness = (battleFieldDiagonal - botPadding / 2) / ringCount;
 
 		this.rings = new boolean[ringCount];
+		this.enemies = new ArrayList<Enemy>();
 		this.enemyVectors = new HashMap<>();
 
 		clearEnv();
@@ -106,6 +112,8 @@ public class SimpleAttackEnvironment implements Environment {
 	@Override
 	public void update(Collection<Enemy> enemies, AdvancedRobot selfBot) {
 		clearEnv();
+		this.selfBot = selfBot;
+		this.enemies = enemies;
 
 		selfPosition = Utils.getBotCoordinates(selfBot);
 
@@ -150,25 +158,40 @@ public class SimpleAttackEnvironment implements Environment {
 						(int) circleSize, (int) circleSize, 0, 360);
 		}
 
-
 		// Zeichne die Richtung der Gegner in blau ein
 		g.setColor(new Color(0x00, 0x00, 0xff, 0x80));
 		GeneralPath triangle = new GeneralPath();
-		triangle.moveTo(-robotSize/4, 0f);
+		triangle.moveTo(-robotSize / 4, 0f);
 		triangle.lineTo(0f, robotSize);
-		triangle.lineTo(robotSize/4, 0f);
-		triangle.closePath();	      
-		
+		triangle.lineTo(robotSize / 4, 0f);
+		triangle.closePath();
+
 		for (Vector2D enemy : enemyVectors.keySet()) {
 			AffineTransform at = new AffineTransform();
 			at.setToTranslation(enemy.getX(), enemy.getY());
 			at.rotate(-Utils.degToRad(enemyVectors.get(enemy).getHeading()));
-		
+
 			triangle.transform(at);
 			g.fill(triangle);
-			
-			at.rotate(-Utils.degToRad(-2*enemyVectors.get(enemy).getHeading()));
-			triangle.transform(at);			
+
+			at.rotate(-Utils
+					.degToRad(-2 * enemyVectors.get(enemy).getHeading()));
+			triangle.transform(at);
+		}
+
+		// Zeichne die möglichen Attackziele in grün ein
+		g.setColor(new Color(0x00, 0xff, 0x00, 0x80));
+		Vector2D target;
+		int pointSize = 4;
+		for (Enemy enemy : enemies) {
+			for (double i = -SimpleAttack.MAX_DEVIATION; i <= SimpleAttack.MAX_DEVIATION; i += SimpleAttack.RESOLUTION) {
+				target = EnvironmentBuilder.addOffsetToEnemyPosition(enemy,
+						selfBot, i);
+				g.fillArc((int) (target.getX() - pointSize / 2),
+						(int) (target.getY() - pointSize / 2), pointSize,
+						pointSize, 0, 360);
+			}
+
 		}
 
 	}
