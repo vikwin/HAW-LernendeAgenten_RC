@@ -152,11 +152,11 @@ public class LARCbot extends RewardRobot {
 
 			if (lastAttackAgentAction == null
 					|| lastAttackAgentAction.hasFinished()) {
-				
+
 				lastAttackAgentAction = getActionByAttack(attackAgent
 						.getNextAction(envBuilder.getAttackEnvId()));
 				this.addAction(lastAttackAgentAction);
-				
+
 				attackAgent.addReward(getReward(1));
 			}
 		}
@@ -257,13 +257,22 @@ public class LARCbot extends RewardRobot {
 	}
 
 	private Vector2D addOffsetToEnemyPosition(Enemy enemy, double offset) {
-		Vector2D tmp = new Vector2D(0, getWidth() / 2 + offset);
+		// Faktor für Einberechnung des Offsets festlegen nach Distanz /
+		// Maxdistanz und in
+		// Offset einberechnen
+		double maxDistance = Math.sqrt(getBattleFieldHeight()
+				* getBattleFieldHeight() + getBattleFieldWidth()
+				* getBattleFieldWidth()); // Diagonale des Spielfelds
+		double factor = getPosition().distanceTo(enemy.getPosition())
+				/ maxDistance;
+
+		Vector2D tmp = new Vector2D(0, getWidth() / 2 + offset * factor);
 		tmp = tmp.rotate(enemy.getHeading());
 
 		tmp = enemy.getPosition().add(tmp);
 
-		System.out.printf("Gegner bei %s, mit Offset %f bei %s\n", enemy
-				.getPosition().toString(), offset, tmp.toString());
+		System.out.printf("Gegner bei %s, mit Offset %f und Faktor %f bei %s\n", enemy
+				.getPosition().toString(), offset, factor, tmp.toString());
 
 		return tmp;
 	}
