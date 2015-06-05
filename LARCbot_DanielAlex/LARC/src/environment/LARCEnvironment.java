@@ -7,8 +7,6 @@ import state.State.EdgeState;
 public class LARCEnvironment implements IEnvironment {
 
 	private LARCRobot robot;
-	private double currentEnergyRatio;
-	private double previousEnergyRatio;
 	public State currentState;
 	private double currentReward;
 
@@ -19,7 +17,6 @@ public class LARCEnvironment implements IEnvironment {
 
 	@Override
 	public void env_init() {
-		this.currentEnergyRatio = 1;
 		this.currentReward = 0;
 	}
 
@@ -27,7 +24,6 @@ public class LARCEnvironment implements IEnvironment {
 	public int env_start() {
 
 		// update currentState
-		this.currentEnergyRatio = this.robot.getEnergyRatio();
 		this.currentState.setEdgeState(this.robot.getMyPosition());
 		this.currentState.setEnemyPosition(this.robot.getAngleToEnemy());
 		this.currentState.setEnemyDirection(this.robot.getEnemyDirection());
@@ -40,8 +36,6 @@ public class LARCEnvironment implements IEnvironment {
 	@Override
 	public int env_step(int action) {
 		// update currentStateF
-		this.previousEnergyRatio = this.currentEnergyRatio;
-		this.currentEnergyRatio = this.robot.getEnergyRatio();
 		this.currentState.setEdgeState(this.robot.getMyPosition());
 		this.currentState.setEnemyPosition(this.robot.getAngleToEnemy());
 
@@ -82,6 +76,5 @@ public class LARCEnvironment implements IEnvironment {
 
 		this.robot.setPreviousReward(currentReward);
 		this.currentReward = this.robot.getReward();
-		this.robot.setCurrentReward(currentReward);
 	}
 }

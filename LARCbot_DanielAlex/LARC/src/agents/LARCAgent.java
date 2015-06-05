@@ -25,7 +25,7 @@ public class LARCAgent implements IAgent {
 	private static final double EPSILON = 0.2; // Exploration rate
 	private static final double GAMMA = 0.9; // Time Discount factor
 	private static final double ALPHA = 0.5; // learning rate (importance of new information)
-	private static final double LAMBDA_VALUE = 0.9; // Abschwächungsfaktor
+	private static final double LAMBDA_VALUE = 0.95; // Abschwächungsfaktor
 
 	private Random randGenerator = new Random();
 	private int previousActionInt;
@@ -33,8 +33,8 @@ public class LARCAgent implements IAgent {
 	private int currentActionInt;
 	private int currentStateInt;
 	private Action action;
-	private boolean policyFrozen = false; // lernen
-	private boolean exploringFrozen = false; // ausprobieren
+	private boolean policyFrozen = true; // lernen
+	private boolean exploringFrozen = true; // ausprobieren
 	public static boolean DEBUG = true;
 	private LARCRobot myRobot;
 	private double previousStateQValue;
@@ -111,7 +111,7 @@ public class LARCAgent implements IAgent {
 			try {
 				this.saveValueFunction(LARCAgent.PATH, LARCRobot.VALUE_FUNCTION);
 			} catch (IOException e) {
-				System.out.println("BURN THE FLAG!");
+				System.out.println("agent_end failure!");
 			}
 		}
 	}

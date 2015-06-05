@@ -5,6 +5,7 @@ import utility.Position;
 
 public class Action {
 
+	private static final double NODISTANCE = 0;
 	private final double GUN_TURN_STEP = 2.0;
 	private final double SHORTDIST = 40.0;
 	private final double LONGDIST = Math.sqrt(2 * SHORTDIST * SHORTDIST);
@@ -25,15 +26,15 @@ public class Action {
 	}
 
 	public int getFire() {
-		return actionID - (getTurnGun() * 16 + getMove() * 2);
+		return actionID - (getTurnGun() * 18 + getMove() * 2);
 	}
 
 	public int getMove() {
-		return (actionID - getTurnGun() * 16) / 2;
+		return (actionID - getTurnGun() * 18) / 2;
 	}
 
 	public int getTurnGun() {
-		return actionID / 16;
+		return actionID / 18;
 	}
 
 	public double[] getMoveVector() {
@@ -83,6 +84,11 @@ public class Action {
 			moveVector[0] = this.LONGDIST;
 			moveVector[1] = Position.normalizeDegrees(-45 - normHeading);
 			break;
+		case 8:
+			Position.printdebug("NO_MOVEMENT");
+			moveVector[0] = NODISTANCE;
+			moveVector[1] = NODISTANCE;
+			break;			
 		default:
 			break;
 		}

@@ -15,10 +15,11 @@ import environment.LARCEnvironment;
 // -Xmx512M -DNOSECURITY=true -Dsun.io.useCanonCaches=false
 
 public class LARCRobot extends RewardRobot {
-	// (2*8*5)*(1*8*8*3+4*5*8*3) //Ohne unerreichbare states = 53760 States/Actions
+	// (2*9*5)*(1*8*8*3+4*5*8*3) //Ohne unerreichbare states = 53760 States/Actions
 	public static final int NO_OF_STATES = 5 * 8 * 8 * 3; // my position * enemyErection * enemyPosition * enemyDistance
-	public static final int NO_OF_ACTIONS = 2 * 8 * 5; // Fire * DriveDirection * GunOffset
+	public static final int NO_OF_ACTIONS = 2 * 9 * 5; // Fire * DriveDirection * GunOffset
 	public static final int BULLETPOWER = 500; //
+	public static final long STEP_TIME = 100;
 	public static double[][] VALUE_FUNCTION = new double[NO_OF_ACTIONS][NO_OF_STATES];
 	public static boolean STATE_REPEAT;
 	public double currentGunAngleToEnemy;
@@ -72,12 +73,10 @@ public class LARCRobot extends RewardRobot {
 			this.selfEnergy = this.getEnergy();
 			this.myPosition.setX(this.getX());
 			this.myPosition.setY(this.getY());
-
 			// default actions:
 			// setTurnRadarRight(2000);
-
 			// stepping
-			if (this.getDistanceRemaining() == 0 && this.getTurnRemaining() == 0) {
+			if (this.getDistanceRemaining() == 0 && this.getTurnRemaining() == 0 ) {
 				updateHeading();
 				stateID = this.environment.env_step(actionID);
 				actionID = this.agent.agent_step(stateID);
