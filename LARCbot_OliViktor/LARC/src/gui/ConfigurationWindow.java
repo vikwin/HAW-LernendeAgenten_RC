@@ -198,7 +198,7 @@ public class ConfigurationWindow {
 		flowLayout_13.setHgap(3);
 		panel_17.setBackground(Color.WHITE);
 		
-		JCheckBox extendedAttackEnv = new JCheckBox("Erweiterte Angriffsumwelt");
+		JCheckBox extendedAttackEnv = new JCheckBox("Komplexe Angriffsumwelt");
 		extendedAttackEnv.setSelected(Config.getBoolValue("Robot_UseExtendedAttackEnv"));
 		panel_17.add(extendedAttackEnv);
 		
@@ -209,7 +209,7 @@ public class ConfigurationWindow {
 		flowLayout_14.setHgap(8);
 		panel_18.setBackground(Color.WHITE);
 		
-		JCheckBox extendedMoveEnv = new JCheckBox("Erweiterte Bewegungsumwelt");
+		JCheckBox extendedMoveEnv = new JCheckBox("Komplexe Bewegungsumwelt");
 		extendedMoveEnv.setSelected(Config.getBoolValue("Robot_UseExtendedMoveEnv"));
 		panel_18.add(extendedMoveEnv);
 		
@@ -519,7 +519,7 @@ public class ConfigurationWindow {
 		flowLayout_16.setHgap(0);
 		flowLayout_16.setAlignment(FlowLayout.RIGHT);
 		hit_rewards.setBackground(Color.WHITE);
-		hit_rewards.setBorder(new TitledBorder(null, "Belohnunge f\u00FCr's Rammen", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		hit_rewards.setBorder(new TitledBorder(null, "Belohnungen f\u00FCr's Rammen", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		hit_rewards.setBounds(242, 11, 224, 145);
 		reward_system.add(hit_rewards);
 		
@@ -564,7 +564,7 @@ public class ConfigurationWindow {
 		flowLayout_17.setAlignment(FlowLayout.RIGHT);
 		flowLayout_17.setVgap(0);
 		flowLayout_17.setHgap(0);
-		victory_rewards.setBorder(new TitledBorder(null, "Belohnunge bei Rundenende", TitledBorder.LEADING, TitledBorder.TOP, null, Color.BLACK));
+		victory_rewards.setBorder(new TitledBorder(null, "Belohnungen bei Rundenende", TitledBorder.LEADING, TitledBorder.TOP, null, Color.BLACK));
 		victory_rewards.setBackground(Color.WHITE);
 		victory_rewards.setBounds(242, 161, 224, 105);
 		reward_system.add(victory_rewards);

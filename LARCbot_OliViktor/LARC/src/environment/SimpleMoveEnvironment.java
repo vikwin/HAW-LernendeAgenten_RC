@@ -13,8 +13,8 @@ import utils.Vector2D;
  * Konkrete Klasse zur Abbildung der Umwelt für den MoveAgent. Hierbei wird die
  * Welt in einer Ringstruktur abgebildet, die den Abstand zum Gegner darstellt.
  * Außerdem gibt es für jede der 4 Wände ein Flag, das zeigt ob sich der Bot
- * nahe an dieser befindet. Um festzustellen, in wo der Gegner sich gerade
- * befindet wird darüber hinaus seine Himmelsrichtung festgehalten.
+ * nahe an dieser befindet. Um festzustellen, wo der Gegner sich gerade
+ * befindet, wird darüber hinaus seine Himmelsrichtung relativ zu uns festgehalten.
  * 
  * Bei z. B. 10 Ringen würde sich somit folgende Anzahl möglicher Zustände
  * ergeben:
