@@ -2,7 +2,6 @@ package environment;
 
 import robot.LARCRobot;
 import state.State;
-import state.State.EdgeState;
 
 public class LARCEnvironment implements IEnvironment {
 
@@ -36,6 +35,10 @@ public class LARCEnvironment implements IEnvironment {
 	@Override
 	public int env_step(int action) {
 		// update currentStateF
+		System.out.println("EdgeState: " + currentState.edgeState);
+		System.out.println("EnemyPosition: " + currentState.enemyPosition);
+		System.out.println("EnemyDirection: " + currentState.enemyDirection);
+		System.out.println("Distance: " + currentState.enemyDistance);
 		this.currentState.setEdgeState(this.robot.getMyPosition());
 		this.currentState.setEnemyPosition(this.robot.getAngleToEnemy());
 

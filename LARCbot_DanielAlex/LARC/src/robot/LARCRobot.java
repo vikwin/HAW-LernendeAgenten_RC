@@ -70,7 +70,6 @@ public class LARCRobot extends RewardRobot {
 		setTurnRadarRight(2000);
 		while (true) {
 			this.gunPostion = this.getGunHeading();
-			this.selfEnergy = this.getEnergy();
 			this.myPosition.setX(this.getX());
 			this.myPosition.setY(this.getY());
 			// default actions:

@@ -7,7 +7,6 @@ import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.util.ArrayList;
-import java.util.Iterator;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
@@ -20,12 +19,12 @@ public class LARCAgent implements IAgent {
 
 	public static double[][] E_TRACE_FUNCTION;
 	public static final double INITIAL_Q_VALUE = 0.0;
-	public static final int LAMBDA_LIST_CAPACITY = 7;
+	public static final int LAMBDA_LIST_CAPACITY = 3;
 
 	private static final double EPSILON = 0.2; // Exploration rate
 	private static final double GAMMA = 0.9; // Time Discount factor
 	private static final double ALPHA = 0.5; // learning rate (importance of new information)
-	private static final double LAMBDA_VALUE = 0.95; // Abschwächungsfaktor
+	private static final double LAMBDA_VALUE = 0.8; // Abschwächungsfaktor
 
 	private Random randGenerator = new Random();
 	private int previousActionInt;
@@ -33,9 +32,9 @@ public class LARCAgent implements IAgent {
 	private int currentActionInt;
 	private int currentStateInt;
 	private Action action;
-	private boolean policyFrozen = true; // lernen
-	private boolean exploringFrozen = true; // ausprobieren
-	public static boolean DEBUG = true;
+	private boolean policyFrozen = false; // lernen
+	private boolean exploringFrozen = false; // ausprobieren
+	public static boolean DEBUG = false;
 	private LARCRobot myRobot;
 	private double previousStateQValue;
 	private double currentStateQValue;
@@ -85,9 +84,9 @@ public class LARCAgent implements IAgent {
 		currentStateInt = stateInt;
 
 		if (!policyFrozen) {
-			 this.eisgekuehlterSarsaLambda();
+			this.eisgekuehlterSarsaLambda();
 			// this.SARSA_onPolicy();
-//			this.QLearning();
+			// this.QLearning();
 		}
 
 		previousActionInt = currentActionInt;
@@ -102,9 +101,9 @@ public class LARCAgent implements IAgent {
 	public void agent_end() {
 
 		if (!policyFrozen) {
-			 this.eisgekuehlterSarsaLambda(); // zuweisen des neu gelernten q-wertes
+			this.eisgekuehlterSarsaLambda(); // zuweisen des neu gelernten q-wertes
 			// this.SARSA_onPolicy();
-//			this.QLearning();
+			// this.QLearning();
 		}
 
 		if (this.myRobot.getNumRounds() - 1 == this.myRobot.getRoundNum() && !policyFrozen) {
@@ -158,6 +157,8 @@ public class LARCAgent implements IAgent {
 					* currentSARSADeltaValue
 					* E_TRACE_FUNCTION[this.lastStatesForLambda.get(t)[0]][this.lastStatesForLambda.get(t)[1]];
 
+			System.out.println("Q Wert: " + LARCRobot.VALUE_FUNCTION[this.lastStatesForLambda.get(t)[0]][this.lastStatesForLambda.get(t)[1]]);
+				
 			// replacing traces
 			if (this.currentStateInt == this.lastStatesForLambda.get(t)[1]) {
 				E_TRACE_FUNCTION[this.lastStatesForLambda.get(t)[0]][this.lastStatesForLambda.get(t)[1]] = 1;
@@ -272,7 +273,7 @@ public class LARCAgent implements IAgent {
 					outputWriter.write(valuefunction[a][s] + "");
 				}
 			}
-		}	
+		}
 		outputWriter.flush();
 		outputWriter.close();
 		System.out.println("Saved valueFunction!!!");
