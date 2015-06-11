@@ -6,6 +6,7 @@ import java.util.Arrays;
 
 import robocode.BattleEndedEvent;
 import robocode.CustomEvent;
+import robocode.HitByBulletEvent;
 import robocode.RadarTurnCompleteCondition;
 import robocode.ScannedRobotEvent;
 import robot.actionsystem.Action;
@@ -321,5 +322,12 @@ public class LARCbot extends RewardRobot {
 
 		attackAgent.saveOnBattleEnd();
 		moveAgent.saveOnBattleEnd();
+	}
+	
+	@Override
+	public void onHitByBullet(HitByBulletEvent event) {
+		super.onHitByBullet(event);
+		
+		envBuilder.onHitByBullet(event);
 	}
 }

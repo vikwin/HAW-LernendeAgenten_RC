@@ -174,7 +174,7 @@ public abstract class AbstractAgent {
 
 	private void sarsa_lambda(double reward, double alpha, double gamma,
 			double lambda) {
-		double delta, q_alt;
+		double delta /*, q_alt*/;
 		int sa, sa_;
 		boolean end = false;
 
@@ -198,7 +198,7 @@ public abstract class AbstractAgent {
 		System.out.printf("Reward: %f, Delta: %f\n", reward, delta);*/
 
 		while (!end) {
-			q_alt = Q[sa]; // DEBUG
+			//q_alt = Q[sa]; // DEBUG
 
 			Q[sa] = Q[sa] + alpha * delta * e(sa);
 

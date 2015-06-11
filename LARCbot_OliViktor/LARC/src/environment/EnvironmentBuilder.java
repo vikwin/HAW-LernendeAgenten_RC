@@ -4,6 +4,7 @@ import java.awt.Graphics2D;
 import java.util.HashMap;
 
 import robocode.AdvancedRobot;
+import robocode.HitByBulletEvent;
 import robocode.ScannedRobotEvent;
 import robot.LARCbot;
 import utils.Config;
@@ -101,6 +102,9 @@ public class EnvironmentBuilder {
 	 * @param g
 	 */
 	public void doPaint(Graphics2D g) {
+		for (Enemy e : enemies.values())
+			e.doPaint(g);
+		
 		if (PAINT_MOVE_ENV)
 			moveEnv.doPaint(g);
 		if (PAINT_ATTACK_ENV)
@@ -208,5 +212,11 @@ public class EnvironmentBuilder {
 		tmp = enemy.getPosition().add(tmp);
 
 		return tmp;
+	}
+
+	public void onHitByBullet(HitByBulletEvent event) {
+		for (Enemy e : enemies.values())
+			e.updateWavesByBulletHit(event);
+		
 	}
 }

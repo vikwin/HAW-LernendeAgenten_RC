@@ -20,6 +20,7 @@ import utils.Vector2D;
 public class ComplexMoveEnvironment implements Environment {
 
 	private MoveEnvElement[][] field;
+	@SuppressWarnings("unused")
 	private int robotSize, gridSize, fieldWidth, fieldHeight;
 
 	// Diese Variablen werden für getId benötigt, bitte Hinweis zu getId beachten
