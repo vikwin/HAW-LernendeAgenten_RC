@@ -2,6 +2,7 @@ package environment;
 
 import robot.LARCRobot;
 import state.State;
+import state.State.EdgeState;
 
 public class LARCEnvironment implements IEnvironment {
 
@@ -35,10 +36,10 @@ public class LARCEnvironment implements IEnvironment {
 	@Override
 	public int env_step(int action) {
 		// update currentStateF
-		System.out.println("EdgeState: " + currentState.edgeState);
-		System.out.println("EnemyPosition: " + currentState.enemyPosition);
-		System.out.println("EnemyDirection: " + currentState.enemyDirection);
-		System.out.println("Distance: " + currentState.enemyDistance);
+		// System.out.println("EdgeState: " + currentState.edgeState);
+		// System.out.println("EnemyPosition: " + currentState.enemyPosition);
+		// System.out.println("EnemyDirection: " + currentState.enemyDirection);
+		// System.out.println("Distance: " + currentState.enemyDistance);
 		this.currentState.setEdgeState(this.robot.getMyPosition());
 		this.currentState.setEnemyPosition(this.robot.getAngleToEnemy());
 
@@ -69,15 +70,16 @@ public class LARCEnvironment implements IEnvironment {
 		// } else if (this.currentEnergyRatio < this.previousEnergyRatio) {
 		// this.currentReward -= 1;
 		// }
-		// if (this.currentState.getEdgeState() != EdgeState.MID) {
-		// // System.out.println("EdgeStage: " + this.currentState.getEdgeState());
-		// this.currentReward -= 2;
-		// }
+		if (this.currentState.getEdgeState() == EdgeState.MID) {
+			// System.out.println("EdgeStage: " + this.currentState.getEdgeState());
+			this.robot.addReward(1);
+		}
 		// System.out.println("Reward: " + this.currentReward);
 
 		// System.out.println(this.currentState.getEdgeState() + ": " + this.currentReward);
 
 		this.robot.setPreviousReward(currentReward);
 		this.currentReward = this.robot.getReward();
+		this.robot.setCurrentReward(this.currentReward);
 	}
 }

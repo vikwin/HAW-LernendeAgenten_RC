@@ -7,6 +7,7 @@ import robocode.DeathEvent;
 import robocode.HitWallEvent;
 import robocode.RobotDeathEvent;
 import robocode.ScannedRobotEvent;
+import state.State;
 import utility.Position;
 import agents.LARCAgent;
 import environment.LARCEnvironment;
@@ -17,9 +18,10 @@ import environment.LARCEnvironment;
 public class LARCRobot extends RewardRobot {
 	// (2*9*5)*(1*8*8*3+4*5*8*3) //Ohne unerreichbare states = 53760 States/Actions
 	public static final int NO_OF_STATES = 5 * 8 * 8 * 3; // my position * enemyErection * enemyPosition * enemyDistance
-	public static final int NO_OF_ACTIONS = 2 * 9 * 5; // Fire * DriveDirection * GunOffset
+	public static final int NO_OF_ACTIONS = 8 * 5; // * DriveDirection * GunOffsetFire
 	public static final int BULLETPOWER = 500; //
 	public static final long STEP_TIME = 100;
+	public static final int DRAW_OFFSET = 60;
 	public static double[][] VALUE_FUNCTION = new double[NO_OF_ACTIONS][NO_OF_STATES];
 	public static boolean STATE_REPEAT;
 	public double currentGunAngleToEnemy;
@@ -75,7 +77,7 @@ public class LARCRobot extends RewardRobot {
 			// default actions:
 			// setTurnRadarRight(2000);
 			// stepping
-			if (this.getDistanceRemaining() == 0 && this.getTurnRemaining() == 0 ) {
+			if (this.getDistanceRemaining() == 0 && this.getTurnRemaining() == 0) {
 				updateHeading();
 				stateID = this.environment.env_step(actionID);
 				actionID = this.agent.agent_step(stateID);
@@ -95,7 +97,7 @@ public class LARCRobot extends RewardRobot {
 			this.setTurnGunRight(gunTurnToEnemy + instructions[3]);
 		}
 
-		// Schießen:
+		// // Schießen:
 		if (instructions[2] == 1.0) {
 			double firePower = Math.min(BULLETPOWER / this.distanceToEnemy, 3); // 3 ist max möglicher wert für firepower
 			setFire(firePower);
@@ -213,7 +215,9 @@ public class LARCRobot extends RewardRobot {
 		}
 		// System.out.println("Enemy Direction: " + enemyDirection);
 		gunTurnToEnemy = Position.normalizeDegrees(getHeading() - getGunHeading() + event.getBearing());
-		// setTurnGunRight(Position.normalizeDegrees(getHeading() - getGunHeading() + event.getBearing()));
+//		setTurnGunRight(Position.normalizeDegrees(getHeading() - getGunHeading() + event.getBearing()));
+
+		// setFire(Math.min(BULLETPOWER / this.distanceToEnemy, 3));
 
 		// update enemy-related state variables:
 		this.currentGunAngleToEnemy = Math.abs(getHeading() - getGunHeading() + event.getBearing());
@@ -248,23 +252,48 @@ public class LARCRobot extends RewardRobot {
 		this.agent.agent_cleanup();
 	}
 
+	// MID, LEFTEDGE, RIGHTEDGE, TOPEDGE, BOTTOMEDGE;
 	@Override
 	public void onPaint(Graphics2D g) {
 		// Set the paint color to red
-		// g.setColor(java.awt.Color.RED);
-		//
-		// // draw grid
-		// for (int i = 0; i < this.getBattleFieldWidth(); i += LARCEnvironment.TILESIZE) {
-		// for (int j = 0; j < this.getBattleFieldHeight(); j += LARCEnvironment.TILESIZE) {
-		//
-		// g.drawRect(i, j, LARCEnvironment.TILESIZE, LARCEnvironment.TILESIZE);
-		// }
-		// }
-		// g.fillRect(((int) (selfGridPos.getX() * LARCEnvironment.TILESIZE)),
-		// ((int) (selfGridPos.getY() * LARCEnvironment.TILESIZE)), LARCEnvironment.TILESIZE,
-		// LARCEnvironment.TILESIZE);
-		// g.fillRect(((int) (enemyGridPos.getX() * LARCEnvironment.TILESIZE)),
-		// ((int) (enemyGridPos.getY() * LARCEnvironment.TILESIZE)), LARCEnvironment.TILESIZE,
-		// LARCEnvironment.TILESIZE);
+		g.setColor(java.awt.Color.RED);
+		// draw grid
+		g.drawRect(0, 0, State.MIN_X, 600);
+		g.drawRect(State.MAX_X, 0, State.MIN_X, 600);
+		g.setColor(java.awt.Color.BLUE);
+		g.drawRect(State.MIN_X, 0, State.MAX_X - State.MIN_X, State.MIN_Y);
+		g.drawRect(State.MIN_X, State.MAX_Y, State.MAX_X - State.MIN_X, State.MIN_Y);
+
+		g.setColor(java.awt.Color.GREEN);
+		// MID:
+		for (int j = 0; j < VALUE_FUNCTION.length; j++) {
+			g.drawString("Q: " + round(LARCRobot.VALUE_FUNCTION[j][0]), 350, 80 + DRAW_OFFSET * j);
+		}
+		// LEFT
+		for (int j = 0; j < VALUE_FUNCTION.length; j++) {
+			g.drawString("Q: " + round(LARCRobot.VALUE_FUNCTION[j][1]), 10, DRAW_OFFSET * (j + 1));
+		}
+
+		// RIGHT
+		for (int j = 0; j < VALUE_FUNCTION.length; j++) {
+			g.drawString("Q: " + round(LARCRobot.VALUE_FUNCTION[j][2]), 760, DRAW_OFFSET * (j + 1));
+		}
+
+		// TOP
+		for (int j = 0; j < VALUE_FUNCTION.length; j++) {
+			g.drawString("Q: " + round(LARCRobot.VALUE_FUNCTION[j][3]), DRAW_OFFSET * (j + 1), 590);
+		}
+
+		// BOTTOM
+		for (int j = 0; j < VALUE_FUNCTION.length; j++) {
+			g.drawString("Q: " + round(LARCRobot.VALUE_FUNCTION[j][4]), DRAW_OFFSET * (j + 1), 10);
+		}
+
+	}
+
+	private double round(double toRound) {
+		toRound = toRound * 100;
+		toRound = Math.round(toRound);
+		return toRound / 100;
 	}
 }

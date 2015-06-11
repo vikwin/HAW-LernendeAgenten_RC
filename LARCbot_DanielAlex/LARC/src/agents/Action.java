@@ -5,7 +5,6 @@ import utility.Position;
 
 public class Action {
 
-	private static final double NODISTANCE = 0;
 	private final double GUN_TURN_STEP = 2.0;
 	private final double SHORTDIST = 40.0;
 	private final double LONGDIST = Math.sqrt(2 * SHORTDIST * SHORTDIST);
@@ -25,21 +24,20 @@ public class Action {
 		return actionID;
 	}
 
-	public int getFire() {
-		return actionID - (getTurnGun() * 18 + getMove() * 2);
-	}
+	// public int getFire() {
+	// return actionID - (getTurnGun() * 18 + getMove() * 2);
+	// }
 
 	public int getMove() {
-		return (actionID - getTurnGun() * 18) / 2;
+		return (actionID - getTurnGun() * 8);
 	}
 
 	public int getTurnGun() {
-		return actionID / 18;
+		return actionID / 8;
 	}
 
 	public double[] getMoveVector() {
 		double[] moveVector = new double[4];
-
 		double currentHeading = this.myRobi.getCurrentHeading();
 		double normHeading = Position.normalizeDegrees(currentHeading);
 		switch (getMove()) {
@@ -52,7 +50,6 @@ public class Action {
 			Position.printdebug("NORDOST");
 			moveVector[0] = this.LONGDIST;
 			moveVector[1] = Position.normalizeDegrees(45 - normHeading);
-
 			break;
 		case 2:
 			Position.printdebug("OST");
@@ -84,24 +81,25 @@ public class Action {
 			moveVector[0] = this.LONGDIST;
 			moveVector[1] = Position.normalizeDegrees(-45 - normHeading);
 			break;
-		case 8:
-			Position.printdebug("NO_MOVEMENT");
-			moveVector[0] = NODISTANCE;
-			moveVector[1] = NODISTANCE;
-			break;			
 		default:
 			break;
 		}
 
-		moveVector[2] = getFire();
-
 		int turnGun = getTurnGun();
-		if (turnGun > 2) {
-			moveVector[3] = -(turnGun - 2) * GUN_TURN_STEP;
+		if (turnGun == 0) {
+			moveVector[2] = 0;
+			moveVector[3] = 0;
 		} else {
-			moveVector[3] = turnGun * GUN_TURN_STEP;
+			if (turnGun > 2) {
+				moveVector[2] = 1;
+				moveVector[3] = -(turnGun - 2) * GUN_TURN_STEP;
+			} else {
+				moveVector[2] = 1;
+				moveVector[3] = turnGun * GUN_TURN_STEP;
+			}
 		}
-		Position.printdebug("Gunturn: " + moveVector[3]);
+
+		// Position.printdebug("Gunturn: " + moveVector[3]);
 		return moveVector;
 	}
 }

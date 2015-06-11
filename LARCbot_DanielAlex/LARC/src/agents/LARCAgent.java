@@ -6,12 +6,14 @@ import java.io.File;
 import java.io.FileReader;
 import java.io.FileWriter;
 import java.io.IOException;
+import java.io.PrintWriter;
 import java.util.ArrayList;
 import java.util.LinkedList;
 import java.util.List;
 import java.util.Random;
 
 import robot.LARCRobot;
+import robot.RewardRobot;
 
 public class LARCAgent implements IAgent {
 
@@ -19,12 +21,12 @@ public class LARCAgent implements IAgent {
 
 	public static double[][] E_TRACE_FUNCTION;
 	public static final double INITIAL_Q_VALUE = 0.0;
-	public static final int LAMBDA_LIST_CAPACITY = 3;
+	public static final int LAMBDA_LIST_CAPACITY = 2;
 
-	private static final double EPSILON = 0.2; // Exploration rate
+	private static final double EPSILON = 0.05; // Exploration rate
 	private static final double GAMMA = 0.9; // Time Discount factor
-	private static final double ALPHA = 0.5; // learning rate (importance of new information)
-	private static final double LAMBDA_VALUE = 0.8; // Abschwächungsfaktor
+	private static final double ALPHA = 0.51; // learning rate (importance of new information)
+	private static final double LAMBDA = 0.5; // Abschwächungsfaktor
 
 	private Random randGenerator = new Random();
 	private int previousActionInt;
@@ -35,12 +37,12 @@ public class LARCAgent implements IAgent {
 	private boolean policyFrozen = false; // lernen
 	private boolean exploringFrozen = false; // ausprobieren
 	public static boolean DEBUG = false;
+	public static boolean LOG = true;
 	private LARCRobot myRobot;
 	private double previousStateQValue;
 	private double currentStateQValue;
 	private LinkedList<int[]> lastStatesForLambda;
 	private double currentQDeltaValue;
-	private double currentSARSADeltaValue;
 
 	public LARCAgent(LARCRobot myRobot) {
 		this.myRobot = myRobot;
@@ -77,9 +79,6 @@ public class LARCAgent implements IAgent {
 
 	@Override
 	public int agent_step(int stateInt) {
-		this.action.setActionID(currentActionInt);
-		this.myRobot.move(this.action.getMoveVector());
-
 		currentActionInt = egreedy(stateInt);
 		currentStateInt = stateInt;
 
@@ -94,6 +93,9 @@ public class LARCAgent implements IAgent {
 
 		this.addToSarsaLambdaList(new int[] { previousActionInt, previousStateInt });
 
+		this.action.setActionID(currentActionInt);
+		this.myRobot.move(this.action.getMoveVector());
+
 		return currentActionInt;
 	}
 
@@ -101,7 +103,8 @@ public class LARCAgent implements IAgent {
 	public void agent_end() {
 
 		if (!policyFrozen) {
-			this.eisgekuehlterSarsaLambda(); // zuweisen des neu gelernten q-wertes
+			this.eisgekuehlterSarsaLambda(); // zuweisen des neu gelernten
+			// q-wertes
 			// this.SARSA_onPolicy();
 			// this.QLearning();
 		}
@@ -117,79 +120,52 @@ public class LARCAgent implements IAgent {
 
 	@Override
 	public void agent_cleanup() {
-		// System.out.println("***** NUMBER OF TIMES MY ROBOT HIT THE WALL:  " + this.myRobot.wallHitCounter);
+		// System.out.println("***** NUMBER OF TIMES MY ROBOT HIT THE WALL:  " +
+		// this.myRobot.wallHitCounter);
 		this.lastStatesForLambda.clear();
 		this.previousActionInt = 0;
 		this.previousStateInt = 0;
 	}
 
 	/********************************************************************************************************************/
-	public void SARSA_onPolicy() {
-		// LARCRobot.VALUE_FUNCTION[this.previousActionInt][this.previousStateInt] += SARSA_ALPHA
-		// * (this.myRobot.getCurrentReward() + SARSA_GAMMA * LARCRobot.VALUE_FUNCTION[this.currentActionInt][this.currentStateInt] -
-		// LARCRobot.VALUE_FUNCTION[this.previousActionInt][this.previousStateInt]);
-		// this.previousActionInt = this.currentActionInt;
-		// this.previousStateInt = this.currentStateInt;
-	}
 
 	private void eisgekuehlterSarsaLambda() {
 		computeSARSADelta();
 
-		E_TRACE_FUNCTION[previousActionInt][previousStateInt]++;
+		E_TRACE_FUNCTION[this.previousActionInt][this.previousStateInt] = 1;
 
-		// LinkedList iterator that descends LIFO over the values:
-		// this.descendingIterator = this.lastStatesForLambda.descendingIterator();
-
-		// while (this.descendingIterator.hasNext()) {
-		// int[] coordinates = this.descendingIterator.next();
-		// LARCRobot.VALUE_FUNCTION[coordinates[0]][coordinates[1]] += SARSA_ALPHA * this.currentSARSADeltaValue
-		// * E_TRACE_FUNCTION[coordinates[0]][coordinates[1]];
-		//
-		// E_TRACE_FUNCTION[coordinates[0]][coordinates[1]] *= SARSA_GAMMA * LAMBDA_VALUE;
-		// }
-
-		// Q(a,s) += alpha*delta*etrace(a,s)
-		// etrace(a,s) *= gamme * lambda
+		if (this.previousStateInt == 0) {
+			this.myRobot.addReward(1.0);
+		}
 
 		for (int t = lastStatesForLambda.size() - 1; t >= 1; t--) {
 
-			LARCRobot.VALUE_FUNCTION[this.lastStatesForLambda.get(t)[0]][this.lastStatesForLambda.get(t)[1]] += ALPHA
-					* currentSARSADeltaValue
-					* E_TRACE_FUNCTION[this.lastStatesForLambda.get(t)[0]][this.lastStatesForLambda.get(t)[1]];
-
-			System.out.println("Q Wert: " + LARCRobot.VALUE_FUNCTION[this.lastStatesForLambda.get(t)[0]][this.lastStatesForLambda.get(t)[1]]);
-				
-			// replacing traces
-			if (this.currentStateInt == this.lastStatesForLambda.get(t)[1]) {
-				E_TRACE_FUNCTION[this.lastStatesForLambda.get(t)[0]][this.lastStatesForLambda.get(t)[1]] = 1;
+			// replacing traces:
+			if (this.previousActionInt == this.lastStatesForLambda.get(t)[0]
+					&& this.previousStateInt == this.lastStatesForLambda.get(t)[1]) {
+				E_TRACE_FUNCTION[this.lastStatesForLambda.get(t)[0]][this.lastStatesForLambda.get(t)[1]] *= GAMMA
+						* LAMBDA + 1;
 			} else {
 				E_TRACE_FUNCTION[this.lastStatesForLambda.get(t)[0]][this.lastStatesForLambda.get(t)[1]] *= GAMMA
-						* LAMBDA_VALUE;
+						* LAMBDA;
 			}
+
+			LARCRobot.VALUE_FUNCTION[this.lastStatesForLambda.get(t)[0]][this.lastStatesForLambda.get(t)[1]] += ALPHA
+					* this.computeSARSADelta()
+					* E_TRACE_FUNCTION[this.lastStatesForLambda.get(t)[0]][this.lastStatesForLambda.get(t)[1]];
+
+			// Remove duplicate values from Sarsa list:
 			if (LARCRobot.STATE_REPEAT) {
 				this.lastStatesForLambda.pop();
 				LARCRobot.STATE_REPEAT = false;
 			}
-			// 1996 Sutton Singh
-			// if (this.previousStateInt == this.lastStatesForLambda.get(t)[1]
-			// && this.previousActionInt == this.lastStatesForLambda.get(t)[0]) {
-			// E_TRACE_FUNCTION[this.lastStatesForLambda.get(t)[0]][this.lastStatesForLambda.get(t)[1]] = 1
-			// + SARSA_GAMMA * LAMBDA_VALUE * oldE;
-			// } else if (this.previousStateInt == this.lastStatesForLambda.get(t)[1]
-			// && this.previousActionInt != this.lastStatesForLambda.get(t)[0]) {
-			// E_TRACE_FUNCTION[this.lastStatesForLambda.get(t)[0]][this.lastStatesForLambda.get(t)[1]] = 0;
-			// } else {
-			// E_TRACE_FUNCTION[this.lastStatesForLambda.get(t)[0]][this.lastStatesForLambda.get(t)[1]] = SARSA_GAMMA
-			// * LAMBDA_VALUE * oldE;
-			// }
 		}
 	}
 
-	private void computeSARSADelta() {
+	private double computeSARSADelta() {
 		this.previousStateQValue = LARCRobot.VALUE_FUNCTION[previousActionInt][previousStateInt];
 		this.currentStateQValue = LARCRobot.VALUE_FUNCTION[currentActionInt][currentStateInt];
-		this.currentSARSADeltaValue = myRobot.getPreviousReward() + GAMMA * this.currentStateQValue
-				- this.previousStateQValue;
+		return (myRobot.getCurrentReward() + GAMMA * this.currentStateQValue - this.previousStateQValue);
 	}
 
 	private void QLearning() {
@@ -211,7 +187,8 @@ public class LARCAgent implements IAgent {
 					lastStatesForLambda.remove(indexPair);
 
 				if (lastStatesForLambda.size() >= LAMBDA_LIST_CAPACITY) {
-					this.lastStatesForLambda.poll();
+					int[] temp = this.lastStatesForLambda.poll();
+					E_TRACE_FUNCTION[temp[0]][temp[1]] = 0;
 				}
 			} else {
 				LARCRobot.STATE_REPEAT = true;
@@ -228,7 +205,10 @@ public class LARCAgent implements IAgent {
 	 */
 	private int egreedy(int theState) {
 		if (!exploringFrozen) {
-			if (randGenerator.nextDouble() <= EPSILON) { // best option is selected 1-epsilon of the time
+			if (randGenerator.nextDouble() <= EPSILON) { // best option is
+															// selected
+															// 1-epsilon of the
+															// time
 				return randGenerator.nextInt(LARCRobot.NO_OF_ACTIONS);
 			}
 		}
@@ -262,20 +242,58 @@ public class LARCAgent implements IAgent {
 	 * @throws IOException
 	 */
 	public void saveValueFunction(String filePath, double[][] valuefunction) throws IOException {
-		BufferedWriter outputWriter = null;
-		outputWriter = new BufferedWriter(new FileWriter(filePath));
-		for (int s = 0; s < LARCRobot.NO_OF_STATES; s++) {
-			for (int a = 0; a < LARCRobot.NO_OF_ACTIONS; a++) {
-				if (a == 0 && s == 0) {
+		PrintWriter outputWriter = null;
+		outputWriter = new PrintWriter(new BufferedWriter(new FileWriter(filePath)));
+		for (int a = 0; a < LARCRobot.NO_OF_ACTIONS; a++) {
+			for (int s = 0; s < LARCRobot.NO_OF_STATES; s++) {
+				if (s == 0 && a == 0) {
 					outputWriter.write(valuefunction[a][s] + "");
 				} else {
-					outputWriter.newLine();
+
 					outputWriter.write(valuefunction[a][s] + "");
 				}
 			}
 		}
 		outputWriter.flush();
 		outputWriter.close();
+
+		if (LOG) {
+			outputWriter = new PrintWriter(new BufferedWriter(new FileWriter("bulletwallhitcounter.csv", true)));
+			outputWriter.println(Double.toString(RewardRobot.bulletwallhitcounter / this.myRobot.getNumRounds()));
+
+			outputWriter.flush();
+			outputWriter.close();
+			outputWriter = new PrintWriter(new BufferedWriter(new FileWriter("enemyhitcounter.csv", true)));
+			outputWriter.println(Double.toString(RewardRobot.enemyHitCounter / this.myRobot.getNumRounds()));
+
+			outputWriter.flush();
+			outputWriter.close();
+			outputWriter = new PrintWriter(new BufferedWriter(new FileWriter("ramHitCounter.csv", true)));
+			outputWriter.println(Double.toString(RewardRobot.ramHitCounter / this.myRobot.getNumRounds()));
+
+			outputWriter.flush();
+			outputWriter.close();
+			outputWriter = new PrintWriter(new BufferedWriter(new FileWriter("rammedCounter.csv", true)));
+			outputWriter.println(Double.toString(RewardRobot.rammedCounter / this.myRobot.getNumRounds()));
+
+			outputWriter.flush();
+			outputWriter.close();
+			outputWriter = new PrintWriter(new BufferedWriter(new FileWriter("selfHitByBulletcounter.csv", true)));
+			outputWriter.println(Double.toString(RewardRobot.selfHitByBulletcounter / this.myRobot.getNumRounds()));
+
+			outputWriter.flush();
+			outputWriter.close();
+			outputWriter = new PrintWriter(new BufferedWriter(new FileWriter("enemyHitCounter.csv", true)));
+			outputWriter.println(Double.toString(RewardRobot.enemyHitCounter / this.myRobot.getNumRounds()));
+
+			outputWriter.flush();
+			outputWriter.close();
+			outputWriter = new PrintWriter(new BufferedWriter(new FileWriter("wallRamCounter.csv", true)));
+			outputWriter.println(Double.toString(RewardRobot.wallRamCounter / this.myRobot.getNumRounds()));
+
+			outputWriter.flush();
+			outputWriter.close();
+		}
 		System.out.println("Saved valueFunction!!!");
 	}
 

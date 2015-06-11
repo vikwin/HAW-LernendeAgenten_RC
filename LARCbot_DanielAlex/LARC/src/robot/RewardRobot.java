@@ -9,7 +9,6 @@ import robocode.HitByBulletEvent;
 import robocode.HitRobotEvent;
 import robocode.HitWallEvent;
 import robocode.RobotDeathEvent;
-import utility.Position;
 
 /**
  * Der RewardRobot ist eine abstrakte Robot Klasse. Dieser wertet Events aus und erstellt aus ihnen Belohnungen oder Bestrafungen.
@@ -26,26 +25,30 @@ public abstract class RewardRobot extends AdvancedRobot {
 	private static double hitByEnemy, hitRobot, hitWall;
 	private static double winning, loosing;
 
-	private int selfhitcounter;
-	private int enemyhitcounter;
-	private static int bulletwallhitcounter;
+	public static double selfHitByBulletcounter;
+	public static double enemyHitCounter;
+	public static double bulletwallhitcounter;
+	public static double ramHitCounter;
+	public static double rammedCounter;
+	public static double wallRamCounter;
 
 	static {
 		// Kugelevents
-		hitByBullet = -1;
+		hitByBullet = 0;
 		bulletHitBullet = 0;
 		bulletHitEnemy = 0;
 		bulletHitWall = 0;
 		multiplyBulletPower = false;
 
 		// Rammen von Objekten
-		hitByEnemy = -1;
-		hitRobot = 1;
+		hitByEnemy = 0;
+		hitRobot = 0;
 		hitWall = -3;
+		// Add reward for staying in mid
 
 		// Rundenende
-		winning = 1;
-		loosing = -1;
+		winning = 0;
+		loosing = 0;
 	}
 
 	private double reward;
@@ -62,15 +65,14 @@ public abstract class RewardRobot extends AdvancedRobot {
 		return r;
 	}
 
-	private void addReward(double value) {
+	public void addReward(double value) {
 		reward += value;
 	}
 
 	/* Events mit Kugeln */
 	@Override
 	public void onHitByBullet(HitByBulletEvent event) {
-		this.selfhitcounter++;
-		Position.printdebug("Getroffen worden: " + this.selfhitcounter);
+		selfHitByBulletcounter++;
 		if (multiplyBulletPower)
 			addReward(hitByBullet * event.getPower() / robocode.Rules.MAX_BULLET_POWER);
 		else
@@ -87,8 +89,7 @@ public abstract class RewardRobot extends AdvancedRobot {
 
 	@Override
 	public void onBulletHit(BulletHitEvent event) {
-		this.enemyhitcounter++;
-		Position.printdebug("Getroffen: " + this.enemyhitcounter);
+		enemyHitCounter++;
 		if (multiplyBulletPower)
 			addReward(bulletHitEnemy * event.getBullet().getPower() / robocode.Rules.MAX_BULLET_POWER);
 		else
@@ -98,7 +99,6 @@ public abstract class RewardRobot extends AdvancedRobot {
 	@Override
 	public void onBulletMissed(BulletMissedEvent event) {
 		bulletwallhitcounter++;
-		Position.printdebug("Wand getroffen: " + bulletwallhitcounter);
 		if (multiplyBulletPower)
 			addReward(bulletHitWall * event.getBullet().getPower() / robocode.Rules.MAX_BULLET_POWER);
 		else
@@ -108,14 +108,18 @@ public abstract class RewardRobot extends AdvancedRobot {
 	/* Events, wenn etwas gerammt wurde */
 	@Override
 	public void onHitRobot(HitRobotEvent event) {
-		if (event.isMyFault())
+		if (event.isMyFault()) {
+			ramHitCounter++;
 			addReward(hitRobot);
-		else
+		} else {
+			rammedCounter++;
 			addReward(hitByEnemy);
+		}
 	}
 
 	@Override
 	public void onHitWall(HitWallEvent event) {
+		wallRamCounter++;
 		addReward(hitWall);
 	}
 

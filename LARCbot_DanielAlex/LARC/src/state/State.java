@@ -4,12 +4,12 @@ import utility.Position;
 
 public class State {
 
-	public static final double MAX_X = 740;
+	public static final int MAX_X = 740;
 
-	public static final double MIN_X = 60;
-	public static final double MAX_Y = 540; 
+	public static final int MIN_X = 60;
+	public static final int MAX_Y = 540; 
 
-	public static final double MIN_Y = 60; 
+	public static final int MIN_Y = 60; 
 
 	public enum EdgeState {
 		MID, LEFTEDGE, RIGHTEDGE, TOPEDGE, BOTTOMEDGE;
