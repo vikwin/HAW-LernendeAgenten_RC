@@ -30,7 +30,6 @@ public class Enemy {
 	private long lastSeen;
 
 	// Wave Surfing Attribute
-	private static final int BINS = 47;
 	private static HashMap<String, double[]> globalSurfStats = new HashMap<>();
 	private double[] surfStats;
 	private ArrayList<EnemyWave> waves;
@@ -48,7 +47,7 @@ public class Enemy {
 		this.selfBot = selfBot;
 		
 		if (!globalSurfStats.containsKey(name))
-			globalSurfStats.put(name, new double[BINS]);
+			globalSurfStats.put(name, new double[WaveSurf.BINS]);
 		
 		surfStats = globalSurfStats.get(name);
 		waves = new ArrayList<>();
@@ -152,26 +151,7 @@ public class Enemy {
 		return surfWave;
 	}
 
-	/**
-	 * Berechnet zunächst, in welche Richtung der Gegner geschossen hat um uns
-	 * zu treffen. Anschließend wird der Richtung ein GuessFactor Index
-	 * zugeordnet.
-	 * 
-	 * @param ew
-	 *            Die EnemyWave, von der wir getroffen wurden
-	 * @param targetLocation
-	 *            Der Ort, an dem wir getroffen wurden
-	 * @return Der GuessFactor Index
-	 */
-	private static int guessfactorIndex(EnemyWave ew, Vector2D targetLocation) {
-		double offsetAngle = (ew.fireLocation.angleTo(targetLocation) - ew.directAngle);
-		double factor = robocode.util.Utils.normalRelativeAngle(offsetAngle)
-				/ WaveSurf.maxEscapeAngle(ew.bulletVelocity) * ew.direction;
-
-		return (int) WaveSurf.limit(0, (factor * ((BINS - 1) / 2))
-				+ ((BINS - 1) / 2), BINS - 1);
-	}
-
+	
 	/**
 	 * Aktualisiert die Statistiken über das Verhalten des Gegners.
 	 * 
@@ -181,14 +161,14 @@ public class Enemy {
 	 *            Der Ort, an dem wir getroffen wurden
 	 */
 	public void logHit(EnemyWave ew, Vector2D targetLocation) {
-		int index = guessfactorIndex(ew, targetLocation);
+		int index = WaveSurf.guessfactorIndex(ew, targetLocation);
 
 		// Hier wird eine gaußkurvenartige Aktualisierung der Statistiken
 		// erreicht
-		for (int x = 0; x < BINS; x++) {
+		for (int x = 0; x < WaveSurf.BINS; x++) {
 			surfStats[x] += 1.0 / (Math.pow(index - x, 2) + 1);
 		}
-	}
+	}	
 
 	/**
 	 * Aktualisiert die Statistiken über das Verhalten des Gegners.
@@ -219,6 +199,21 @@ public class Enemy {
 			waves.remove(hitWave);
 		}
 	}
+	
+	/**
+	 * Gibt den Gefahrenwert für eine angegebene Richtung und Wave zurück.
+	 * Setzt orbitale Bewegung vorraus.
+	 * 
+	 * @param surfWave Die zu surfende Wave
+	 * @param direction Die Richtung: -1 = links, +1 = rechts
+	 * @return
+	 */
+	public double checkDanger(EnemyWave surfWave, int direction) {
+        int index = WaveSurf.guessfactorIndex(surfWave,
+            WaveSurf.predictPosition(selfBot, surfWave, direction));
+ 
+        return surfStats[index];
+    }
 
 	/**
 	 * Aktualisieren der absoluten Position.

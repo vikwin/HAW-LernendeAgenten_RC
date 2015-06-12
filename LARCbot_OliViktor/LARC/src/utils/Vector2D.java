@@ -158,6 +158,18 @@ public class Vector2D {
 	}
 	
 	/**
+	 * Prüf ob der Vector in einem Rechteck liegt.
+	 * @param x
+	 * @param y
+	 * @param width
+	 * @param height
+	 * @return
+	 */
+	public boolean inRectangle(double x, double y, double width, double height) {
+		return !(this.x < x || this.y < y || this.x > x + width || this.y > y + height);
+	}
+	
+	/**
 	 * Liefert eine String Darstellung der Vektorkoordinaten. 
 	 */
 	@Override

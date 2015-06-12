@@ -39,7 +39,8 @@ public class EnvironmentBuilder {
 	private HashMap<String, Enemy> enemies = new HashMap<String, Enemy>();
 	private AdvancedRobot selfBot;
 	private double selfBotLastEnergy;
-
+	private Enemy lockedEnemy;
+	
 	private Environment moveEnv, attackEnv;
 
 	public EnvironmentBuilder(AdvancedRobot bot, boolean useComplexMoveEnv,
@@ -79,6 +80,7 @@ public class EnvironmentBuilder {
 		}
 
 		Enemy enemy = enemies.get(event.getName());
+		lockedEnemy = enemy;
 		enemy.updateAllAttributes(event);
 
 		if (DEBUG) {
@@ -214,6 +216,15 @@ public class EnvironmentBuilder {
 		return tmp;
 	}
 
+	
+	/**
+	 * Gibt den zuletzt gescannten und somit gelockten Gegner zurück.
+	 * @return Gegner
+	 */
+	public Enemy getLockedEnemy(){
+		return lockedEnemy;
+	}
+	
 	public void onHitByBullet(HitByBulletEvent event) {
 		for (Enemy e : enemies.values())
 			e.updateWavesByBulletHit(event);

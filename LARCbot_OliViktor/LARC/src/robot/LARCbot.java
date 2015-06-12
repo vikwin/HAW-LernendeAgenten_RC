@@ -21,13 +21,17 @@ import robot.rewardsystem.RewardRobot;
 import utils.Config;
 import utils.Utils;
 import utils.Vector2D;
+import utils.WaveSurf;
 import agents.AttackAgent;
 import agents.MoveAgent;
 import environment.Enemy;
+import environment.EnemyWave;
 import environment.EnvironmentBuilder;
 
 public class LARCbot extends RewardRobot {
-	// Gibt an, ob das einfache Belohnungssystem (per Energieäderungen) oder das
+	private static final boolean USE_WAVE_SURF = false;
+	
+	// Gibt an, ob das einfache Belohnungssystem (per Energieänderungen) oder das
 	// Event basierte System verwendet werden soll
 	private static final boolean USE_SIMPLE_REWARD_SYSTEM = Config
 			.getBoolValue("Robot_SimpleReward");
@@ -126,7 +130,21 @@ public class LARCbot extends RewardRobot {
 			doScan();
 
 		// Agents updaten und neue Actions holen
-		if (USE_SIMPLE_REWARD_SYSTEM) {
+		if (USE_WAVE_SURF) {
+			if (lastAttackAgentAction == null
+					|| lastAttackAgentAction.hasFinished()) {
+
+				lastAttackAgentAction = getActionByAttack(attackAgent
+						.getNextAction(envBuilder.getAttackEnvId()));
+				this.addAction(lastAttackAgentAction);
+
+				attackAgent.addReward(getReward(1));
+			}
+			
+			doSurf();
+
+		}
+		else if (USE_SIMPLE_REWARD_SYSTEM) {
 			if ((lastMoveAgentAction == null || lastMoveAgentAction
 					.hasFinished())
 					&& (lastAttackAgentAction == null || lastAttackAgentAction
@@ -262,6 +280,33 @@ public class LARCbot extends RewardRobot {
 		return new SerialAction(Arrays.asList(new Action[] { gunturn, fire }));
 	}
 
+	/**
+	 * Wavesurfing anstatt MoveAgent.
+	 */
+	public void doSurf(){
+		Enemy enemy = envBuilder.getLockedEnemy();
+		if (enemy == null)
+			return;
+		
+		EnemyWave surfWave = enemy.getClosestSurfableWave();
+		 
+        if (surfWave == null) { return; }
+ 
+        double dangerLeft = enemy.checkDanger(surfWave, -1);
+        double dangerRight = enemy.checkDanger(surfWave, 1);
+ 
+     
+        Vector2D myLocation = Utils.getBotCoordinates(this);
+        double goAngle = surfWave.fireLocation.angleTo(myLocation);
+        if (dangerLeft < dangerRight) {
+            goAngle = WaveSurf.wallSmoothing(myLocation, goAngle - (Math.PI/2), -1, 160);
+        } else {
+            goAngle = WaveSurf.wallSmoothing(myLocation, goAngle + (Math.PI/2), 1, 160);
+        }
+ 
+        WaveSurf.setBackAsFront(this, goAngle);
+	}
+	
 	/**
 	 * Liefert einen Ortsvektor des Bots.
 	 * 

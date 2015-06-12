@@ -2,11 +2,11 @@ package environment;
 
 import utils.Vector2D;
 
-class EnemyWave {
-	Vector2D fireLocation;
-    long fireTime;
-    double bulletVelocity, directAngle, distanceTraveled;
-    int direction;
+public class EnemyWave {
+	public Vector2D fireLocation;
+	public long fireTime;
+	public double bulletVelocity, directAngle, distanceTraveled;
+	public int direction;
     
 	@Override
 	public int hashCode() {
