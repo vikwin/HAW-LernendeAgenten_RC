@@ -125,7 +125,8 @@ public class MoveAgent extends AbstractAgent {
 
 	@Override
 	public void saveOnBattleEnd() {
-		save("move_agent", null);
+		if (SAVE)
+			save("move_agent", null);
 	}
 	
 	@Override
@@ -136,8 +137,7 @@ public class MoveAgent extends AbstractAgent {
 
 	@Override
 	public void onRoundEnded() {
-		if (SAVE && ++roundCounter >= SAVE_TIMES) {
-			System.out.println("###### Try to save MoveAgent! #######");
+		if (++roundCounter >= SAVE_TIMES) {
 			save("move_agent", FOLDER_NAME + "/" + fileCounter++ + ".zip");
 			roundCounter = 0;
 		}	

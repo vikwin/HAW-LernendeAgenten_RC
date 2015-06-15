@@ -90,49 +90,6 @@ public abstract class AbstractAgent {
 			public void run() {
 				File zipFile = new File(zipFileName == null ? SAVE_FILENAME : zipFileName);
 				FileHandler.saveZipFile(zipFile, entryFilename, getActionList());
-
-				/*try {
-					ArrayList<ZipEntry> oldEntries = new ArrayList<ZipEntry>();
-					
-					if (zipFile.exists()) {
-						// Load Zip file Entrys if exists
-						ZipFile zf = new ZipFile(zipFile);
-						
-						Enumeration<? extends ZipEntry> entries = zf.entries();
-						while (entries.hasMoreElements()) {
-							oldEntries.add(entries.nextElement());
-						}
-						
-						zf.close();
-					}
-					
-					ZipOutputStream zos = new ZipOutputStream(
-							new FileOutputStream(zipFile));
-					
-					// write all old entries
-					for (ZipEntry ze : oldEntries) {
-						zos.putNextEntry(ze);
-					}
-					
-					ZipEntry entry = new ZipEntry(entryFilename + ".json");
-					zos.putNextEntry(entry);
-
-					StringBuilder actionListString = new StringBuilder("["); // JSONValue.toJSONString(actionList);
-					Double[] actionList = getActionList();
-					for (double d : actionList) {
-						actionListString.append(d + ",");
-					}
-					actionListString.delete(actionListString.length() - 1,
-							actionListString.length());
-					actionListString.append("]");
-
-					zos.write(actionListString.toString().getBytes());
-					zos.close();
-				} catch (IOException e) {
-					System.err.printf(
-							"### Fehler beim Speichern des Agents: %s ###\n",
-							e.getMessage());
-				}*/
 			}
 		});
 

@@ -10,13 +10,16 @@ import org.json.simple.parser.ParseException;
 import utils.Config;
 
 public class AttackAgent extends AbstractAgent {
-	private static int SUCCESS_CHANCE = Config.getIntValue("Agent_SuccesChance"); // Erfolgswahrscheinlich, dass die bevorzugte Action ausgeführt wird, in Prozent
+	private static int SUCCESS_CHANCE = Config
+			.getIntValue("Agent_SuccesChance"); // Erfolgswahrscheinlich, dass
+												// die bevorzugte Action
+												// ausgeführt wird, in Prozent
 
 	private static Double[] actionList = null;
 	private static int roundCounter = 0, fileCounter = 0;
-	
-//	private static final String FILENAME = "attack_agent" + FOLDER_NAME;
-	
+
+	// private static final String FILENAME = "attack_agent" + FOLDER_NAME;
+
 	static {
 		if (LOAD_ON_START) {
 			try {
@@ -28,13 +31,15 @@ public class AttackAgent extends AbstractAgent {
 			}
 		}
 	}
-	
+
 	private Random rnd;
 	private int numberOfActions;
 
 	/**
-	 * @param environmentStateCount Anzahl der Zustände, die die Umwelt annehmen kann
-	 * @param actionCount Anzahl der möglichen Aktionen
+	 * @param environmentStateCount
+	 *            Anzahl der Zustände, die die Umwelt annehmen kann
+	 * @param actionCount
+	 *            Anzahl der möglichen Aktionen
 	 */
 	public AttackAgent(int stateCount, int actionCount) {
 		super();
@@ -47,7 +52,7 @@ public class AttackAgent extends AbstractAgent {
 			Arrays.fill(actionList, new Double(0.0));
 		}
 	}
-	
+
 	@Override
 	protected Double[] getActionList() {
 		return actionList;
@@ -65,21 +70,22 @@ public class AttackAgent extends AbstractAgent {
 
 		for (int i = 0; i < numberOfActions; i++) {
 			if (actionList[startID + i] >= max) {
-				if (actionList[startID + i] > max) {	
+				if (actionList[startID + i] > max) {
 					max = actionList[startID + i];
 					maxIDs.clear();
 				}
-				
+
 				maxIDs.add(i);
 			}
 		}
 
 		int size = maxIDs.size();
 		if (size <= 0) {
-//			System.out.println("MoveAgent Fehler>> " + size + " bei StartIndex " + startID);
+			// System.out.println("MoveAgent Fehler>> " + size +
+			// " bei StartIndex " + startID);
 			return rnd.nextInt(numberOfActions);
 		}
-		
+
 		return maxIDs.get(rnd.nextInt(size));
 	}
 
@@ -109,24 +115,25 @@ public class AttackAgent extends AbstractAgent {
 
 		addToLastActionQueue(stateID * numberOfActions + actionID);
 
-//		System.out.println("AttackAgent asked for next action and returns #"
-//				+ (actionID % 36));
-		
+		// System.out.println("AttackAgent asked for next action and returns #"
+		// + (actionID % 36));
+
 		return actionID;
 	}
 
 	@Override
 	public void addReward(double reward) {
-//		System.out.println("AttackAgent gets reward: " + reward);
+		// System.out.println("AttackAgent gets reward: " + reward);
 		if (mode != AgentMode.FIGHTING) {
-//			System.out.print("AttackAgent > ");
+			// System.out.print("AttackAgent > ");
 			addRewardToLastActions(reward);
 		}
 	}
 
 	@Override
 	public void saveOnBattleEnd() {
-		save("attack_agent", null);
+		if (SAVE)
+			save("attack_agent", null);
 	}
 
 	@Override
@@ -137,10 +144,9 @@ public class AttackAgent extends AbstractAgent {
 
 	@Override
 	public void onRoundEnded() {
-		if (SAVE && ++roundCounter >= SAVE_TIMES) {
-			System.out.println("###### Try to save AttackAgent! #######");
+		if (++roundCounter >= SAVE_TIMES) {
 			save("attack_agent", FOLDER_NAME + "/" + fileCounter++ + ".zip");
 			roundCounter = 0;
-		}	
+		}
 	}
 }
