@@ -8,6 +8,7 @@ import robocode.BattleEndedEvent;
 import robocode.CustomEvent;
 import robocode.HitByBulletEvent;
 import robocode.RadarTurnCompleteCondition;
+import robocode.RoundEndedEvent;
 import robocode.ScannedRobotEvent;
 import robot.actionsystem.Action;
 import robot.actionsystem.ConcurrentAction;
@@ -379,6 +380,15 @@ public class LARCbot extends RewardRobot {
 		envBuilder.doPaint(g);
 
 	}
+	
+	@Override
+	public void onRoundEnded(RoundEndedEvent event) {
+		super.onRoundEnded(event);
+		
+		attackAgent.onRoundEnded();
+		moveAgent.onRoundEnded();
+	}
+
 
 	@Override
 	public void onBattleEnded(BattleEndedEvent event) {

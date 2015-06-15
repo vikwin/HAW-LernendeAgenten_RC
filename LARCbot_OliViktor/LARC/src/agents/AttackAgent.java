@@ -13,18 +13,14 @@ public class AttackAgent extends AbstractAgent {
 	private static int SUCCESS_CHANCE = Config.getIntValue("Agent_SuccesChance"); // Erfolgswahrscheinlich, dass die bevorzugte Action ausgeführt wird, in Prozent
 
 	private static Double[] actionList = null;
-	private static int actionCounter = 0, fileCounter = 0;
+	private static int roundCounter = 0, fileCounter = 0;
 	
-	private static final String FILENAME = "attack_agent" + FILE_SUFFIX;
-	
-	protected static void fillActionList(Double[] values) {
-		actionList = values;		
-	}
+//	private static final String FILENAME = "attack_agent" + FOLDER_NAME;
 	
 	static {
 		if (LOAD_ON_START) {
 			try {
-				load("", FILENAME);
+				actionList = load("attack_agent");
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (ParseException e) {
@@ -123,11 +119,6 @@ public class AttackAgent extends AbstractAgent {
 	public void addReward(double reward) {
 //		System.out.println("AttackAgent gets reward: " + reward);
 		if (mode != AgentMode.FIGHTING) {
-			if (++actionCounter >= SAVE_TIMES) {
-				save(TIMESTAMP + FILE_SUFFIX, "attack_agent_" + fileCounter++);
-				actionCounter = 0;
-			}
-			
 //			System.out.print("AttackAgent > ");
 			addRewardToLastActions(reward);
 		}
@@ -135,12 +126,21 @@ public class AttackAgent extends AbstractAgent {
 
 	@Override
 	public void saveOnBattleEnd() {
-		save("", FILENAME);
+		save("attack_agent", null);
 	}
 
 	@Override
 	protected double getMaxQForState(int stateID) {
 		int actionID = getActionWithMaxValue(stateID * numberOfActions);
 		return actionList[stateID * numberOfActions + actionID];
+	}
+
+	@Override
+	public void onRoundEnded() {
+		if (SAVE && ++roundCounter >= SAVE_TIMES) {
+			System.out.println("###### Try to save AttackAgent! #######");
+			save("attack_agent", FOLDER_NAME + "/" + fileCounter++ + ".zip");
+			roundCounter = 0;
+		}	
 	}
 }

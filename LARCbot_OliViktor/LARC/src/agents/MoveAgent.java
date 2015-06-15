@@ -13,18 +13,14 @@ public class MoveAgent extends AbstractAgent {
 	private static int SUCCESS_CHANCE = Config.getIntValue("Agent_SuccesChance"); // Erfolgswahrscheinlich, dass die bevorzugte Action ausgeführt wird, in Prozent
 
 	private static Double[] actionList = null;
-	private static int actionCounter = 0, fileCounter = 0;
+	private static int roundCounter = 0, fileCounter = 0;
 	
-	private static final String FILENAME = "move_agent" + FILE_SUFFIX;
-	
-	protected static void fillActionList(Double[] values) {
-		actionList = values;		
-	}
+//	private static final String FILENAME = "move_agent" + FOLDER_NAME;
 	
 	static {
 		if (LOAD_ON_START) {
 			try {
-				load("", FILENAME);
+				actionList = load("move_agent");
 			} catch (IOException e) {
 				e.printStackTrace();
 			} catch (ParseException e) {
@@ -122,11 +118,6 @@ public class MoveAgent extends AbstractAgent {
 	public void addReward(double reward) {
 //		System.out.println("MoveAgent gets reward");
 		if (mode != AgentMode.FIGHTING) {
-			if (++actionCounter >= SAVE_TIMES) {
-				save(TIMESTAMP + FILE_SUFFIX, "move_agent_" + fileCounter++);
-				actionCounter = 0;
-			}
-			
 //			System.out.print("MoveAgent > ");
 			addRewardToLastActions(reward);
 		}
@@ -134,12 +125,21 @@ public class MoveAgent extends AbstractAgent {
 
 	@Override
 	public void saveOnBattleEnd() {
-		save("", FILENAME);
+		save("move_agent", null);
 	}
 	
 	@Override
 	protected double getMaxQForState(int stateID) {
 		int actionID = getActionWithMaxValue(stateID * actionCount);
 		return actionList[stateID * actionID + actionID];
+	}
+
+	@Override
+	public void onRoundEnded() {
+		if (SAVE && ++roundCounter >= SAVE_TIMES) {
+			System.out.println("###### Try to save MoveAgent! #######");
+			save("move_agent", FOLDER_NAME + "/" + fileCounter++ + ".zip");
+			roundCounter = 0;
+		}	
 	}
 }

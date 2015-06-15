@@ -38,6 +38,7 @@ import javax.swing.border.EmptyBorder;
 import javax.swing.border.TitledBorder;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import javax.swing.filechooser.FileFilter;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 
 import utils.Config;
@@ -47,9 +48,9 @@ public class ConfigurationWindow {
 	private ArrayList<Process> robocodeProcesses = new ArrayList<Process>();
 	private JTabbedPane tabbedPane;
 	private JFrame frmLarcbotExperimentKonfigurator;
-	private JFileChooser fc;
+	private JFileChooser folder_fc, zip_fc;
 	private DefaultListModel<String> robot_listModel;
-	private JTextField robocodeHome;
+	private JTextField robocodeHome, agentSaveFile, agentLoadFile;
 	private JPanel processPanel;
 	private JPanel processSelectionPanel;
 	private ButtonGroup processSelectionBtnGrp;
@@ -93,8 +94,25 @@ public class ConfigurationWindow {
 	 * Initialize the contents of the frame.
 	 */
 	private void initialize() {		
-		fc = new JFileChooser(Config.getStringValue("RobocodeHome"));
-		fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		folder_fc = new JFileChooser(Config.getStringValue("RobocodeHome"));
+		folder_fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
+		
+		zip_fc = new JFileChooser();
+		zip_fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
+		zip_fc.setFileFilter(new FileFilter() {
+			
+			@Override
+			public String getDescription() {
+				return "*.zip";
+			}
+			
+			@Override
+			public boolean accept(File f) {
+				if (f.isDirectory())
+					return true;
+				return f.getName().endsWith(".zip");
+			}
+		});
 		
 		frmLarcbotExperimentKonfigurator = new JFrame();
 		frmLarcbotExperimentKonfigurator.getContentPane().setBackground(Color.WHITE);
@@ -121,7 +139,7 @@ public class ConfigurationWindow {
 		JPanel agent_panel = new JPanel();
 		agent_panel.setBackground(Color.WHITE);
 		agent_panel.setBorder(new TitledBorder(null, "Agenten", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		agent_panel.setBounds(6, 106, 231, 179);
+		agent_panel.setBounds(6, 105, 231, 180);
 		bot_panel.add(agent_panel);
 		agent_panel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		
@@ -137,34 +155,85 @@ public class ConfigurationWindow {
 		loadOnStart.setSelected(Config.getBoolValue("Agent_LoadOnStart"));
 		panel_6.add(loadOnStart);
 		
-		JPanel panel_7 = new JPanel();
-		panel_7.setBackground(Color.WHITE);
-		agent_panel.add(panel_7);
+		JPanel panel_33 = new JPanel();
+		FlowLayout flowLayout_30 = (FlowLayout) panel_33.getLayout();
+		flowLayout_30.setHgap(15);
+		flowLayout_30.setVgap(2);
+		flowLayout_30.setAlignment(FlowLayout.LEFT);
+		panel_33.setBackground(Color.WHITE);
+		agent_panel.add(panel_33);
 		
-		JLabel lblErfolgsrate = new JLabel("Erfolgsrate (%):");
-		panel_7.add(lblErfolgsrate);
+		agentLoadFile = new JTextField();
+		agentLoadFile.setText(Config.getStringValue("Agent_LoadFile"));
+		panel_33.add(agentLoadFile);
+		agentLoadFile.setColumns(10);
 		
-		JSpinner succesChance = new JSpinner();
-		panel_7.add(succesChance);
-		succesChance.setModel(new SpinnerNumberModel(Config.getIntValue("Agent_SuccesChance", 50), 50, 100, 1));
+		JButton btnNewButton = new JButton("...");
+		btnNewButton.setBackground(Color.WHITE);
+		btnNewButton.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				zip_fc.setCurrentDirectory(new File(Config.getStringValue("Agent_LoadFile")).getParentFile());
+				int res = zip_fc.showOpenDialog(frmLarcbotExperimentKonfigurator);
+				
+				if (res == JFileChooser.APPROVE_OPTION) {
+					agentLoadFile.setText(zip_fc.getSelectedFile().getPath());
+					Config.setStringValue("Agent_LoadFile", agentLoadFile.getText());
+				}
+			}
+		});
+		panel_33.add(btnNewButton);
+		
+		
+		JPanel panel_34 = new JPanel();
+		panel_34.setBackground(Color.WHITE);
+		agent_panel.add(panel_34);
+		FlowLayout flowLayout_34 = (FlowLayout) panel_34.getLayout();
+		flowLayout_34.setHgap(3);
+		flowLayout_34.setAlignment(FlowLayout.LEFT);
+		
+		JCheckBox saveAgents = new JCheckBox("Letzten Stand speichern");
+		saveAgents.setBackground(Color.WHITE);
+		saveAgents.setSelected(Config.getBoolValue("Agent_SaveAgents"));
+		panel_34.add(saveAgents);
+		
+		JPanel panel_35 = new JPanel();
+		FlowLayout flowLayout_35 = (FlowLayout) panel_35.getLayout();
+		flowLayout_35.setHgap(15);
+		flowLayout_35.setVgap(2);
+		flowLayout_35.setAlignment(FlowLayout.LEFT);
+		panel_35.setBackground(Color.WHITE);
+		agent_panel.add(panel_35);
+		
+		agentSaveFile = new JTextField();
+		agentSaveFile.setText(Config.getStringValue("Agent_SaveFile"));
+		panel_35.add(agentSaveFile);
+		agentSaveFile.setColumns(10);
+		
+		JButton btnNewButton2 = new JButton("...");
+		btnNewButton2.setBackground(Color.WHITE);
+		btnNewButton2.addActionListener(new ActionListener() {
+			public void actionPerformed(ActionEvent e) {
+				zip_fc.setCurrentDirectory(new File(Config.getStringValue("Agent_SaveFile")).getParentFile());
+				int res = zip_fc.showOpenDialog(frmLarcbotExperimentKonfigurator);
+				
+				if (res == JFileChooser.APPROVE_OPTION) {
+					agentSaveFile.setText(zip_fc.getSelectedFile().getPath());
+					Config.setStringValue("Agent_SaveFile", agentSaveFile.getText());
+				}
+			}
+		});
+		panel_35.add(btnNewButton2);
 		
 		JPanel panel_3 = new JPanel();
 		panel_3.setBackground(Color.WHITE);
 		agent_panel.add(panel_3);
 		panel_3.setLayout(new FlowLayout(FlowLayout.CENTER, 5, 3));
 		
-		JLabel lblNewLabel = new JLabel("Speicherzyklus:");
-		panel_3.add(lblNewLabel);
-		
 		JPanel panel_5 = new JPanel();
 		FlowLayout flowLayout_5 = (FlowLayout) panel_5.getLayout();
 		flowLayout_5.setHgap(20);
 		panel_5.setBackground(Color.WHITE);
 		agent_panel.add(panel_5);
-		
-		JSpinner saveTimes = new JSpinner();
-		panel_5.add(saveTimes);
-		saveTimes.setModel(new SpinnerNumberModel(Config.getIntValue("Agent_SaveTimes", 10000), 10000, 10000000, 10000));
 		
 		JPanel robot_panel = new JPanel();
 		robot_panel.setBackground(Color.WHITE);
@@ -216,7 +285,7 @@ public class ConfigurationWindow {
 		JPanel env_panel = new JPanel();
 		env_panel.setBackground(Color.WHITE);
 		env_panel.setBorder(new TitledBorder(null, "Umwelt", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		env_panel.setBounds(241, 106, 225, 179);
+		env_panel.setBounds(241, 105, 225, 180);
 		bot_panel.add(env_panel);
 		env_panel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		
@@ -284,11 +353,12 @@ public class ConfigurationWindow {
 		flowLayout_19.setVgap(0);
 		flowLayout_19.setHgap(0);
 		switchAlgorithm.setBackground(Color.WHITE);
-		switchAlgorithm.setBounds(6, 6, 460, 60);
+		switchAlgorithm.setBounds(6, 6, 460, 52);
 		algorithm_panel.add(switchAlgorithm);
 		
 		JPanel panel_25 = new JPanel();
 		FlowLayout flowLayout_18 = (FlowLayout) panel_25.getLayout();
+		flowLayout_18.setVgap(2);
 		flowLayout_18.setHgap(3);
 		panel_25.setBackground(Color.WHITE);
 		switchAlgorithm.add(panel_25);
@@ -299,6 +369,7 @@ public class ConfigurationWindow {
 		
 		JPanel panel_28 = new JPanel();
 		FlowLayout flowLayout_20 = (FlowLayout) panel_28.getLayout();
+		flowLayout_20.setVgap(2);
 		flowLayout_20.setHgap(20);
 		panel_28.setBackground(Color.WHITE);
 		switchAlgorithm.add(panel_28);
@@ -317,6 +388,29 @@ public class ConfigurationWindow {
 			break;
 		}
 		
+		JPanel algorithmGeneralPanel = new JPanel();
+		FlowLayout flowLayout_32 = (FlowLayout) algorithmGeneralPanel.getLayout();
+		flowLayout_32.setVgap(0);
+		flowLayout_32.setHgap(0);
+		flowLayout_32.setAlignment(FlowLayout.LEFT);
+		algorithmGeneralPanel.setBorder(new TitledBorder(null, "Allgemein", TitledBorder.LEADING, TitledBorder.TOP, null, null));
+		algorithmGeneralPanel.setBackground(Color.WHITE);
+		algorithmGeneralPanel.setBounds(6, 58, 460, 56);
+		algorithm_panel.add(algorithmGeneralPanel);
+		
+		JPanel panel_7 = new JPanel();
+		FlowLayout flowLayout_31 = (FlowLayout) panel_7.getLayout();
+		flowLayout_31.setVgap(0);
+		algorithmGeneralPanel.add(panel_7);
+		panel_7.setBackground(Color.WHITE);
+		
+		JLabel lblErfolgsrate = new JLabel("Erfolgsrate (%):");
+		panel_7.add(lblErfolgsrate);
+		
+		JSpinner succesChance = new JSpinner();
+		panel_7.add(succesChance);
+		succesChance.setModel(new SpinnerNumberModel(Config.getIntValue("Agent_SuccesChance", 50), 50, 100, 1));
+		
 		JPanel sarsaLambda = new JPanel();
 		FlowLayout flowLayout_21 = (FlowLayout) sarsaLambda.getLayout();
 		flowLayout_21.setVgap(0);
@@ -324,7 +418,7 @@ public class ConfigurationWindow {
 		flowLayout_21.setAlignment(FlowLayout.RIGHT);
 		sarsaLambda.setBorder(new TitledBorder(null, "SARSA-Lambda", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		sarsaLambda.setBackground(Color.WHITE);
-		sarsaLambda.setBounds(6, 66, 224, 169);
+		sarsaLambda.setBounds(6, 116, 224, 169);
 		algorithm_panel.add(sarsaLambda);
 		
 		JPanel panel_13 = new JPanel();
@@ -394,7 +488,7 @@ public class ConfigurationWindow {
 		flowLayout_22.setAlignment(FlowLayout.RIGHT);
 		flowLayout_22.setVgap(0);
 		flowLayout_22.setHgap(0);
-		qLearning.setBounds(235, 66, 231, 169);
+		qLearning.setBounds(235, 116, 231, 169);
 		algorithm_panel.add(qLearning);
 		
 		JPanel panel_29 = new JPanel();
@@ -694,10 +788,10 @@ public class ConfigurationWindow {
 		button.setIcon(null);
 		button.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				int res = fc.showOpenDialog(frmLarcbotExperimentKonfigurator);
+				int res = folder_fc.showOpenDialog(frmLarcbotExperimentKonfigurator);
 				
 				if (res == JFileChooser.APPROVE_OPTION) {
-					robocodeHome.setText(fc.getSelectedFile().getPath());
+					robocodeHome.setText(folder_fc.getSelectedFile().getPath());
 					Config.setStringValue("RobocodeHome", robocodeHome.getText());
 					
 					loadRobots();
@@ -742,7 +836,7 @@ public class ConfigurationWindow {
 				}
 				
 				Config.setBoolValue("Agent_LoadOnStart", loadOnStart.isSelected());
-				Config.setIntValue("Agent_SaveTimes", (int)saveTimes.getValue());
+				Config.setBoolValue("Agent_SaveAgents", saveAgents.isSelected());
 				Config.setStringValue("Agent_Algorithm", algo);
 				Config.setIntValue("Agent_SuccesChance", (int)succesChance.getValue());
 				switch (algo) {

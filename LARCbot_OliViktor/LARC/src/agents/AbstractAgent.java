@@ -1,7 +1,6 @@
 package agents;
 
 import java.io.File;
-import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStreamReader;
 import java.text.SimpleDateFormat;
@@ -11,7 +10,6 @@ import java.util.Iterator;
 import java.util.List;
 import java.util.zip.ZipEntry;
 import java.util.zip.ZipFile;
-import java.util.zip.ZipOutputStream;
 
 import org.json.simple.JSONArray;
 import org.json.simple.parser.JSONParser;
@@ -29,12 +27,17 @@ public abstract class AbstractAgent {
 	private static final String ALGORITHM = Config
 			.getStringValue("Agent_Algorithm");
 
-	protected static final int SAVE_TIMES = Config
-			.getIntValue("Agent_SaveTimes");
+	private static final String LOAD_FILENAME = Config
+			.getStringValue("Agent_LoadFile");
+	private static final String SAVE_FILENAME = Config
+			.getStringValue("Agent_SaveFile");
+	protected static final int SAVE_TIMES = Config.getIntValue("Rounds") / 10;
 	protected static final String TIMESTAMP = new SimpleDateFormat(
-			"yyyy_MM_dd_HH-mm").format(new Date()), FILE_SUFFIX;
+			"yyyy_MM_dd_HH-mm").format(new Date()), FOLDER_NAME;
 	protected static final boolean LOAD_ON_START = Config
 			.getBoolValue("Agent_LoadOnStart");
+	protected static final boolean SAVE = Config
+			.getBoolValue("Agent_SaveAgents");
 
 	protected AgentMode mode;
 
@@ -50,9 +53,9 @@ public abstract class AbstractAgent {
 		if (ALGORITHM.length() > 0)
 			algo = "_" + ALGORITHM.charAt(0);
 
-		FILE_SUFFIX = enemy + algo;
+		FOLDER_NAME = "LARCAgents/" + TIMESTAMP + enemy + algo;
 
-		new File("LARCAgents/" + TIMESTAMP + FILE_SUFFIX).mkdirs();
+		new File(FOLDER_NAME).mkdirs();
 	}
 
 	protected AbstractAgent() {
@@ -71,11 +74,7 @@ public abstract class AbstractAgent {
 	protected abstract int getStateFromId(int id);
 
 	protected abstract double getMaxQForState(int stateID);
-
-	protected static void fillActionList(Double[] values) {
-
-	}
-
+	
 	/**
 	 * Speichert gelernte Informationen des Bots in einer Datei ab.
 	 * 
@@ -85,17 +84,37 @@ public abstract class AbstractAgent {
 	 *             Wenn die angebene Datei nicht vorhanden ist oder nicht
 	 *             zugreifbar
 	 */
-	public void save(final String directory, final String filename) {
+	public void save(final String entryFilename, final String zipFileName) {
 		Thread t = new Thread(new Runnable() {
 			@Override
 			public void run() {
+				File zipFile = new File(zipFileName == null ? SAVE_FILENAME : zipFileName);
+				FileHandler.saveZipFile(zipFile, entryFilename, getActionList());
 
-				try {
+				/*try {
+					ArrayList<ZipEntry> oldEntries = new ArrayList<ZipEntry>();
+					
+					if (zipFile.exists()) {
+						// Load Zip file Entrys if exists
+						ZipFile zf = new ZipFile(zipFile);
+						
+						Enumeration<? extends ZipEntry> entries = zf.entries();
+						while (entries.hasMoreElements()) {
+							oldEntries.add(entries.nextElement());
+						}
+						
+						zf.close();
+					}
+					
 					ZipOutputStream zos = new ZipOutputStream(
-							new FileOutputStream("LARCAgents\\" + directory
-									+ "\\" + filename + ".zip"));
-					ZipEntry entry = new ZipEntry(filename + ".json");
-
+							new FileOutputStream(zipFile));
+					
+					// write all old entries
+					for (ZipEntry ze : oldEntries) {
+						zos.putNextEntry(ze);
+					}
+					
+					ZipEntry entry = new ZipEntry(entryFilename + ".json");
 					zos.putNextEntry(entry);
 
 					StringBuilder actionListString = new StringBuilder("["); // JSONValue.toJSONString(actionList);
@@ -113,7 +132,7 @@ public abstract class AbstractAgent {
 					System.err.printf(
 							"### Fehler beim Speichern des Agents: %s ###\n",
 							e.getMessage());
-				}
+				}*/
 			}
 		});
 
@@ -122,24 +141,30 @@ public abstract class AbstractAgent {
 	}
 
 	@SuppressWarnings("unchecked")
-	public static void load(String directory, String filename)
-			throws IOException, ParseException {
-		File f = new File("LARCAgents\\" + directory + "\\" + filename + ".zip");
-		if (f.exists() && f.isFile()) {
-			ZipFile zf = new ZipFile("LARCAgents\\" + directory + "\\"
-					+ filename + ".zip");
-			ZipEntry ze = zf.getEntry(filename + ".json");
+	protected static Double[] load(String entryFilename) throws IOException,
+			ParseException {
+		File f = new File(LOAD_FILENAME);
+		Double[] ary = null;
+		if (f.exists() && f.isFile() && LOAD_FILENAME.endsWith(".zip")) {
+			ZipFile zf = new ZipFile(LOAD_FILENAME);
+			ZipEntry ze = zf.getEntry(entryFilename + ".json");
+			
+			if (ze != null) {
+				InputStreamReader reader = new InputStreamReader(
+						zf.getInputStream(ze));
+				JSONParser parser = new JSONParser();
 
-			InputStreamReader reader = new InputStreamReader(
-					zf.getInputStream(ze));
-			JSONParser parser = new JSONParser();
+				List<Double> obj = (List<Double>) ((JSONArray) parser
+						.parse(reader));
+				ary = obj.toArray(new Double[0]);
 
-			List<Double> obj = (List<Double>) ((JSONArray) parser.parse(reader));
-			fillActionList(obj.toArray(new Double[0]));
-
-			reader.close();
+				reader.close();
+			}
+			
 			zf.close();
+			
 		}
+		return ary;
 	}
 
 	protected void addToLastActionQueue(int id) {
@@ -174,7 +199,7 @@ public abstract class AbstractAgent {
 
 	private void sarsa_lambda(double reward, double alpha, double gamma,
 			double lambda) {
-		double delta /*, q_alt*/;
+		double delta /* , q_alt */;
 		int sa, sa_;
 		boolean end = false;
 
@@ -191,14 +216,16 @@ public abstract class AbstractAgent {
 		setE(sa, 1);
 
 		// Debug Ausgaben
-		/*System.out.println(this.getClass().toString());
-		System.out.printf("Q-Wert von %d ist %f\n", sa_, Q[sa_]);
-		System.out.println(lastActionQueue.toString());
-		System.out.println(eValues.toString());
-		System.out.printf("Reward: %f, Delta: %f\n", reward, delta);*/
+		/*
+		 * System.out.println(this.getClass().toString());
+		 * System.out.printf("Q-Wert von %d ist %f\n", sa_, Q[sa_]);
+		 * System.out.println(lastActionQueue.toString());
+		 * System.out.println(eValues.toString());
+		 * System.out.printf("Reward: %f, Delta: %f\n", reward, delta);
+		 */
 
 		while (!end) {
-			//q_alt = Q[sa]; // DEBUG
+			// q_alt = Q[sa]; // DEBUG
 
 			Q[sa] = Q[sa] + alpha * delta * e(sa);
 
@@ -209,17 +236,18 @@ public abstract class AbstractAgent {
 				setE(sa, gamma * lambda * e(sa));
 
 			// Debug Ausgaben
-			/*System.out.printf("sa: %d, Q_alt: %f, Q_neu: %f, e: %f\n", sa,
-					q_alt, Q[sa], e(sa));*/
+			/*
+			 * System.out.printf("sa: %d, Q_alt: %f, Q_neu: %f, e: %f\n", sa,
+			 * q_alt, Q[sa], e(sa));
+			 */
 
 			if (it.hasNext())
 				sa = it.next();
 			else
 				end = true;
 		}
-		;
 
-		System.out.println();
+//		System.out.println();
 	}
 
 	protected void addRewardToLastActions(double reward) {
@@ -252,4 +280,6 @@ public abstract class AbstractAgent {
 	public abstract void addReward(double reward);
 
 	public abstract void saveOnBattleEnd();
+
+	public abstract void onRoundEnded();
 }
