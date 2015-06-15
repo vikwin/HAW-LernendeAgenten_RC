@@ -124,7 +124,7 @@ public class WaveSurfMoveEnvironment implements Environment {
 
 		selfPosition = Utils.getBotCoordinates(selfBot);
 
-		int ringNr, enemyIndex = 0;
+		int ringNr = 0;
 		for (Enemy enemy : enemies) {
 			ringNr = (int) ((enemy.getDistance() - botPadding) / ringThickness);
 
@@ -132,7 +132,6 @@ public class WaveSurfMoveEnvironment implements Environment {
 				ringNr = ringCount - 1;
 
 			rings[ringNr] = true;
-
 		}
 
 		Vector2D wallDistance = new Vector2D(0, WALL_DISTANCE);
@@ -204,14 +203,16 @@ public class WaveSurfMoveEnvironment implements Environment {
 
 		int wallState = 0;
 		if (wallToLeft)
-			wallState
+			wallState += 1;
+		if (wallToRight)
+			wallState += 2;
 
 		
-		for (int i = 0; i < 4; i++)
-			if (nearWalls[i])
-				wallState += Math.pow(2, i);
-
-		return ringState * 36 + 
+		int dangerState = 0;
+		dangerState += dangerLeft.ordinal();
+		dangerState += dangerRight.ordinal() * Danger.values().length;
+		
+		return ringState * 36 + dangerState * 4 + wallState; 
 	}
 
 	@Override

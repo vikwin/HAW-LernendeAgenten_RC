@@ -7,6 +7,8 @@ package robot.actionsystem;
  */
 public class MoveAction extends Action {
 
+	private static final double DISTANCE_PADDING = 40.0; // Wird benötigt, damit die Bewegungen weicher werden
+	
 	private double distance;
 
 	public MoveAction(double distance) {
@@ -16,7 +18,10 @@ public class MoveAction extends Action {
 	@Override
 	public void start() {
 		if (!started) {
-			bot.setAhead(distance);
+			if (distance > 0)
+				bot.setAhead(distance + DISTANCE_PADDING);
+			else
+				bot.setAhead(distance - DISTANCE_PADDING);
 			started = true;
 		}
 	}
@@ -29,7 +34,7 @@ public class MoveAction extends Action {
 
 	@Override
 	public void update() {
-		if (started && bot.getDistanceRemaining() == 0)
+		if (started && Math.abs(bot.getDistanceRemaining()) < DISTANCE_PADDING)
 			finished = true;
 
 	}
