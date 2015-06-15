@@ -42,6 +42,10 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 
 import utils.Config;
+import javax.swing.JComboBox;
+import javax.swing.DefaultComboBoxModel;
+import environment.EnvironmentBuilder.AttackEnvironments;
+import environment.EnvironmentBuilder.MoveEnvironments;
 
 public class ConfigurationWindow {
 
@@ -242,45 +246,40 @@ public class ConfigurationWindow {
 		bot_panel.add(robot_panel);
 		robot_panel.setLayout(new FlowLayout(FlowLayout.LEFT, 0, 0));
 		
-		JPanel panel_4 = new JPanel();
-		panel_4.setBackground(Color.WHITE);
-		robot_panel.add(panel_4);
-		FlowLayout flowLayout = (FlowLayout) panel_4.getLayout();
-		flowLayout.setVgap(8);
-		flowLayout.setHgap(3);
-		
-		JCheckBox simpleReward = new JCheckBox("Erweitertes Belohnungssystem");
-		simpleReward.setBackground(Color.WHITE);
-		simpleReward.setSelected(!Config.getBoolValue("Robot_SimpleReward"));
-		panel_4.add(simpleReward);
-		
-		JPanel panel_31 = new JPanel();
-		FlowLayout flowLayout_23 = (FlowLayout) panel_31.getLayout();
-		flowLayout_23.setHgap(0);
-		panel_31.setBackground(Color.WHITE);
-		robot_panel.add(panel_31);
-		
 		JPanel panel_17 = new JPanel();
-		panel_31.add(panel_17);
+		robot_panel.add(panel_17);
 		FlowLayout flowLayout_13 = (FlowLayout) panel_17.getLayout();
-		flowLayout_13.setVgap(0);
-		flowLayout_13.setHgap(3);
+		flowLayout_13.setVgap(3);
 		panel_17.setBackground(Color.WHITE);
 		
-		JCheckBox extendedAttackEnv = new JCheckBox("Komplexe Angriffsumwelt");
-		extendedAttackEnv.setSelected(Config.getBoolValue("Robot_UseExtendedAttackEnv"));
-		panel_17.add(extendedAttackEnv);
+		JLabel lblAngriffumwelt = new JLabel("Angriffumwelt-Typ:");
+		panel_17.add(lblAngriffumwelt);
+		
+		JPanel panel_4 = new JPanel();
+		panel_4.setBackground(Color.WHITE);
+		FlowLayout flowLayout = (FlowLayout) panel_4.getLayout();
+		flowLayout.setHgap(32);
+		flowLayout.setVgap(0);
+		panel_17.add(panel_4);
+		
+		JComboBox<AttackEnvironments> attackEnvChoose = new JComboBox<AttackEnvironments>();
+		attackEnvChoose.setSelectedItem(AttackEnvironments.values()[Config.getIntValue("Robot_AttackEnv")]);
+		panel_4.add(attackEnvChoose);
+		attackEnvChoose.setModel(new DefaultComboBoxModel<AttackEnvironments>(AttackEnvironments.values()));
 		
 		JPanel panel_18 = new JPanel();
-		panel_31.add(panel_18);
+		robot_panel.add(panel_18);
 		FlowLayout flowLayout_14 = (FlowLayout) panel_18.getLayout();
-		flowLayout_14.setVgap(0);
-		flowLayout_14.setHgap(8);
+		flowLayout_14.setVgap(3);
 		panel_18.setBackground(Color.WHITE);
 		
-		JCheckBox extendedMoveEnv = new JCheckBox("Komplexe Bewegungsumwelt");
-		extendedMoveEnv.setSelected(Config.getBoolValue("Robot_UseExtendedMoveEnv"));
-		panel_18.add(extendedMoveEnv);
+		JLabel lblBewegungsumwelt = new JLabel("Bewegungsumwelt-Typ:");
+		panel_18.add(lblBewegungsumwelt);
+		
+		JComboBox<MoveEnvironments> moveEnvChoose = new JComboBox<MoveEnvironments>();
+		moveEnvChoose.setSelectedItem(MoveEnvironments.values()[Config.getIntValue("Robot_MoveEnv")]);
+		moveEnvChoose.setModel(new DefaultComboBoxModel<MoveEnvironments>(MoveEnvironments.values()));
+		panel_18.add(moveEnvChoose);
 		
 		JPanel env_panel = new JPanel();
 		env_panel.setBackground(Color.WHITE);
@@ -527,7 +526,6 @@ public class ConfigurationWindow {
 		JPanel reward_system = new JPanel();
 		reward_system.setBackground(Color.WHITE);
 		tabbedPane.addTab("Reward", null, reward_system, null);
-		tabbedPane.setEnabledAt(2, simpleReward.isSelected());
 		reward_system.setLayout(null);
 		
 		JPanel bullet_rewards = new JPanel();
@@ -852,9 +850,12 @@ public class ConfigurationWindow {
 						break;
 				}
 				
-				Config.setBoolValue("Robot_SimpleReward", !simpleReward.isSelected());
-				Config.setBoolValue("Robot_UseExtendedMoveEnv", extendedMoveEnv.isSelected());
-				Config.setBoolValue("Robot_UseExtendedAttackEnv", extendedAttackEnv.isSelected());
+//				Config.setBoolValue("Robot_SimpleReward", !simpleReward.isSelected());
+//				Config.setBoolValue("Robot_UseExtendedMoveEnv", extendedMoveEnv.isSelected());
+//				Config.setBoolValue("Robot_UseExtendedAttackEnv", extendedAttackEnv.isSelected());
+				
+				Config.setIntValue("Robot_MoveEnv", ((MoveEnvironments)moveEnvChoose.getSelectedItem()).ordinal());
+				Config.setIntValue("Robot_AttackEnv", ((AttackEnvironments)attackEnvChoose.getSelectedItem()).ordinal());
 				
 				Config.setBoolValue("Env_Debug", envDebug.isSelected());
 				Config.setBoolValue("Env_PaintMoveEnv", paintMoveEnv.isSelected());
@@ -885,24 +886,6 @@ public class ConfigurationWindow {
 			}
 		});
 		button_panel.add(btnStart);
-		
-		extendedMoveEnv.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				moveGridSize.setEnabled(extendedMoveEnv.isSelected());
-			}
-		});
-		
-		simpleReward.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				tabbedPane.setEnabledAt(2, simpleReward.isSelected());
-			}
-		});
-		
-		simpleReward.addChangeListener(new ChangeListener() {
-			public void stateChanged(ChangeEvent e) {
-				tabbedPane.setEnabledAt(2, simpleReward.isSelected());
-			}
-		});
 	}
 
 	private void loadRobots() {

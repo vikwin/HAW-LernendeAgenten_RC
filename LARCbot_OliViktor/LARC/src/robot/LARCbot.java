@@ -16,7 +16,7 @@ import robot.actionsystem.FireAction;
 import robot.actionsystem.GunTurnAction;
 import robot.actionsystem.MoveAction;
 import robot.actionsystem.NothingAction;
-import robot.actionsystem.OrbitalMovement;
+import robot.actionsystem.OrbitalMoveAction;
 import robot.actionsystem.SerialAction;
 import robot.actionsystem.TurnAction;
 import robot.rewardsystem.RewardRobot;
@@ -33,19 +33,13 @@ import environment.EnvironmentBuilder.AttackEnvironments;
 import environment.EnvironmentBuilder.MoveEnvironments;
 
 public class LARCbot extends RewardRobot {
-	private static final boolean USE_WAVE_SURF = true;
+//	private static final boolean USE_WAVE_SURF = true;
 
-	// Gibt an, ob das einfache Belohnungssystem (per Energieänderungen) oder
-	// das
-	// Event basierte System verwendet werden soll
-	private static final boolean USE_SIMPLE_REWARD_SYSTEM = Config
-			.getBoolValue("Robot_SimpleReward");
-
-	// Komplexe oder Simple Umgebungen benutzen
-	private static final boolean COMPLEX_ATTACK_ENV = Config
-			.getBoolValue("Robot_UseExtendedAttackEnv");
-	private static final boolean COMPLEX_MOVE_ENV = Config
-			.getBoolValue("Robot_UseExtendedMoveEnv");
+	// Art der Umgebungen
+	private static final AttackEnvironments ATTACK_ENV = AttackEnvironments
+			.values()[Config.getIntValue("Robot_AttackEnv")];
+	private static final MoveEnvironments MOVE_ENV = MoveEnvironments.values()[Config
+			.getIntValue("Robot_MoveEnv")];
 
 	private double enemyBearing = 0.0;
 	private boolean lastRadarTurnRight = false; // Flag für die letzte
@@ -79,17 +73,37 @@ public class LARCbot extends RewardRobot {
 		// werden, weil sonst der Zugriff auf die Eigenschaften des Spielfelds
 		// verwehrt wird
 		try {
-			envBuilder = new EnvironmentBuilder(this, MoveEnvironments.SIMPLE_MOVE,
-					AttackEnvironments.SIMPLE_ATTACK);
+			envBuilder = new EnvironmentBuilder(this, MOVE_ENV, ATTACK_ENV);
 		} catch (Exception e1) {
 			e1.printStackTrace();
-		} // TODO: Auf enums umstellen sobald Config fertig
+		}
+
+		int moveActionCount = 0, attackActionCount = 0;
+		switch (MOVE_ENV) {
+		case SIMPLE_MOVE:
+			moveActionCount = SimpleMovement.values().length;
+			break;
+		case COMPLEX_MOVE:
+			moveActionCount = ComplexMovement.values().length;
+			break;
+		case WAVESURF_MOVE:
+			moveActionCount = OrbitalMovement.values().length;
+			break;
+		}
+
+		switch (ATTACK_ENV) {
+		case SIMPLE_ATTACK:
+			attackActionCount = SimpleAttack.getActionCount();
+			break;
+		case COMPLEX_ATTACK:
+			attackActionCount = ComplexAttack.getActionCount();
+			break;
+		}
+
 		moveAgent = new MoveAgent(envBuilder.getMoveEnvStateCount(),
-				COMPLEX_MOVE_ENV ? ComplexMovement.values().length
-						: SimpleMovement.values().length);
+				moveActionCount);
 		attackAgent = new AttackAgent(envBuilder.getAttackEnvStateCount(),
-				COMPLEX_ATTACK_ENV ? ComplexAttack.getActionCount()
-						: SimpleAttack.getActionCount());
+				attackActionCount);
 
 		setAdjustGunForRobotTurn(true);
 		setAdjustRadarForGunTurn(true);
@@ -139,89 +153,61 @@ public class LARCbot extends RewardRobot {
 			doScan();
 
 		// Agents updaten und neue Actions holen
-		if (USE_WAVE_SURF) {
-			if (lastAttackAgentAction == null
-					|| lastAttackAgentAction.hasFinished()) {
+		if (lastMoveAgentAction == null
+				|| lastMoveAgentAction.hasFinished()) {
 
-				lastAttackAgentAction = getActionByAttack(attackAgent
-						.getNextAction(envBuilder.getAttackEnvId()));
-				this.addAction(lastAttackAgentAction);
+			lastMoveAgentAction = getActionByMovement(moveAgent
+					.getNextAction(envBuilder.getMoveEnvId()));
+			this.addAction(lastMoveAgentAction);
 
-				attackAgent.addReward(getReward(1));
-			}
+			moveAgent.addReward(getReward(0));
+		}
 
-			// doSurf();
-			if (envBuilder.getLockedEnemy() != null
-					&& (lastMoveAgentAction == null
-					|| lastMoveAgentAction.hasFinished())) {
-				lastMoveAgentAction = new OrbitalMovement(
-						envBuilder.getLockedEnemy(), -100, -10);
-				this.addAction(lastMoveAgentAction);
-			}
+		if (lastAttackAgentAction == null
+				|| lastAttackAgentAction.hasFinished()) {
 
-		} else if (USE_SIMPLE_REWARD_SYSTEM) {
-			if ((lastMoveAgentAction == null || lastMoveAgentAction
-					.hasFinished())
-					&& (lastAttackAgentAction == null || lastAttackAgentAction
-							.hasFinished())) {
+			lastAttackAgentAction = getActionByAttack(attackAgent
+					.getNextAction(envBuilder.getAttackEnvId()));
+			this.addAction(lastAttackAgentAction);
 
-				lastMoveAgentAction = getActionByMovement(moveAgent
-						.getNextAction(envBuilder.getMoveEnvId()));
-				this.addAction(lastMoveAgentAction);
-				lastAttackAgentAction = getActionByAttack(attackAgent
-						.getNextAction(envBuilder.getAttackEnvId()));
-				this.addAction(lastAttackAgentAction);
-
-				double reward = 0.0;
-				reward = envBuilder.getReward(); // Belohnung für die Agents
-				// anhand der
-				// Energieverändeurng
-				moveAgent.addReward(reward);
-				attackAgent.addReward(reward);
-			}
-		} else {
-			if (lastMoveAgentAction == null
-					|| lastMoveAgentAction.hasFinished()) {
-
-				lastMoveAgentAction = getActionByMovement(moveAgent
-						.getNextAction(envBuilder.getMoveEnvId()));
-				this.addAction(lastMoveAgentAction);
-
-				moveAgent.addReward(getReward(0));
-			}
-
-			if (lastAttackAgentAction == null
-					|| lastAttackAgentAction.hasFinished()) {
-
-				lastAttackAgentAction = getActionByAttack(attackAgent
-						.getNextAction(envBuilder.getAttackEnvId()));
-				this.addAction(lastAttackAgentAction);
-
-				attackAgent.addReward(getReward(1));
-			}
+			attackAgent.addReward(getReward(1));
 		}
 	}
 
 	private Action getActionByMovement(int movementId) {
-		boolean nothing = false;
+		boolean nothing = true;
 		TurnAction turn = null;
 		MoveAction move = null;
 		Vector2D destination = null;
 
-		if (COMPLEX_MOVE_ENV) {
-			ComplexMovement movement = ComplexMovement.byId(movementId);
+		switch (MOVE_ENV) {
+		case COMPLEX_MOVE:
+			ComplexMovement complexMovement = ComplexMovement.byId(movementId);
 
-			if (movement == ComplexMovement.NOTHING)
-				nothing = true;
-			else
-				destination = getPosition().add(movement.getMoveVector());
-		} else {
-			SimpleMovement movement = SimpleMovement.byId(movementId);
+			if (complexMovement != ComplexMovement.NOTHING) {
+				nothing = false;
+				destination = getPosition()
+						.add(complexMovement.getMoveVector());
+			}
 
-			if (movement == SimpleMovement.NOTHING)
-				nothing = true;
-			else
-				destination = getPosition().add(movement.getMoveVector());
+			break;
+		case SIMPLE_MOVE:
+			SimpleMovement simpleMovement = SimpleMovement.byId(movementId);
+
+			if (simpleMovement != SimpleMovement.NOTHING) {
+				nothing = false;
+				destination = getPosition().add(simpleMovement.getMoveVector());
+			}
+
+			break;
+		case WAVESURF_MOVE:
+			// TODO: Implementieren, sobald OrbitalMovement fertig ist
+			// aktuell nur Debug Code
+			if (envBuilder.getLockedEnemy() != null) {
+				return new OrbitalMoveAction(envBuilder.getLockedEnemy(), -100,
+						-10);
+			}
+			break;
 		}
 
 		if (nothing)
@@ -256,31 +242,38 @@ public class LARCbot extends RewardRobot {
 	private Action getActionByAttack(int attackId) {
 		double gunTurnDirection = 0, firePower = 0;
 
-		if (COMPLEX_ATTACK_ENV) {
-			ComplexAttack attack = ComplexAttack.byId(attackId);
+		switch (ATTACK_ENV) {
+		case COMPLEX_ATTACK:
+			ComplexAttack complexAttack = ComplexAttack.byId(attackId);
 
-			if (attack == ComplexAttack.NOTHING) {
+			if (complexAttack == ComplexAttack.NOTHING) {
 				return new NothingAction();
 			} else {
-				gunTurnDirection = attack.getDirection();
-				firePower = attack.getPower().toDouble();
+				gunTurnDirection = complexAttack.getDirection();
+				firePower = complexAttack.getPower().toDouble();
 			}
-		} else {
-			SimpleAttack attack = SimpleAttack.byId(attackId);
+
+			break;
+
+		case SIMPLE_ATTACK:
+			SimpleAttack simpleAttack = SimpleAttack.byId(attackId);
 
 			Enemy enemy = envBuilder.getEnemy();
 
-			if (attack == SimpleAttack.NOTHING || enemy == null) {
+			if (simpleAttack == SimpleAttack.NOTHING || enemy == null) {
 				return new NothingAction();
 			} else {
-				firePower = attack.getPower().toDouble();
+				firePower = simpleAttack.getPower().toDouble();
 				Vector2D vectorToTarget = EnvironmentBuilder
 						.addOffsetToEnemyPosition(enemy, this,
-								attack.getDeviation()).subtract(getPosition());
+								simpleAttack.getDeviation()).subtract(
+								getPosition());
 
 				double enemyAngle = vectorToTarget.getHeading();
 				gunTurnDirection = enemyAngle - getGunHeading();
 			}
+
+			break;
 		}
 
 		if (gunTurnDirection > 180)
@@ -295,8 +288,6 @@ public class LARCbot extends RewardRobot {
 		return new SerialAction(Arrays.asList(new Action[] { gunturn, fire }));
 	}
 
-	
-	
 	/**
 	 * Einaches Wavesurfing anstatt MoveAgent.
 	 */
@@ -380,15 +371,14 @@ public class LARCbot extends RewardRobot {
 		envBuilder.doPaint(g);
 
 	}
-	
+
 	@Override
 	public void onRoundEnded(RoundEndedEvent event) {
 		super.onRoundEnded(event);
-		
+
 		attackAgent.onRoundEnded();
 		moveAgent.onRoundEnded();
 	}
-
 
 	@Override
 	public void onBattleEnded(BattleEndedEvent event) {
