@@ -33,11 +33,6 @@ public class FireAction extends Action {
 	}
 	
 	@Override
-	public void setActor(ActorRobot robot) {
-		bot = robot;
-	}
-	
-	@Override
 	public String toString() {
 		return String.format("FireAction mit Power %f", power);
 	}

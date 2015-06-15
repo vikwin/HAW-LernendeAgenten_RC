@@ -35,11 +35,6 @@ public class MoveAction extends Action {
 	}
 
 	@Override
-	public void setActor(ActorRobot robot) {
-		bot = robot;
-	}
-
-	@Override
 	public String toString() {
 		return String.format("MoveAction um %f Meter", distance);
 	}

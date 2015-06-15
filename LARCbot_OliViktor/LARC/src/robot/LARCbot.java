@@ -15,6 +15,7 @@ import robot.actionsystem.FireAction;
 import robot.actionsystem.GunTurnAction;
 import robot.actionsystem.MoveAction;
 import robot.actionsystem.NothingAction;
+import robot.actionsystem.OrbitalMovement;
 import robot.actionsystem.SerialAction;
 import robot.actionsystem.TurnAction;
 import robot.rewardsystem.RewardRobot;
@@ -27,11 +28,14 @@ import agents.MoveAgent;
 import environment.Enemy;
 import environment.EnemyWave;
 import environment.EnvironmentBuilder;
+import environment.EnvironmentBuilder.AttackEnvironments;
+import environment.EnvironmentBuilder.MoveEnvironments;
 
 public class LARCbot extends RewardRobot {
-	private static final boolean USE_WAVE_SURF = false;
-	
-	// Gibt an, ob das einfache Belohnungssystem (per Energieänderungen) oder das
+	private static final boolean USE_WAVE_SURF = true;
+
+	// Gibt an, ob das einfache Belohnungssystem (per Energieänderungen) oder
+	// das
 	// Event basierte System verwendet werden soll
 	private static final boolean USE_SIMPLE_REWARD_SYSTEM = Config
 			.getBoolValue("Robot_SimpleReward");
@@ -73,8 +77,12 @@ public class LARCbot extends RewardRobot {
 		// Der Environmentbuilder muss aus der run Methode heraus initialisiert
 		// werden, weil sonst der Zugriff auf die Eigenschaften des Spielfelds
 		// verwehrt wird
-		envBuilder = new EnvironmentBuilder(this, COMPLEX_MOVE_ENV,
-				COMPLEX_ATTACK_ENV);
+		try {
+			envBuilder = new EnvironmentBuilder(this, MoveEnvironments.SIMPLE_MOVE,
+					AttackEnvironments.SIMPLE_ATTACK);
+		} catch (Exception e1) {
+			e1.printStackTrace();
+		} // TODO: Auf enums umstellen sobald Config fertig
 		moveAgent = new MoveAgent(envBuilder.getMoveEnvStateCount(),
 				COMPLEX_MOVE_ENV ? ComplexMovement.values().length
 						: SimpleMovement.values().length);
@@ -140,11 +148,17 @@ public class LARCbot extends RewardRobot {
 
 				attackAgent.addReward(getReward(1));
 			}
-			
-			doSurf();
 
-		}
-		else if (USE_SIMPLE_REWARD_SYSTEM) {
+			// doSurf();
+			if (envBuilder.getLockedEnemy() != null
+					&& (lastMoveAgentAction == null
+					|| lastMoveAgentAction.hasFinished())) {
+				lastMoveAgentAction = new OrbitalMovement(
+						envBuilder.getLockedEnemy(), -100, -10);
+				this.addAction(lastMoveAgentAction);
+			}
+
+		} else if (USE_SIMPLE_REWARD_SYSTEM) {
 			if ((lastMoveAgentAction == null || lastMoveAgentAction
 					.hasFinished())
 					&& (lastAttackAgentAction == null || lastAttackAgentAction
@@ -280,33 +294,38 @@ public class LARCbot extends RewardRobot {
 		return new SerialAction(Arrays.asList(new Action[] { gunturn, fire }));
 	}
 
+	
+	
 	/**
-	 * Wavesurfing anstatt MoveAgent.
+	 * Einaches Wavesurfing anstatt MoveAgent.
 	 */
-	public void doSurf(){
+	public void doSurf() {
 		Enemy enemy = envBuilder.getLockedEnemy();
 		if (enemy == null)
 			return;
-		
+
 		EnemyWave surfWave = enemy.getClosestSurfableWave();
-		 
-        if (surfWave == null) { return; }
- 
-        double dangerLeft = enemy.checkDanger(surfWave, -1);
-        double dangerRight = enemy.checkDanger(surfWave, 1);
- 
-     
-        Vector2D myLocation = Utils.getBotCoordinates(this);
-        double goAngle = surfWave.fireLocation.angleTo(myLocation);
-        if (dangerLeft < dangerRight) {
-            goAngle = WaveSurf.wallSmoothing(myLocation, goAngle - (Math.PI/2), -1, 160);
-        } else {
-            goAngle = WaveSurf.wallSmoothing(myLocation, goAngle + (Math.PI/2), 1, 160);
-        }
- 
-        WaveSurf.setBackAsFront(this, goAngle);
+
+		if (surfWave == null) {
+			return;
+		}
+
+		double dangerLeft = enemy.checkDanger(surfWave, -1);
+		double dangerRight = enemy.checkDanger(surfWave, 1);
+
+		Vector2D myLocation = getPosition();
+		double goAngle = surfWave.fireLocation.angleTo(myLocation);
+		if (dangerLeft < dangerRight) {
+			goAngle = WaveSurf.wallSmoothing(myLocation, goAngle
+					- (Math.PI / 2), -1, 160);
+		} else {
+			goAngle = WaveSurf.wallSmoothing(myLocation, goAngle
+					+ (Math.PI / 2), 1, 160);
+		}
+
+		WaveSurf.setBackAsFront(this, goAngle);
 	}
-	
+
 	/**
 	 * Liefert einen Ortsvektor des Bots.
 	 * 
@@ -368,11 +387,11 @@ public class LARCbot extends RewardRobot {
 		attackAgent.saveOnBattleEnd();
 		moveAgent.saveOnBattleEnd();
 	}
-	
+
 	@Override
 	public void onHitByBullet(HitByBulletEvent event) {
 		super.onHitByBullet(event);
-		
+
 		envBuilder.onHitByBullet(event);
 	}
 }

@@ -20,6 +20,14 @@ import utils.Vector2D;
  */
 public class EnvironmentBuilder {
 
+	public enum MoveEnvironments {
+		SIMPLE_MOVE, COMPLEX_MOVE, WAVESURF_MOVE
+	}
+
+	public enum AttackEnvironments {
+		SIMPLE_ATTACK, COMPLEX_ATTACK
+	}
+
 	private static final int ROBOT_SIZE = 40; // Die Seitenlänge der Bots in
 												// Pixeln
 	private static final int GRID_SIZE = Config.getIntValue("Env_GridSize");// Die
@@ -40,32 +48,50 @@ public class EnvironmentBuilder {
 	private AdvancedRobot selfBot;
 	private double selfBotLastEnergy;
 	private Enemy lockedEnemy;
-	
+
 	private Environment moveEnv, attackEnv;
 
-	public EnvironmentBuilder(AdvancedRobot bot, boolean useComplexMoveEnv,
-			boolean useComplexAttackEnv) {
+	public EnvironmentBuilder(AdvancedRobot bot, MoveEnvironments usedMoveEnv,
+			AttackEnvironments usedAttackEnv) throws Exception {
 		selfBot = bot;
 		selfBotLastEnergy = selfBot.getEnergy();
 
-		if (useComplexMoveEnv)
-			moveEnv = new ComplexMoveEnvironment(ROBOT_SIZE, GRID_SIZE,
-					(int) selfBot.getBattleFieldWidth(),
-					(int) selfBot.getBattleFieldHeight());
-		else
+		switch (usedMoveEnv) {
+		case SIMPLE_MOVE:
 			moveEnv = new SimpleMoveEnvironment(10, ROBOT_SIZE,
 					(int) selfBot.getBattleFieldWidth(),
 					(int) selfBot.getBattleFieldHeight());
+			break;
 
-		if (useComplexAttackEnv)
+		case COMPLEX_MOVE:
+			moveEnv = new ComplexMoveEnvironment(ROBOT_SIZE, GRID_SIZE,
+					(int) selfBot.getBattleFieldWidth(),
+					(int) selfBot.getBattleFieldHeight());
+			break;
+		case WAVESURF_MOVE:
+			moveEnv = new WaveSurfMoveEnvironment(10, ROBOT_SIZE,
+					(int) selfBot.getBattleFieldWidth(),
+					(int) selfBot.getBattleFieldHeight());
+			break;
+		default:
+			throw new Exception("Ungültige MoveEnvironment ausgewählt!");
+		}
+
+		switch (usedAttackEnv) {
+		case SIMPLE_ATTACK:
+			attackEnv = new SimpleAttackEnvironment(15, ROBOT_SIZE,
+					(int) selfBot.getBattleFieldWidth(),
+					(int) selfBot.getBattleFieldHeight());
+			break;
+		case COMPLEX_ATTACK:
 			attackEnv = new ComplexAttackEnvironment(ROBOT_SIZE * 2,
 					ROBOT_SIZE, Utils.getBotCoordinates(bot),
 					bot.getGunHeading(), (int) selfBot.getBattleFieldWidth(),
 					(int) selfBot.getBattleFieldHeight());
-		else
-			attackEnv = new SimpleAttackEnvironment(15, ROBOT_SIZE,
-					(int) selfBot.getBattleFieldWidth(),
-					(int) selfBot.getBattleFieldHeight());
+			break;
+		default:
+			throw new Exception("Ungültige AttackEnvironment ausgewählt!");
+		}
 	}
 
 	/**
@@ -106,7 +132,7 @@ public class EnvironmentBuilder {
 	public void doPaint(Graphics2D g) {
 		for (Enemy e : enemies.values())
 			e.doPaint(g);
-		
+
 		if (PAINT_MOVE_ENV)
 			moveEnv.doPaint(g);
 		if (PAINT_ATTACK_ENV)
@@ -188,11 +214,15 @@ public class EnvironmentBuilder {
 	}
 
 	/**
-	 * Diese Methode berechnet die neue Position eines Gegners nach Aufrechnung eines
-	 * Offsets in Blickrichtung des Gegners. 
-	 * @param enemy Der Gegner
-	 * @param selfBot Der eigene Bot
-	 * @param offset Das aufzurechnende Offset
+	 * Diese Methode berechnet die neue Position eines Gegners nach Aufrechnung
+	 * eines Offsets in Blickrichtung des Gegners.
+	 * 
+	 * @param enemy
+	 *            Der Gegner
+	 * @param selfBot
+	 *            Der eigene Bot
+	 * @param offset
+	 *            Das aufzurechnende Offset
 	 * @return Die neue Position
 	 */
 	public static Vector2D addOffsetToEnemyPosition(Enemy enemy,
@@ -205,7 +235,8 @@ public class EnvironmentBuilder {
 
 		// Faktor für Einberechnung des Offsets festlegen nach Distanz /
 		// Maxdistanz (= Diagonale)
-		double factor = ((LARCbot)selfBot).getPosition().distanceTo(enemy.getPosition())
+		double factor = ((LARCbot) selfBot).getPosition().distanceTo(
+				enemy.getPosition())
 				/ battleFieldDiagonal;
 
 		Vector2D tmp = new Vector2D(0, offset * factor);
@@ -216,18 +247,18 @@ public class EnvironmentBuilder {
 		return tmp;
 	}
 
-	
 	/**
 	 * Gibt den zuletzt gescannten und somit gelockten Gegner zurück.
+	 * 
 	 * @return Gegner
 	 */
-	public Enemy getLockedEnemy(){
+	public Enemy getLockedEnemy() {
 		return lockedEnemy;
 	}
-	
+
 	public void onHitByBullet(HitByBulletEvent event) {
 		for (Enemy e : enemies.values())
 			e.updateWavesByBulletHit(event);
-		
+
 	}
 }

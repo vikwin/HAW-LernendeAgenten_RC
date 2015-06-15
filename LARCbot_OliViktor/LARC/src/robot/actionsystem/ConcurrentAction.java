@@ -44,7 +44,7 @@ public class ConcurrentAction extends Action {
 
 	@Override
 	public void setActor(ActorRobot robot) {
-		bot = robot;
+		super.setActor(robot);
 		for (Action action : actions)
 			action.setActor(bot);
 	}

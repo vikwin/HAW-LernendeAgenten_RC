@@ -29,7 +29,9 @@ public abstract class Action {
 
 	public abstract void update();
 
-	public abstract void setActor(ActorRobot robot);
+	public void setActor(ActorRobot robot) {
+		bot = robot;
+	}
 
 	public abstract String toString();
 

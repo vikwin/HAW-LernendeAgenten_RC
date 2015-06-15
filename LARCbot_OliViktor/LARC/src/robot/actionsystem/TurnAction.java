@@ -36,11 +36,6 @@ public class TurnAction extends Action {
 	}
 
 	@Override
-	public void setActor(ActorRobot robot) {
-		bot = robot;
-	}
-
-	@Override
 	public String toString() {
 		return String.format("TurnAction um %f Grad", angle);
 	}

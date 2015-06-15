@@ -39,11 +39,6 @@ public class NothingAction extends Action {
 	}
 
 	@Override
-	public void setActor(ActorRobot robot) {
-		bot = robot;
-	}
-
-	@Override
 	public String toString() {
 		return String.format("NothingAction für %d Nillisekunden", waitingTicks);
 	}
