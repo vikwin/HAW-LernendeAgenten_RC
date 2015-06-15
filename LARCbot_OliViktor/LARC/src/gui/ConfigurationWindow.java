@@ -263,9 +263,9 @@ public class ConfigurationWindow {
 		panel_17.add(panel_4);
 		
 		JComboBox<AttackEnvironments> attackEnvChoose = new JComboBox<AttackEnvironments>();
+		attackEnvChoose.setModel(new DefaultComboBoxModel<AttackEnvironments>(AttackEnvironments.values()));
 		attackEnvChoose.setSelectedItem(AttackEnvironments.values()[Config.getIntValue("Robot_AttackEnv")]);
 		panel_4.add(attackEnvChoose);
-		attackEnvChoose.setModel(new DefaultComboBoxModel<AttackEnvironments>(AttackEnvironments.values()));
 		
 		JPanel panel_18 = new JPanel();
 		robot_panel.add(panel_18);
@@ -277,8 +277,8 @@ public class ConfigurationWindow {
 		panel_18.add(lblBewegungsumwelt);
 		
 		JComboBox<MoveEnvironments> moveEnvChoose = new JComboBox<MoveEnvironments>();
-		moveEnvChoose.setSelectedItem(MoveEnvironments.values()[Config.getIntValue("Robot_MoveEnv")]);
 		moveEnvChoose.setModel(new DefaultComboBoxModel<MoveEnvironments>(MoveEnvironments.values()));
+		moveEnvChoose.setSelectedItem(MoveEnvironments.values()[Config.getIntValue("Robot_MoveEnv")]);
 		panel_18.add(moveEnvChoose);
 		
 		JPanel env_panel = new JPanel();
