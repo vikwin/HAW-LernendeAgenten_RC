@@ -128,12 +128,12 @@ public abstract class RewardRobot extends AdvancedRobot {
 	/* Events bei Ende der Runde */
 	@Override
 	public void onDeath(DeathEvent event) {
-		addReward(winning);
+		addReward(loosing);
 	}
 
 	@Override
 	public void onRobotDeath(RobotDeathEvent event) {
 		roundsWon++;
-		addReward(loosing);
+		addReward(winning);
 	}
 }
