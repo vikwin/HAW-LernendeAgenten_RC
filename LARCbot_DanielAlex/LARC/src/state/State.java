@@ -5,14 +5,19 @@ import utility.Position;
 public class State {
 
 	public static final int MAX_X = 740;
+	public static final int NEXTMAX_X = 680;
 
 	public static final int MIN_X = 60;
-	public static final int MAX_Y = 540; 
+	public static final int NEXTMIN_X = 120;
 
-	public static final int MIN_Y = 60; 
+	public static final int MAX_Y = 540;
+	public static final int NEXTMAX_Y = 480;
+
+	public static final int MIN_Y = 60;
+	public static final int NEXTMIN_Y = 120;
 
 	public enum EdgeState {
-		MID, LEFTEDGE, RIGHTEDGE, TOPEDGE, BOTTOMEDGE;
+		MID, LEFTEDGE, RIGHTEDGE, TOPEDGE, BOTTOMEDGE, NEXTLEFTEDGE, NEXTRIGHTEDGE, NEXTTOPEDGE, NEXTBOTTOMEDGE;
 	}
 
 	public enum EnemyPosition {
@@ -31,11 +36,11 @@ public class State {
 	// public int gunPosition;
 
 	public int getStateID() {
-		int state = 
-				  this.edgeState.ordinal()
+		int state = this.edgeState.ordinal() 
 				+ this.enemyPosition.ordinal() * EdgeState.values().length
 				+ this.enemyDirection.ordinal() * EdgeState.values().length * EnemyPosition.values().length
-				+ this.enemyDistance.ordinal() * EdgeState.values().length * EnemyPosition.values().length * EnemyPosition.values().length;
+				+ this.enemyDistance.ordinal() * EdgeState.values().length * EnemyPosition.values().length
+				* EnemyPosition.values().length;
 		return state;
 	}
 
@@ -62,14 +67,25 @@ public class State {
 
 	public void setEdgeState(Position position) {
 		this.edgeState = EdgeState.MID;
+
 		if (position.getX() < MIN_X) {
 			this.edgeState = EdgeState.LEFTEDGE;
+		} else if (position.getX() < NEXTMIN_X) {
+			this.edgeState = EdgeState.NEXTLEFTEDGE;
 		} else if (position.getX() > MAX_X) {
 			this.edgeState = EdgeState.RIGHTEDGE;
-		} else if (position.getY() < MIN_Y) {
+		} else if (position.getX() > NEXTMAX_X) {
+			this.edgeState = EdgeState.NEXTRIGHTEDGE;
+		}
+
+		if (position.getY() < MIN_Y) {
 			this.edgeState = EdgeState.BOTTOMEDGE;
+		} else if (position.getY() < NEXTMIN_Y) {
+			this.edgeState = EdgeState.NEXTBOTTOMEDGE;
 		} else if (position.getY() > MAX_Y) {
 			this.edgeState = EdgeState.TOPEDGE;
+		} else if (position.getY() > NEXTMAX_Y) {
+			this.edgeState = EdgeState.NEXTTOPEDGE;
 		}
 	}
 

@@ -31,24 +31,26 @@ public abstract class RewardRobot extends AdvancedRobot {
 	public static double ramHitCounter;
 	public static double rammedCounter;
 	public static double wallRamCounter;
+	public static double roundsWon;
+
 
 	static {
 		// Kugelevents
-		hitByBullet = 0;
+		hitByBullet = -1;
 		bulletHitBullet = 0;
-		bulletHitEnemy = 0;
-		bulletHitWall = 0;
+		bulletHitEnemy = 3;
+		bulletHitWall = -1;
 		multiplyBulletPower = false;
 
 		// Rammen von Objekten
-		hitByEnemy = 0;
-		hitRobot = 0;
+		hitByEnemy = -1;
+		hitRobot = 1;
 		hitWall = -3;
 		// Add reward for staying in mid
 
 		// Rundenende
-		winning = 0;
-		loosing = 0;
+		winning = 1;
+		loosing = -1;
 	}
 
 	private double reward;
@@ -131,6 +133,7 @@ public abstract class RewardRobot extends AdvancedRobot {
 
 	@Override
 	public void onRobotDeath(RobotDeathEvent event) {
+		roundsWon++;
 		addReward(loosing);
 	}
 }

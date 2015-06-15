@@ -3,6 +3,7 @@ package robot;
 import java.awt.Color;
 import java.awt.Graphics2D;
 
+import robocode.BattleEndedEvent;
 import robocode.DeathEvent;
 import robocode.HitWallEvent;
 import robocode.RobotDeathEvent;
@@ -16,8 +17,8 @@ import environment.LARCEnvironment;
 // -Xmx512M -DNOSECURITY=true -Dsun.io.useCanonCaches=false
 
 public class LARCRobot extends RewardRobot {
-	// (2*9*5)*(1*8*8*3+4*5*8*3) //Ohne unerreichbare states = 53760 States/Actions
-	public static final int NO_OF_STATES = 5 * 8 * 8 * 3; // my position * enemyErection * enemyPosition * enemyDistance
+	// (8*5)*(1*8*8*3+4*5*8*3) //Ohne unerreichbare states = 53760 States/Actions
+	public static final int NO_OF_STATES = 9 * 8 * 8 * 3; // my position * enemyErection * enemyPosition * enemyDistance
 	public static final int NO_OF_ACTIONS = 8 * 5; // * DriveDirection * GunOffsetFire
 	public static final int BULLETPOWER = 500; //
 	public static final long STEP_TIME = 100;
@@ -46,6 +47,7 @@ public class LARCRobot extends RewardRobot {
 	private int scanDirection;
 	private double gunTurnToEnemy;
 	public int wallHitCounter;
+	
 
 	public LARCRobot() {
 		this.enemyX = 0;
@@ -74,13 +76,14 @@ public class LARCRobot extends RewardRobot {
 			this.gunPostion = this.getGunHeading();
 			this.myPosition.setX(this.getX());
 			this.myPosition.setY(this.getY());
-			// default actions:
-			// setTurnRadarRight(2000);
+
 			// stepping
 			if (this.getDistanceRemaining() == 0 && this.getTurnRemaining() == 0) {
 				updateHeading();
 				stateID = this.environment.env_step(actionID);
 				actionID = this.agent.agent_step(stateID);
+			} else if (this.getDistanceRemaining() != 0 && this.getGunTurnRemaining() == 0) {
+				fire(Math.min(BULLETPOWER / this.distanceToEnemy, 3));
 			}
 			execute();
 		}
@@ -89,18 +92,17 @@ public class LARCRobot extends RewardRobot {
 	public void move(double[] instructions) {
 		// Gun Zielen:
 		// setTurnGunRight(this.angleToEnemy + instructions[4]);
+		if (getGunTurnRemaining() == 0) {
+			this.turnGunRight(gunTurnToEnemy + instructions[3]);
+		}
 
 		// Panzer Fahren!:
 		backOrAhead(instructions[1], instructions[0]);
 
-		if (getGunTurnRemaining() == 0) {
-			this.setTurnGunRight(gunTurnToEnemy + instructions[3]);
-		}
-
 		// // Schießen:
 		if (instructions[2] == 1.0) {
 			double firePower = Math.min(BULLETPOWER / this.distanceToEnemy, 3); // 3 ist max möglicher wert für firepower
-			setFire(firePower);
+			// setFire(firePower);
 		}
 	}
 
@@ -215,9 +217,6 @@ public class LARCRobot extends RewardRobot {
 		}
 		// System.out.println("Enemy Direction: " + enemyDirection);
 		gunTurnToEnemy = Position.normalizeDegrees(getHeading() - getGunHeading() + event.getBearing());
-//		setTurnGunRight(Position.normalizeDegrees(getHeading() - getGunHeading() + event.getBearing()));
-
-		// setFire(Math.min(BULLETPOWER / this.distanceToEnemy, 3));
 
 		// update enemy-related state variables:
 		this.currentGunAngleToEnemy = Math.abs(getHeading() - getGunHeading() + event.getBearing());
@@ -238,6 +237,7 @@ public class LARCRobot extends RewardRobot {
 
 	@Override
 	public void onDeath(DeathEvent event) {
+		
 		super.onDeath(event);
 		this.agent.agent_end();
 		this.environment.env_cleanup();
@@ -263,6 +263,14 @@ public class LARCRobot extends RewardRobot {
 		g.setColor(java.awt.Color.BLUE);
 		g.drawRect(State.MIN_X, 0, State.MAX_X - State.MIN_X, State.MIN_Y);
 		g.drawRect(State.MIN_X, State.MAX_Y, State.MAX_X - State.MIN_X, State.MIN_Y);
+
+		// Next:
+		g.setColor(java.awt.Color.CYAN);
+		g.drawRect(State.NEXTMIN_X, State.MIN_X, State.NEXTMAX_X - State.NEXTMIN_X, State.MIN_Y);
+		g.drawRect(State.NEXTMIN_X, State.NEXTMAX_Y, State.NEXTMAX_X - State.NEXTMIN_X, State.MIN_Y);
+		g.setColor(java.awt.Color.ORANGE);
+		g.drawRect(State.MIN_X, State.MIN_Y, State.MIN_X, State.MAX_Y - State.MIN_Y);
+		g.drawRect(State.NEXTMAX_X, State.MIN_Y, State.MIN_X, State.MAX_Y - State.MIN_Y);
 
 		g.setColor(java.awt.Color.GREEN);
 		// MID:
