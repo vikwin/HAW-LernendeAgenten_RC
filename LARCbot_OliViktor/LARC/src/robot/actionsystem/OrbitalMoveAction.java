@@ -3,7 +3,7 @@ package robot.actionsystem;
 import utils.Vector2D;
 import environment.Enemy;
 
-public class OrbitalMovement extends Action {
+public class OrbitalMoveAction extends Action {
 	private static final double DISTANCE_PADDING = 40.0; // Wird benötigt, damit die Bewegungen weicher werden  
 	private double orbitDistance, enemyDistanceOffset, angleCorrectionOffset;
 	private Enemy enemy;
@@ -21,7 +21,7 @@ public class OrbitalMovement extends Action {
 	 *            Eine Erhöhung (=positive Werte) oder Senkung (=negative Werte)
 	 *            der Distanz zum Gegner
 	 */
-	public OrbitalMovement(Enemy enemy, double orbitDistance,
+	public OrbitalMoveAction(Enemy enemy, double orbitDistance,
 			double enemyDistanceOffset) {
 		this.enemy = enemy;
 		this.orbitDistance = orbitDistance;

@@ -30,6 +30,10 @@ import utils.Vector2D;
  */
 public class WaveSurfMoveEnvironment implements Environment {
 
+	private enum Danger {
+		NONE, LOW, HIGH
+	}
+
 	private static final double WALL_DISTANCE = 100; // Abstand, unter dem eine
 														// Wand als nah
 														// eingestuft
@@ -41,8 +45,10 @@ public class WaveSurfMoveEnvironment implements Environment {
 
 	private Vector2D selfPosition;
 
-	private Direction[] directions;
-	private boolean[] nearWalls, rings;
+	private boolean[] rings;
+	private boolean wallToLeft, wallToRight;
+
+	private Danger dangerLeft, dangerRight;
 
 	/**
 	 * Standardkonstruktor für einen Gegner.
@@ -96,23 +102,20 @@ public class WaveSurfMoveEnvironment implements Environment {
 				* battleFieldHeight + battleFieldWidth * battleFieldWidth);
 		this.ringThickness = (battleFieldDiagonal - botPadding / 2) / ringCount;
 
-		this.nearWalls = new boolean[4];
 		this.rings = new boolean[ringCount];
-		this.directions = new Direction[enemyCount];
 
 		clearEnv();
 	}
 
 	private void clearEnv() {
-		for (int i = 0; i < nearWalls.length; i++)
-			nearWalls[i] = false;
+		wallToLeft = false;
+		wallToRight = false;
+
+		dangerLeft = Danger.NONE;
+		dangerRight = Danger.NONE;
 
 		for (int i = 0; i < rings.length; i++)
 			rings[i] = false;
-
-		for (int i = 0; i < directions.length; i++)
-			directions[i] = Direction.NORTH;
-
 	}
 
 	@Override
@@ -130,16 +133,23 @@ public class WaveSurfMoveEnvironment implements Environment {
 
 			rings[ringNr] = true;
 
-			directions[enemyIndex] = Direction.byHeading(robocode.util.Utils
-					.normalAbsoluteAngleDegrees(enemy.getBearing()
-							+ selfBot.getHeading()));
 		}
 
-		// Linke, Obere, Rechte, Untere Wand nahe?
-		nearWalls[0] = selfBot.getX() < WALL_DISTANCE;
-		nearWalls[1] = (selfBot.getBattleFieldHeight() - selfBot.getY()) < WALL_DISTANCE;
-		nearWalls[2] = (selfBot.getBattleFieldWidth() - selfBot.getX()) < WALL_DISTANCE;
-		nearWalls[3] = selfBot.getY() < WALL_DISTANCE;
+		Vector2D wallDistance = new Vector2D(0, WALL_DISTANCE);
+		// Linke Seite nahe Wand?
+		wallToLeft = selfPosition.add(
+				wallDistance.rotate(90 + Utils.normalizeHeading(selfBot
+						.getHeading()))).inRectangle(0, 0, battleFieldWidth,
+				battleFieldHeight);
+
+		// Rechte Seite nahe Wand?
+				wallToRight = selfPosition.add(
+						wallDistance.rotate(-90 + Utils.normalizeHeading(selfBot
+								.getHeading()))).inRectangle(0, 0, battleFieldWidth,
+						battleFieldHeight);
+
+		
+		// TODO: Gefahren berechnen
 	}
 
 	@Override
@@ -168,42 +178,15 @@ public class WaveSurfMoveEnvironment implements Environment {
 						(int) circleSize, (int) circleSize, 0, 360);
 		}
 
-		// Zeichne die Himmelsrichtung des Gegners in cyan ein
-		g.setColor(new Color(0x00, 0xff, 0xcc, 0x80));
-		g.setStroke(new BasicStroke());
-		int arcWidth = 360 / Direction.values().length;
-		circleSize = robotSize + ringThickness + ringCount * ringThickness * 2;
-
-		for (Direction d : directions) {
-			int arcStart = (int) d.getHeading() - arcWidth / 2;
-			g.fillArc((int) (selfPosition.getX() - circleSize / 2),
-					(int) (selfPosition.getY() - circleSize / 2),
-					(int) circleSize, (int) circleSize, arcStart, arcWidth);
-		}
 
 		// Zeichne nahe Wände in blau ein
-		g.setColor(new Color(0x00, 0x00, 0xff, 0x80));
+		g.setColor(new Color(0x00, 0x00, 0xff, 0xff));
+		if (wallToLeft) 
+			g.drawChars("WALL TO LEFT".toCharArray(), 0, 12, 50, 50);
 
-		if (nearWalls[0]) {
-			// linke Wand
-			g.fillRect(-robotSize, 0, robotSize, battleFieldHeight);
-		}
-
-		if (nearWalls[1]) {
-			// obere Wand
-			g.fillRect(0, battleFieldHeight, battleFieldWidth, robotSize);
-		}
-
-		if (nearWalls[2]) {
-			// rechte Wand
-			g.fillRect(battleFieldWidth, 0, robotSize, battleFieldHeight);
-
-		}
-
-		if (nearWalls[3]) {
-			// untere Wand
-			g.fillRect(0, -robotSize, battleFieldWidth, robotSize);
-		}
+		if (wallToRight) 
+			g.drawChars("WALL TO RIGHT".toCharArray(), 0, 13, 200, 50);
+		
 	}
 
 	/**
@@ -220,19 +203,21 @@ public class WaveSurfMoveEnvironment implements Environment {
 				ringState = i;
 
 		int wallState = 0;
+		if (wallToLeft)
+			wallState
 
+		
 		for (int i = 0; i < 4; i++)
 			if (nearWalls[i])
 				wallState += Math.pow(2, i);
 
-		return ringState * 16 * Direction.values().length + wallState
-				* Direction.values().length + directions[0].ordinal();
+		return ringState * 36 + 
 	}
 
 	@Override
 	public int getStateCount() {
 		// + 1, weil es sein kann dass kein Gegner da ist
-		return (int) Math.pow(16 * (ringCount + 1) * Direction.values().length,
+		return (int) Math.pow(36 * (ringCount + 1),
 				enemyCount);
 	}
 
