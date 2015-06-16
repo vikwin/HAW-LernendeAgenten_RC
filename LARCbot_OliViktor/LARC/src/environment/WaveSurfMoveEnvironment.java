@@ -31,7 +31,17 @@ import utils.Vector2D;
 public class WaveSurfMoveEnvironment implements Environment {
 
 	private enum Danger {
-		NONE, LOW, HIGH
+		NONE, LOW, HIGH;
+
+		public static Danger getByValue(double danger) {
+			if (danger == 0.0)
+				return Danger.NONE;
+			else if (danger < 0.5)
+				return Danger.LOW;
+			else
+				return Danger.HIGH;
+
+		}
 	}
 
 	private static final double WALL_DISTANCE = 100; // Abstand, unter dem eine
@@ -125,6 +135,9 @@ public class WaveSurfMoveEnvironment implements Environment {
 		selfPosition = Utils.getBotCoordinates(selfBot);
 
 		int ringNr = 0;
+
+		Enemy anEnemy = null;
+
 		for (Enemy enemy : enemies) {
 			ringNr = (int) ((enemy.getDistance() - botPadding) / ringThickness);
 
@@ -132,23 +145,29 @@ public class WaveSurfMoveEnvironment implements Environment {
 				ringNr = ringCount - 1;
 
 			rings[ringNr] = true;
+			anEnemy = enemy;
 		}
 
-		Vector2D wallDistance = new Vector2D(0, WALL_DISTANCE);
+		Vector2D wallDistance = new Vector2D(WALL_DISTANCE, 0);
 		// Linke Seite nahe Wand?
-		wallToLeft = selfPosition.add(
-				wallDistance.rotate(90 + Utils.normalizeHeading(selfBot
+		wallToLeft = !selfPosition.add(
+				wallDistance.rotate(Utils.normalizeHeading(selfBot
 						.getHeading()))).inRectangle(0, 0, battleFieldWidth,
 				battleFieldHeight);
 
 		// Rechte Seite nahe Wand?
-				wallToRight = selfPosition.add(
-						wallDistance.rotate(-90 + Utils.normalizeHeading(selfBot
-								.getHeading()))).inRectangle(0, 0, battleFieldWidth,
-						battleFieldHeight);
+		wallToRight = !selfPosition.add(
+				wallDistance.rotate(-180
+						+ Utils.normalizeHeading(selfBot.getHeading())))
+				.inRectangle(0, 0, battleFieldWidth, battleFieldHeight);
 
-		
-		// TODO: Gefahren berechnen
+		if (anEnemy == null)
+			return;
+
+		dangerLeft = Danger.getByValue(anEnemy.checkNormalizedDanger(
+				anEnemy.getClosestSurfableWave(), 1));
+		dangerRight = Danger.getByValue(anEnemy.checkNormalizedDanger(
+				anEnemy.getClosestSurfableWave(), -1));
 	}
 
 	@Override
@@ -177,15 +196,21 @@ public class WaveSurfMoveEnvironment implements Environment {
 						(int) circleSize, (int) circleSize, 0, 360);
 		}
 
-
 		// Zeichne nahe Wände in blau ein
 		g.setColor(new Color(0x00, 0x00, 0xff, 0xff));
-		if (wallToLeft) 
-			g.drawChars("WALL TO LEFT".toCharArray(), 0, 12, 50, 50);
+		if (wallToLeft)
+			g.drawChars("WALL TO LEFT".toCharArray(), 0, 12, 50, 30);
 
-		if (wallToRight) 
-			g.drawChars("WALL TO RIGHT".toCharArray(), 0, 13, 200, 50);
-		
+		if (wallToRight)
+			g.drawChars("WALL TO RIGHT".toCharArray(), 0, 13, 200, 30);
+
+		// Zeichne Gefahrenstufen in Rot ein
+		g.setColor(new Color(0xff, 0x00, 0x00, 0xff));
+		String leftDanger = "DANGER TO LEFT: " + dangerLeft.toString();
+		g.drawChars(leftDanger.toCharArray(), 0, leftDanger.length(), 50, 50);
+		String rightDanger = "DANGER TO RIGHT: " + dangerRight.toString();
+		g.drawChars(rightDanger.toCharArray(), 0, rightDanger.length(), 200, 50);
+
 	}
 
 	/**
@@ -207,19 +232,17 @@ public class WaveSurfMoveEnvironment implements Environment {
 		if (wallToRight)
 			wallState += 2;
 
-		
 		int dangerState = 0;
 		dangerState += dangerLeft.ordinal();
 		dangerState += dangerRight.ordinal() * Danger.values().length;
-		
-		return ringState * 36 + dangerState * 4 + wallState; 
+
+		return ringState * 36 + dangerState * 4 + wallState;
 	}
 
 	@Override
 	public int getStateCount() {
 		// + 1, weil es sein kann dass kein Gegner da ist
-		return (int) Math.pow(36 * (ringCount + 1),
-				enemyCount);
+		return (int) Math.pow(36 * (ringCount + 1), enemyCount);
 	}
 
 }

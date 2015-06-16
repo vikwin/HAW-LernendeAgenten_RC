@@ -62,10 +62,10 @@ public class OrbitalMoveAction extends Action {
 
 	@Override
 	public void update() {
-		if (!started)
+		if (!started )
 			return;
 
-		if (Math.abs(bot.getDistanceRemaining()) < DISTANCE_PADDING) {
+		if (Math.abs(bot.getDistanceRemaining()) < DISTANCE_PADDING || enemy == null) {
 			finished = true;
 			return;
 		}

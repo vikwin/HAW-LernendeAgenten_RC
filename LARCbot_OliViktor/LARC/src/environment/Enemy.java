@@ -205,15 +205,38 @@ public class Enemy {
 	 * Setzt orbitale Bewegung vorraus.
 	 * 
 	 * @param surfWave Die zu surfende Wave
-	 * @param direction Die Richtung: -1 = links, +1 = rechts
+	 * @param direction Die Richtung: -1 = entegen Uhrzeigesinn, +1 = im Uhrzeigesinn
 	 * @return
 	 */
 	public double checkDanger(EnemyWave surfWave, int direction) {
+		if (surfWave == null)
+			return 0;
         int index = WaveSurf.guessfactorIndex(surfWave,
             WaveSurf.predictPosition(selfBot, surfWave, direction));
  
         return surfStats[index];
     }
+	
+	/**
+	 * Gibt den normalisierten Gefahrenwert für eine angegebene Richtung und Wave zurück.
+	 * Setzt orbitale Bewegung vorraus.
+	 * 
+	 * @param surfWave Die zu surfende Wave
+	 * @param direction Die Richtung: -1 = entegen Uhrzeigesinn, +1 = im Uhrzeigesinn
+	 * @return Normalisierte Gefahr zwischen 0 und 1
+	 */
+	public double checkNormalizedDanger(EnemyWave surfWave, int direction) {
+		double max = 0.0;
+		// finde maximales Element
+		for (double e : surfStats) {
+			max = Math.max(max, e);
+		}
+		
+		if (max == 0.0)
+			return 0;
+		
+		return checkDanger(surfWave, direction) / max;
+	}
 
 	/**
 	 * Aktualisieren der absoluten Position.

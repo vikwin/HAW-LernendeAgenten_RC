@@ -8,8 +8,8 @@ import environment.Enemy;
 public enum OrbitalMovement {
 	CLOCKWISE, COUNTERCLOCKWISE, CLOCKWISE_APPROACH, COUNTERCLOCKWISE_APPROACH, CLOCKWISE_DEPART, COUNTERCLOCKWISE_DEPART, NOTHING;
 	
-	private static double MOVE_RADIUS = 80.0;
-	private static double ENEMY_DISTANCE_STEP = 40.0;
+	private static double MOVE_RADIUS = 20.0;
+	private static double ENEMY_DISTANCE_STEP = MOVE_RADIUS * 0.75;
 	
 	/**
 	 * @param id die ID der OrbitalMovement
@@ -20,6 +20,9 @@ public enum OrbitalMovement {
 	}
 	
 	public Action getMoveAction(Enemy enemy) {
+		if (enemy == null)
+			return new NothingAction();
+		
 		switch (this) {
 		case CLOCKWISE:
 			return new OrbitalMoveAction(enemy, MOVE_RADIUS, 0);

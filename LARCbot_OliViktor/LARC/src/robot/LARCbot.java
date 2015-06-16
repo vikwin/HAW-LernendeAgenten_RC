@@ -16,7 +16,6 @@ import robot.actionsystem.FireAction;
 import robot.actionsystem.GunTurnAction;
 import robot.actionsystem.MoveAction;
 import robot.actionsystem.NothingAction;
-import robot.actionsystem.OrbitalMoveAction;
 import robot.actionsystem.SerialAction;
 import robot.actionsystem.TurnAction;
 import robot.rewardsystem.RewardRobot;
@@ -33,7 +32,7 @@ import environment.EnvironmentBuilder.AttackEnvironments;
 import environment.EnvironmentBuilder.MoveEnvironments;
 
 public class LARCbot extends RewardRobot {
-//	private static final boolean USE_WAVE_SURF = true;
+	// private static final boolean USE_WAVE_SURF = true;
 
 	// Art der Umgebungen
 	private static final AttackEnvironments ATTACK_ENV = AttackEnvironments
@@ -153,8 +152,7 @@ public class LARCbot extends RewardRobot {
 			doScan();
 
 		// Agents updaten und neue Actions holen
-		if (lastMoveAgentAction == null
-				|| lastMoveAgentAction.hasFinished()) {
+		if (lastMoveAgentAction == null || lastMoveAgentAction.hasFinished()) {
 
 			lastMoveAgentAction = getActionByMovement(moveAgent
 					.getNextAction(envBuilder.getMoveEnvId()));
@@ -201,12 +199,13 @@ public class LARCbot extends RewardRobot {
 
 			break;
 		case WAVESURF_MOVE:
-			// TODO: Implementieren, sobald OrbitalMovement fertig ist
-			// aktuell nur Debug Code
-			if (envBuilder.getLockedEnemy() != null) {
-				return new OrbitalMoveAction(envBuilder.getLockedEnemy(), -100,
-						-10);
+			OrbitalMovement orbitalMovement = OrbitalMovement.byId(movementId);
+			if (orbitalMovement != OrbitalMovement.NOTHING) {
+				nothing = false;
+				Enemy enemy = envBuilder.getLockedEnemy();
+				return orbitalMovement.getMoveAction(enemy);
 			}
+			
 			break;
 		}
 
@@ -288,6 +287,8 @@ public class LARCbot extends RewardRobot {
 		return new SerialAction(Arrays.asList(new Action[] { gunturn, fire }));
 	}
 
+	
+	
 	/**
 	 * Einaches Wavesurfing anstatt MoveAgent.
 	 */
