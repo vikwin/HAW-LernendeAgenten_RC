@@ -180,8 +180,10 @@ public class ConfigurationWindow {
 				int res = zip_fc.showOpenDialog(frmLarcbotExperimentKonfigurator);
 				
 				if (res == JFileChooser.APPROVE_OPTION) {
-					agentLoadFile.setText(zip_fc.getSelectedFile().getPath());
-					Config.setStringValue("Agent_LoadFile", agentLoadFile.getText());
+					String filename = zip_fc.getSelectedFile().getPath();
+					if (!filename.endsWith(".zip"))
+						filename += ".zip";
+					agentLoadFile.setText(filename);
 				}
 			}
 		});
@@ -221,8 +223,10 @@ public class ConfigurationWindow {
 				int res = zip_fc.showOpenDialog(frmLarcbotExperimentKonfigurator);
 				
 				if (res == JFileChooser.APPROVE_OPTION) {
-					agentSaveFile.setText(zip_fc.getSelectedFile().getPath());
-					Config.setStringValue("Agent_SaveFile", agentSaveFile.getText());
+					String filename = zip_fc.getSelectedFile().getPath();
+					if (!filename.endsWith(".zip"))
+						filename += ".zip";
+					agentSaveFile.setText(filename);
 				}
 			}
 		});
@@ -834,7 +838,10 @@ public class ConfigurationWindow {
 				}
 				
 				Config.setBoolValue("Agent_LoadOnStart", loadOnStart.isSelected());
+				Config.setStringValue("Agent_LoadFile", agentLoadFile.getText());
 				Config.setBoolValue("Agent_SaveAgents", saveAgents.isSelected());
+				Config.setStringValue("Agent_SaveFile", agentSaveFile.getText());
+				
 				Config.setStringValue("Agent_Algorithm", algo);
 				Config.setIntValue("Agent_SuccesChance", (int)succesChance.getValue());
 				switch (algo) {
