@@ -35,6 +35,10 @@ public class Config {
 		}
 	}
 	
+	public static void resetConfig() {
+		values = new HashMap<String, String>();
+	}
+	
 	public static String getStringValue(String key) {
 		return getStringValue(key, "");
 	}

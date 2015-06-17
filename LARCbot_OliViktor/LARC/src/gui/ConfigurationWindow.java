@@ -3,10 +3,13 @@ package gui;
 import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
+import java.awt.Container;
 import java.awt.EventQueue;
 import java.awt.FlowLayout;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
+import java.awt.event.ItemEvent;
+import java.awt.event.ItemListener;
 import java.io.File;
 import java.io.IOException;
 import java.lang.ProcessBuilder.Redirect;
@@ -16,9 +19,11 @@ import java.util.Enumeration;
 
 import javax.swing.AbstractButton;
 import javax.swing.ButtonGroup;
+import javax.swing.DefaultComboBoxModel;
 import javax.swing.DefaultListModel;
 import javax.swing.JButton;
 import javax.swing.JCheckBox;
+import javax.swing.JComboBox;
 import javax.swing.JFileChooser;
 import javax.swing.JFrame;
 import javax.swing.JLabel;
@@ -42,8 +47,7 @@ import javax.swing.filechooser.FileFilter;
 import javax.swing.plaf.nimbus.NimbusLookAndFeel;
 
 import utils.Config;
-import javax.swing.JComboBox;
-import javax.swing.DefaultComboBoxModel;
+import agents.AgentMode;
 import environment.EnvironmentBuilder.AttackEnvironments;
 import environment.EnvironmentBuilder.MoveEnvironments;
 
@@ -58,6 +62,10 @@ public class ConfigurationWindow {
 	private JPanel processPanel;
 	private JPanel processSelectionPanel;
 	private ButtonGroup processSelectionBtnGrp;
+	
+	private JComboBox<AgentMode> agentModeChoose;
+	private JPanel sarsaLambda, qLearning;
+	private JSpinner successChance;
 	
 	private Console redirectConsole;
 
@@ -159,17 +167,17 @@ public class ConfigurationWindow {
 		loadOnStart.setSelected(Config.getBoolValue("Agent_LoadOnStart"));
 		panel_6.add(loadOnStart);
 		
-		JPanel panel_33 = new JPanel();
-		FlowLayout flowLayout_30 = (FlowLayout) panel_33.getLayout();
+		JPanel agentLoadFilePanel = new JPanel();
+		FlowLayout flowLayout_30 = (FlowLayout) agentLoadFilePanel.getLayout();
 		flowLayout_30.setHgap(15);
 		flowLayout_30.setVgap(2);
 		flowLayout_30.setAlignment(FlowLayout.LEFT);
-		panel_33.setBackground(Color.WHITE);
-		agent_panel.add(panel_33);
+		agentLoadFilePanel.setBackground(Color.WHITE);
+		agent_panel.add(agentLoadFilePanel);
 		
 		agentLoadFile = new JTextField();
 		agentLoadFile.setText(Config.getStringValue("Agent_LoadFile"));
-		panel_33.add(agentLoadFile);
+		agentLoadFilePanel.add(agentLoadFile);
 		agentLoadFile.setColumns(10);
 		
 		JButton btnNewButton = new JButton("...");
@@ -187,8 +195,15 @@ public class ConfigurationWindow {
 				}
 			}
 		});
-		panel_33.add(btnNewButton);
+		agentLoadFilePanel.add(btnNewButton);
 		
+		loadOnStart.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				enableComponents(agentLoadFilePanel, loadOnStart.isSelected());
+			}
+		});
+		enableComponents(agentLoadFilePanel, loadOnStart.isSelected());
+
 		
 		JPanel panel_34 = new JPanel();
 		panel_34.setBackground(Color.WHITE);
@@ -202,17 +217,17 @@ public class ConfigurationWindow {
 		saveAgents.setSelected(Config.getBoolValue("Agent_SaveAgents"));
 		panel_34.add(saveAgents);
 		
-		JPanel panel_35 = new JPanel();
-		FlowLayout flowLayout_35 = (FlowLayout) panel_35.getLayout();
+		JPanel agengtSaveFilePanel = new JPanel();
+		FlowLayout flowLayout_35 = (FlowLayout) agengtSaveFilePanel.getLayout();
 		flowLayout_35.setHgap(15);
 		flowLayout_35.setVgap(2);
 		flowLayout_35.setAlignment(FlowLayout.LEFT);
-		panel_35.setBackground(Color.WHITE);
-		agent_panel.add(panel_35);
+		agengtSaveFilePanel.setBackground(Color.WHITE);
+		agent_panel.add(agengtSaveFilePanel);
 		
 		agentSaveFile = new JTextField();
 		agentSaveFile.setText(Config.getStringValue("Agent_SaveFile"));
-		panel_35.add(agentSaveFile);
+		agengtSaveFilePanel.add(agentSaveFile);
 		agentSaveFile.setColumns(10);
 		
 		JButton btnNewButton2 = new JButton("...");
@@ -230,7 +245,15 @@ public class ConfigurationWindow {
 				}
 			}
 		});
-		panel_35.add(btnNewButton2);
+		agengtSaveFilePanel.add(btnNewButton2);
+		
+		saveAgents.addChangeListener(new ChangeListener() {
+			public void stateChanged(ChangeEvent e) {
+				enableComponents(agengtSaveFilePanel, saveAgents.isSelected());
+			}
+		});
+		enableComponents(agengtSaveFilePanel, saveAgents.isSelected());
+		
 		
 		JPanel panel_3 = new JPanel();
 		panel_3.setBackground(Color.WHITE);
@@ -283,6 +306,7 @@ public class ConfigurationWindow {
 		JComboBox<MoveEnvironments> moveEnvChoose = new JComboBox<MoveEnvironments>();
 		moveEnvChoose.setModel(new DefaultComboBoxModel<MoveEnvironments>(MoveEnvironments.values()));
 		moveEnvChoose.setSelectedItem(MoveEnvironments.values()[Config.getIntValue("Robot_MoveEnv")]);
+		
 		panel_18.add(moveEnvChoose);
 		
 		JPanel env_panel = new JPanel();
@@ -337,8 +361,18 @@ public class ConfigurationWindow {
 		JSpinner moveGridSize = new JSpinner();
 		moveGridSize.setModel(new SpinnerNumberModel(Config.getIntValue("Env_GridSize", 40), null, null, new Integer(1)));
 		moveGridSize.setBackground(Color.WHITE);
-		moveGridSize.setEnabled(Config.getBoolValue("Env_UseExtendedMoveEnv"));
+		moveGridSize.setEnabled(Config.getIntValue("Robot_MoveEnv") == MoveEnvironments.COMPLEX_MOVE.ordinal());
 		moveGridSize_panel.add(moveGridSize);
+
+		moveEnvChoose.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+				if ((MoveEnvironments)moveEnvChoose.getSelectedItem() == MoveEnvironments.COMPLEX_MOVE) {
+					moveGridSize.setEnabled(true);
+				} else {
+					moveGridSize.setEnabled(false);
+				}
+			}
+		});
 		
 		JLabel lblNewLabel_1 = new JLabel("Bewegungsgittergröße");
 		moveGridSize_panel.add(lblNewLabel_1);
@@ -348,49 +382,6 @@ public class ConfigurationWindow {
 		tabbedPane.addTab("Algorithmus", null, algorithm_panel, null);
 		algorithm_panel.setLayout(null);
 		
-		ButtonGroup algorithmButtonGroup = new ButtonGroup();
-		JPanel switchAlgorithm = new JPanel();
-		switchAlgorithm.setBorder(new TitledBorder(null, "Auswahl", TitledBorder.LEADING, TitledBorder.TOP, null, null));
-		FlowLayout flowLayout_19 = (FlowLayout) switchAlgorithm.getLayout();
-		flowLayout_19.setAlignment(FlowLayout.LEFT);
-		flowLayout_19.setVgap(0);
-		flowLayout_19.setHgap(0);
-		switchAlgorithm.setBackground(Color.WHITE);
-		switchAlgorithm.setBounds(6, 6, 460, 52);
-		algorithm_panel.add(switchAlgorithm);
-		
-		JPanel panel_25 = new JPanel();
-		FlowLayout flowLayout_18 = (FlowLayout) panel_25.getLayout();
-		flowLayout_18.setVgap(2);
-		flowLayout_18.setHgap(3);
-		panel_25.setBackground(Color.WHITE);
-		switchAlgorithm.add(panel_25);
-		
-		JRadioButton chooseSarsaLambda = new JRadioButton("SARSA-Lambda");
-		algorithmButtonGroup.add(chooseSarsaLambda);
-		panel_25.add(chooseSarsaLambda);
-		
-		JPanel panel_28 = new JPanel();
-		FlowLayout flowLayout_20 = (FlowLayout) panel_28.getLayout();
-		flowLayout_20.setVgap(2);
-		flowLayout_20.setHgap(20);
-		panel_28.setBackground(Color.WHITE);
-		switchAlgorithm.add(panel_28);
-		
-		JRadioButton chooseQLearning = new JRadioButton("Q-Learning");
-		algorithmButtonGroup.add(chooseQLearning);
-		panel_28.add(chooseQLearning);
-		
-		switch (Config.getStringValue("Agent_Algorithm")) {
-		case "SARSA-Lambda":
-			chooseSarsaLambda.setSelected(true);
-			break;
-
-		case "Q-Learning":
-			chooseQLearning.setSelected(true);
-			break;
-		}
-		
 		JPanel algorithmGeneralPanel = new JPanel();
 		FlowLayout flowLayout_32 = (FlowLayout) algorithmGeneralPanel.getLayout();
 		flowLayout_32.setVgap(0);
@@ -398,33 +389,54 @@ public class ConfigurationWindow {
 		flowLayout_32.setAlignment(FlowLayout.LEFT);
 		algorithmGeneralPanel.setBorder(new TitledBorder(null, "Allgemein", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		algorithmGeneralPanel.setBackground(Color.WHITE);
-		algorithmGeneralPanel.setBounds(6, 58, 460, 56);
+		algorithmGeneralPanel.setBounds(6, 6, 460, 98);
 		algorithm_panel.add(algorithmGeneralPanel);
+		
+		JPanel panel_31 = new JPanel();
+		FlowLayout flowLayout_18 = (FlowLayout) panel_31.getLayout();
+		flowLayout_18.setVgap(3);
+		panel_31.setBackground(Color.WHITE);
+		algorithmGeneralPanel.add(panel_31);
+		
+		JLabel lblAgentenModus = new JLabel("Agenten Modus:");
+		panel_31.add(lblAgentenModus);
+		
+		agentModeChoose = new JComboBox<AgentMode>();
+		agentModeChoose.setModel(new DefaultComboBoxModel<AgentMode>(AgentMode.values()));
+		agentModeChoose.setSelectedItem(AgentMode.values()[Config.getIntValue("Agent_Mode")]);
+		agentModeChoose.addItemListener(new ItemListener() {
+			public void itemStateChanged(ItemEvent e) {
+				agentModeChooseChanged();
+			}
+		});
+		panel_31.add(agentModeChoose);
 		
 		JPanel panel_7 = new JPanel();
 		FlowLayout flowLayout_31 = (FlowLayout) panel_7.getLayout();
-		flowLayout_31.setVgap(0);
+		flowLayout_31.setVgap(3);
 		algorithmGeneralPanel.add(panel_7);
 		panel_7.setBackground(Color.WHITE);
 		
 		JLabel lblErfolgsrate = new JLabel("Erfolgsrate (%):");
 		panel_7.add(lblErfolgsrate);
 		
-		JSpinner succesChance = new JSpinner();
-		panel_7.add(succesChance);
-		succesChance.setModel(new SpinnerNumberModel(Config.getIntValue("Agent_SuccesChance", 50), 50, 100, 1));
+		successChance = new JSpinner();
+		panel_7.add(successChance);
+		successChance.setModel(new SpinnerNumberModel(Config.getIntValue("Agent_SuccesChance", 50), 50, 100, 1));
 		
-		JPanel sarsaLambda = new JPanel();
+		sarsaLambda = new JPanel();
 		FlowLayout flowLayout_21 = (FlowLayout) sarsaLambda.getLayout();
 		flowLayout_21.setVgap(0);
 		flowLayout_21.setHgap(0);
 		flowLayout_21.setAlignment(FlowLayout.RIGHT);
 		sarsaLambda.setBorder(new TitledBorder(null, "SARSA-Lambda", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		sarsaLambda.setBackground(Color.WHITE);
-		sarsaLambda.setBounds(6, 116, 224, 169);
+		sarsaLambda.setBounds(6, 105, 224, 180);
 		algorithm_panel.add(sarsaLambda);
 		
 		JPanel panel_13 = new JPanel();
+		FlowLayout flowLayout_19 = (FlowLayout) panel_13.getLayout();
+		flowLayout_19.setVgap(4);
 		panel_13.setBackground(Color.WHITE);
 		sarsaLambda.add(panel_13);
 		
@@ -439,7 +451,7 @@ public class ConfigurationWindow {
 		JPanel panel_16 = new JPanel();
 		sarsaLambda.add(panel_16, BorderLayout.NORTH);
 		FlowLayout flowLayout_11 = (FlowLayout) panel_16.getLayout();
-		flowLayout_11.setVgap(2);
+		flowLayout_11.setVgap(4);
 		flowLayout_11.setAlignment(FlowLayout.LEFT);
 		panel_16.setBackground(Color.WHITE);
 		
@@ -455,7 +467,7 @@ public class ConfigurationWindow {
 		JPanel panel_14 = new JPanel();
 		sarsaLambda.add(panel_14, BorderLayout.CENTER);
 		FlowLayout flowLayout_9 = (FlowLayout) panel_14.getLayout();
-		flowLayout_9.setVgap(2);
+		flowLayout_9.setVgap(4);
 		flowLayout_9.setAlignment(FlowLayout.LEFT);
 		panel_14.setBackground(Color.WHITE);
 		
@@ -471,7 +483,7 @@ public class ConfigurationWindow {
 		JPanel panel_15 = new JPanel();
 		sarsaLambda.add(panel_15, BorderLayout.SOUTH);
 		FlowLayout flowLayout_10 = (FlowLayout) panel_15.getLayout();
-		flowLayout_10.setVgap(2);
+		flowLayout_10.setVgap(4);
 		flowLayout_10.setAlignment(FlowLayout.LEFT);
 		panel_15.setBackground(Color.WHITE);
 		
@@ -484,14 +496,14 @@ public class ConfigurationWindow {
 		discountRate.setBackground(Color.WHITE);
 		panel_15.add(discountRate);
 		
-		JPanel qLearning = new JPanel();
+		qLearning = new JPanel();
 		qLearning.setBackground(Color.WHITE);
 		qLearning.setBorder(new TitledBorder(null, "Q-Learning", TitledBorder.LEADING, TitledBorder.TOP, null, null));
 		FlowLayout flowLayout_22 = (FlowLayout) qLearning.getLayout();
 		flowLayout_22.setAlignment(FlowLayout.RIGHT);
 		flowLayout_22.setVgap(0);
 		flowLayout_22.setHgap(0);
-		qLearning.setBounds(235, 116, 231, 169);
+		qLearning.setBounds(235, 110, 231, 175);
 		algorithm_panel.add(qLearning);
 		
 		JPanel panel_29 = new JPanel();
@@ -828,38 +840,31 @@ public class ConfigurationWindow {
 		JButton btnStart = new JButton("Start");
 		btnStart.addActionListener(new ActionListener() {
 			public void actionPerformed(ActionEvent e) {
-				String algo = "";
-				for (Enumeration<AbstractButton> buttons = algorithmButtonGroup.getElements(); buttons.hasMoreElements();) {
-					AbstractButton b = buttons.nextElement();
-					if (b.isSelected()) {
-						algo = b.getText();
-						break;
-					}
-				}
+				Config.resetConfig();
 				
 				Config.setBoolValue("Agent_LoadOnStart", loadOnStart.isSelected());
 				Config.setStringValue("Agent_LoadFile", agentLoadFile.getText());
 				Config.setBoolValue("Agent_SaveAgents", saveAgents.isSelected());
 				Config.setStringValue("Agent_SaveFile", agentSaveFile.getText());
 				
-				Config.setStringValue("Agent_Algorithm", algo);
-				Config.setIntValue("Agent_SuccesChance", (int)succesChance.getValue());
-				switch (algo) {
-					case "Q-Learning":
+				AgentMode agentMode = (AgentMode)agentModeChoose.getSelectedItem();
+				
+				Config.setIntValue("Agent_Mode", agentMode.ordinal());
+				Config.setIntValue("Agent_SuccesChance", (int)successChance.getValue());
+				switch (agentMode) {
+					case Q_LEARNING:
 						Config.setIntValue("Agent_DiscountRate", (int)discountRateQ.getValue());
 						Config.setIntValue("Agent_LearnRate", (int)learnRateQ.getValue());
 						break;
-					case "SARSA-Lambda":
+					case SARSA_LAMBDA:
 						Config.setIntValue("Agent_QueueSize", (int)propagationDepth.getValue());
 						Config.setIntValue("Agent_Lambda", (int)lambda.getValue());
 						Config.setIntValue("Agent_DiscountRate", (int)discountRate.getValue());
 						Config.setIntValue("Agent_LearnRate", (int)learnRate.getValue());
 						break;
+					default:
+						break;
 				}
-				
-//				Config.setBoolValue("Robot_SimpleReward", !simpleReward.isSelected());
-//				Config.setBoolValue("Robot_UseExtendedMoveEnv", extendedMoveEnv.isSelected());
-//				Config.setBoolValue("Robot_UseExtendedAttackEnv", extendedAttackEnv.isSelected());
 				
 				Config.setIntValue("Robot_MoveEnv", ((MoveEnvironments)moveEnvChoose.getSelectedItem()).ordinal());
 				Config.setIntValue("Robot_AttackEnv", ((AttackEnvironments)attackEnvChoose.getSelectedItem()).ordinal());
@@ -888,11 +893,70 @@ public class ConfigurationWindow {
 				
 				Config.setDoubleValue("Reward_Winning", Double.parseDouble(winningReward.getText()));
 				Config.setDoubleValue("Reward_Loosing", Double.parseDouble(loosingReward.getText()));
+				
+				Config.setStringValue("RobocodeHome", robocodeHome.getText());
 
 				start();
 			}
 		});
 		button_panel.add(btnStart);
+		
+		agentModeChooseChanged();
+	}
+	
+	private void agentModeChooseChanged() {
+		switch ((AgentMode)agentModeChoose.getSelectedItem()) {
+		case FIGHTING:
+			sarsaLambda.setEnabled(false);
+			enableComponents(sarsaLambda, false);
+			
+			qLearning.setEnabled(false);
+			enableComponents(qLearning, false);
+			
+			successChance.setEnabled(false);
+			tabbedPane.setEnabledAt(2, false);
+			break;
+		case Q_LEARNING:
+			sarsaLambda.setEnabled(false);
+			enableComponents(sarsaLambda, false);
+			
+			qLearning.setEnabled(true);
+			enableComponents(qLearning, true);
+			
+			successChance.setEnabled(true);
+			tabbedPane.setEnabledAt(2, true);
+			break;
+		case RANDOM:
+			sarsaLambda.setEnabled(false);
+			enableComponents(sarsaLambda, false);
+			
+			qLearning.setEnabled(false);
+			enableComponents(qLearning, false);
+			
+			successChance.setEnabled(false);
+			tabbedPane.setEnabledAt(2, false);
+			break;
+		case SARSA_LAMBDA:
+			sarsaLambda.setEnabled(true);
+			enableComponents(sarsaLambda, true);
+			
+			qLearning.setEnabled(false);
+			enableComponents(qLearning, false);
+			
+			successChance.setEnabled(true);
+			tabbedPane.setEnabledAt(2, true);
+			break;
+		}
+	}
+	
+	private void enableComponents(Container container, boolean enable) {
+		Component[] components = container.getComponents();
+		for (Component component : components) {
+			component.setEnabled(enable);
+			if (component instanceof Container) {
+				enableComponents((Container)component, enable);
+			}
+		}
 	}
 
 	private void loadRobots() {

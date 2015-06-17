@@ -24,8 +24,6 @@ public abstract class AbstractAgent {
 			.getIntValue("Agent_DiscountRate") / 100.0;
 	private static final double LAMBDA = Config.getIntValue("Agent_Lambda") / 100.0;
 	private static final int QUEUE_SIZE = Config.getIntValue("Agent_QueueSize");
-	private static final String ALGORITHM = Config
-			.getStringValue("Agent_Algorithm");
 
 	private static final String LOAD_FILENAME = Config
 			.getStringValue("Agent_LoadFile");
@@ -39,34 +37,31 @@ public abstract class AbstractAgent {
 	protected static final boolean SAVE = Config
 			.getBoolValue("Agent_SaveAgents");
 
-	protected AgentMode mode;
+	protected static AgentMode mode = AgentMode.values()[Config.getIntValue("Agent_Mode")];
 
 	private ActionQueue lastActionQueue;
 
 	private HashMap<Integer, Double> eValues;
 
 	static {
-		String enemy = "", algo = "";
-		if (Config.getBoolValue("StartBattle"))
-			enemy = "_" + Config.getStringValue("EnemyRobot");
-
-		if (ALGORITHM.length() > 0)
-			algo = "_" + ALGORITHM.charAt(0);
-
-		FOLDER_NAME = "LARCAgents/" + TIMESTAMP + enemy + algo;
-
-		new File(FOLDER_NAME).mkdirs();
+		if (mode == AgentMode.Q_LEARNING || mode == AgentMode.SARSA_LAMBDA) {
+			String enemy = "", algo = "";
+			if (Config.getBoolValue("StartBattle"))
+				enemy = "_" + Config.getStringValue("EnemyRobot");
+		
+			algo = "_" + mode.toString().charAt(0);
+		
+			FOLDER_NAME = "LARCAgents/" + TIMESTAMP + enemy + algo;
+		
+			new File(FOLDER_NAME).mkdirs();
+		} else {
+			FOLDER_NAME = null;
+		}
 	}
 
 	protected AbstractAgent() {
-		mode = AgentMode.LEARNING;
-
 		eValues = new HashMap<Integer, Double>();
 		lastActionQueue = new ActionQueue(QUEUE_SIZE);
-	}
-
-	public void setMode(AgentMode newMode) {
-		mode = newMode;
 	}
 
 	protected abstract Double[] getActionList();
@@ -208,12 +203,12 @@ public abstract class AbstractAgent {
 	}
 
 	protected void addRewardToLastActions(double reward) {
-		switch (ALGORITHM) {
-		case "SARSA-Lambda":
+		switch (mode) {
+		case SARSA_LAMBDA:
 			sarsa_lambda(reward, LEARN_RATE, DISCOUNT_RATE, LAMBDA);
 			break;
 
-		case "Q-Learning":
+		case Q_LEARNING:
 			if (lastActionQueue.size() > 1) {
 				Iterator<Integer> it = lastActionQueue.reverseIterator();
 				int s_ = getStateFromId(it.next());
@@ -221,6 +216,10 @@ public abstract class AbstractAgent {
 
 				q_learning(sa, s_, reward, LEARN_RATE, DISCOUNT_RATE);
 			}
+			break;
+			
+		default:
+			// should never happen
 			break;
 		}
 	}

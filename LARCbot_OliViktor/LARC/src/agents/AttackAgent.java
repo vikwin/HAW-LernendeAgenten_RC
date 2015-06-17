@@ -94,11 +94,12 @@ public class AttackAgent extends AbstractAgent {
 		int actionID = -1;
 
 		switch (mode) {
-		case RNDLEARN:
+		case RANDOM:
 			actionID = rnd.nextInt(numberOfActions);
 			break;
 
-		case LEARNING:
+		case Q_LEARNING:
+		case SARSA_LAMBDA:
 			int chance = rnd.nextInt(100);
 
 			if (chance < SUCCESS_CHANCE) {
@@ -106,6 +107,8 @@ public class AttackAgent extends AbstractAgent {
 			} else {
 				actionID = rnd.nextInt(numberOfActions);
 			}
+
+			addToLastActionQueue(stateID * numberOfActions + actionID);
 			break;
 
 		case FIGHTING:
@@ -113,7 +116,6 @@ public class AttackAgent extends AbstractAgent {
 			break;
 		}
 
-		addToLastActionQueue(stateID * numberOfActions + actionID);
 
 		// System.out.println("AttackAgent asked for next action and returns #"
 		// + (actionID % 36));
@@ -124,7 +126,7 @@ public class AttackAgent extends AbstractAgent {
 	@Override
 	public void addReward(double reward) {
 		// System.out.println("AttackAgent gets reward: " + reward);
-		if (mode != AgentMode.FIGHTING) {
+		if (mode == AgentMode.Q_LEARNING || mode == AgentMode.SARSA_LAMBDA) {
 			// System.out.print("AttackAgent > ");
 			addRewardToLastActions(reward);
 		}
