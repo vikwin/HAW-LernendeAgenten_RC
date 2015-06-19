@@ -5,7 +5,7 @@ import utility.Position;
 
 public class Action {
 
-	private final double GUN_TURN_STEP = 10.0;
+	private final double GUN_TURN_STEP = 4.0;
 	private final double SHORTDIST = 40.0;
 	private final double LONGDIST = Math.sqrt(2 * SHORTDIST * SHORTDIST);
 
@@ -86,8 +86,8 @@ public class Action {
 		}
 
 		int turnGun = getTurnGun();
-		if (turnGun == 0) {
-			moveVector[2] = 0;
+		if (turnGun == 0) { 
+			moveVector[2] = 1;
 			moveVector[3] = 0;
 		} else {
 			if (turnGun > 2) {

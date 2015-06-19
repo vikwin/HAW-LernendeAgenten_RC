@@ -39,7 +39,7 @@ public abstract class RewardRobot extends AdvancedRobot {
 		hitByBullet = -1;
 		bulletHitBullet = 0;
 		bulletHitEnemy = 3;
-		bulletHitWall = -1;
+		bulletHitWall = -3;
 		multiplyBulletPower = false;
 
 		// Rammen von Objekten

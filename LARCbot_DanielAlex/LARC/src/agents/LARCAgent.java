@@ -265,11 +265,6 @@ public class LARCAgent implements IAgent {
 			outputWriter.close();
 			outputWriter = new PrintWriter(new BufferedWriter(new FileWriter("winpercentage.csv", true)));
 			outputWriter.println(Double.toString(RewardRobot.roundsWon / this.myRobot.getNumRounds()));
-			
-			outputWriter.flush();
-			outputWriter.close();
-			outputWriter = new PrintWriter(new BufferedWriter(new FileWriter("enemyhitcounter.csv", true)));
-			outputWriter.println(Double.toString(RewardRobot.enemyHitCounter / this.myRobot.getNumRounds()));
 
 			outputWriter.flush();
 			outputWriter.close();

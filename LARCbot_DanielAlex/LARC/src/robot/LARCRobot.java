@@ -2,12 +2,13 @@ package robot;
 
 import java.awt.Color;
 import java.awt.Graphics2D;
+import java.awt.geom.Point2D;
 
-import robocode.BattleEndedEvent;
 import robocode.DeathEvent;
 import robocode.HitWallEvent;
 import robocode.RobotDeathEvent;
 import robocode.ScannedRobotEvent;
+import robocode.util.Utils;
 import state.State;
 import utility.Position;
 import agents.LARCAgent;
@@ -25,6 +26,7 @@ public class LARCRobot extends RewardRobot {
 	public static final int DRAW_OFFSET = 60;
 	public static double[][] VALUE_FUNCTION = new double[NO_OF_ACTIONS][NO_OF_STATES];
 	public static boolean STATE_REPEAT;
+	public double bulletPower;
 	public double currentGunAngleToEnemy;
 	public double oldGunAngleToEnemy = 0;
 	public LARCEnvironment environment;
@@ -44,10 +46,9 @@ public class LARCRobot extends RewardRobot {
 	private double currentDistance;
 	private double currentEnemyDistance;
 	private double currentHeading;
-	private int scanDirection;
-	private double gunTurnToEnemy;
+	private volatile double gunTurnToEnemy;
 	public int wallHitCounter;
-	
+	private boolean dontAdjustGun;
 
 	public LARCRobot() {
 		this.enemyX = 0;
@@ -56,7 +57,6 @@ public class LARCRobot extends RewardRobot {
 		this.enemyDirection = 1;
 		this.environment = new LARCEnvironment(this);
 		this.agent = new LARCAgent(this);
-		this.scanDirection = 1;
 	}
 
 	@Override
@@ -82,28 +82,31 @@ public class LARCRobot extends RewardRobot {
 				updateHeading();
 				stateID = this.environment.env_step(actionID);
 				actionID = this.agent.agent_step(stateID);
-			} else if (this.getDistanceRemaining() != 0 && this.getGunTurnRemaining() == 0) {
+			} else if (this.getGunTurnRemaining() == 0) {
+				this.dontAdjustGun = false;
 				fire(Math.min(BULLETPOWER / this.distanceToEnemy, 3));
 			}
 			execute();
+
 		}
 	}
 
 	public void move(double[] instructions) {
+		this.dontAdjustGun = true;
 		// Gun Zielen:
 		// setTurnGunRight(this.angleToEnemy + instructions[4]);
 		if (getGunTurnRemaining() == 0) {
-			this.turnGunRight(gunTurnToEnemy + instructions[3]);
+			this.setTurnGunRight(instructions[3]);
 		}
 
 		// Panzer Fahren!:
 		backOrAhead(instructions[1], instructions[0]);
 
 		// // Schießen:
-		if (instructions[2] == 1.0) {
-			double firePower = Math.min(BULLETPOWER / this.distanceToEnemy, 3); // 3 ist max möglicher wert für firepower
-			// setFire(firePower);
-		}
+//		if (instructions[2] == 1.0) {
+//			// firePower = Math.min(BULLETPOWER / this.distanceToEnemy, 3); // 3 ist max möglicher wert für firepower
+//			setFire(bulletPower);
+//		}
 	}
 
 	public void updateHeading() {
@@ -201,30 +204,59 @@ public class LARCRobot extends RewardRobot {
 
 	/*************************************************************************************************************************/
 	@Override
-	public void onScannedRobot(ScannedRobotEvent event) {
-		scanDirection *= -1; // changes value from 1 to -1
-		setTurnRadarRight(360 * scanDirection);
+	public void onScannedRobot(ScannedRobotEvent e) {
+
+		this.bulletPower = Math.min(BULLETPOWER / this.distanceToEnemy, 3); // 3 ist max möglicher wert für firepower
+
+		double myX = getX();
+		double myY = getY();
+		double absoluteBearing = getHeadingRadians() + e.getBearingRadians();
+		double enemyX = getX() + e.getDistance() * Math.sin(absoluteBearing);
+		double enemyY = getY() + e.getDistance() * Math.cos(absoluteBearing);
+		double enemyHeading = e.getHeadingRadians();
+		double enemyVelocity = e.getVelocity();
+
+		double deltaTime = 0;
+		double battleFieldHeight = getBattleFieldHeight(), battleFieldWidth = getBattleFieldWidth();
+		double predictedX = enemyX, predictedY = enemyY;
+		while ((++deltaTime) * (20.0 - 3.0 * bulletPower) < Point2D.Double.distance(myX, myY, predictedX, predictedY)) {
+			predictedX += Math.sin(enemyHeading) * enemyVelocity;
+			predictedY += Math.cos(enemyHeading) * enemyVelocity;
+			if (predictedX < 18.0 || predictedY < 18.0 || predictedX > battleFieldWidth - 18.0
+					|| predictedY > battleFieldHeight - 18.0) {
+				predictedX = Math.min(Math.max(18.0, predictedX), battleFieldWidth - 18.0);
+				predictedY = Math.min(Math.max(18.0, predictedY), battleFieldHeight - 18.0);
+				break;
+			}
+		}
+		double theta = Utils.normalAbsoluteAngle(Math.atan2(predictedX - getX(), predictedY - getY()));
+
+		setTurnRadarRightRadians(Utils.normalRelativeAngle(absoluteBearing - getRadarHeadingRadians()));
+
+		if (!this.dontAdjustGun) {
+			setTurnGunRightRadians(Utils.normalRelativeAngle(theta - getGunHeadingRadians()));
+		}
 
 		// calculate enemy direction via oster algorithm:
-		double velocity = event.getVelocity();
+		double velocity = e.getVelocity();
 		if (velocity >= 0) {
-			enemyDirection = event.getHeading();
+			enemyDirection = e.getHeading();
 		} else {
-			enemyDirection = event.getHeading() - 180;
+			enemyDirection = e.getHeading() - 180;
 			if (enemyDirection < 0) {
 				enemyDirection += 360;
 			}
 		}
 		// System.out.println("Enemy Direction: " + enemyDirection);
-		gunTurnToEnemy = Position.normalizeDegrees(getHeading() - getGunHeading() + event.getBearing());
+		gunTurnToEnemy = Position.normalizeDegrees(getHeading() - getGunHeading() + e.getBearing());
 
 		// update enemy-related state variables:
-		this.currentGunAngleToEnemy = Math.abs(getHeading() - getGunHeading() + event.getBearing());
-		this.angleToEnemy = event.getBearing();
-		this.distanceToEnemy = event.getDistance();
+		this.currentGunAngleToEnemy = Math.abs(getHeading() - getGunHeading() + e.getBearing());
+		this.angleToEnemy = e.getBearing();
+		this.distanceToEnemy = e.getDistance();
 		this.triangulateEnemyPosition();
-		this.enemyEnergy = event.getEnergy();
-		this.currentEnemyDistance = event.getDistance();
+		this.enemyEnergy = e.getEnergy();
+		this.currentEnemyDistance = e.getDistance();
 
 		this.updateEnergyRatio();
 	}
@@ -237,7 +269,7 @@ public class LARCRobot extends RewardRobot {
 
 	@Override
 	public void onDeath(DeathEvent event) {
-		
+
 		super.onDeath(event);
 		this.agent.agent_end();
 		this.environment.env_cleanup();
