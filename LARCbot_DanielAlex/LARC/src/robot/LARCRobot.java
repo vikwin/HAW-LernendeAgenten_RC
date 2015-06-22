@@ -4,6 +4,7 @@ import java.awt.Color;
 import java.awt.Graphics2D;
 import java.awt.geom.Point2D;
 
+import robocode.BattleEndedEvent;
 import robocode.DeathEvent;
 import robocode.HitWallEvent;
 import robocode.RobotDeathEvent;
@@ -25,6 +26,7 @@ public class LARCRobot extends RewardRobot {
 	public static final long STEP_TIME = 100;
 	public static final int DRAW_OFFSET = 60;
 	public static double[][] VALUE_FUNCTION = new double[NO_OF_ACTIONS][NO_OF_STATES];
+	public static int BATTLE_SCORE;
 	public static boolean STATE_REPEAT;
 	public double bulletPower;
 	public double currentGunAngleToEnemy;
@@ -72,22 +74,25 @@ public class LARCRobot extends RewardRobot {
 		int stateID = this.environment.env_start();
 		int actionID = this.agent.agent_start(stateID);
 		setTurnRadarRight(2000);
-		while (true) {
-			this.gunPostion = this.getGunHeading();
-			this.myPosition.setX(this.getX());
-			this.myPosition.setY(this.getY());
+		try {
+			while (true) {
+				this.gunPostion = this.getGunHeading();
+				this.myPosition.setX(this.getX());
+				this.myPosition.setY(this.getY());
 
-			// stepping
-			if (this.getDistanceRemaining() == 0 && this.getTurnRemaining() == 0) {
-				updateHeading();
-				stateID = this.environment.env_step(actionID);
-				actionID = this.agent.agent_step(stateID);
-			} else if (this.getGunTurnRemaining() == 0) {
-				this.dontAdjustGun = false;
-				fire(Math.min(BULLETPOWER / this.distanceToEnemy, 3));
+				// stepping
+				if (this.getDistanceRemaining() == 0 && this.getTurnRemaining() == 0) {
+					updateHeading();
+					stateID = this.environment.env_step(actionID);
+					actionID = this.agent.agent_step(stateID);
+				} else if (this.getGunTurnRemaining() == 0) {
+					this.dontAdjustGun = false;
+					fire(Math.min(BULLETPOWER / this.distanceToEnemy, 3));
+				}
+				execute();
+
 			}
-			execute();
-
+		} catch (ThreadDeath ex) {
 		}
 	}
 
@@ -103,10 +108,10 @@ public class LARCRobot extends RewardRobot {
 		backOrAhead(instructions[1], instructions[0]);
 
 		// // Schießen:
-//		if (instructions[2] == 1.0) {
-//			// firePower = Math.min(BULLETPOWER / this.distanceToEnemy, 3); // 3 ist max möglicher wert für firepower
-//			setFire(bulletPower);
-//		}
+		// if (instructions[2] == 1.0) {
+		// // firePower = Math.min(BULLETPOWER / this.distanceToEnemy, 3); // 3 ist max möglicher wert für firepower
+		// setFire(bulletPower);
+		// }
 	}
 
 	public void updateHeading() {
@@ -269,18 +274,21 @@ public class LARCRobot extends RewardRobot {
 
 	@Override
 	public void onDeath(DeathEvent event) {
-
 		super.onDeath(event);
-		this.agent.agent_end();
 		this.environment.env_cleanup();
-		this.agent.agent_cleanup();
 	}
 
 	@Override
 	public void onRobotDeath(RobotDeathEvent event) {
 		super.onRobotDeath(event);
-		this.agent.agent_end();
 		this.environment.env_cleanup();
+	}
+
+	@Override
+	public void onBattleEnded(BattleEndedEvent event) {
+		super.onBattleEnded(event);
+		BATTLE_SCORE = event.getResults().getScore();
+		this.agent.agent_end();
 		this.agent.agent_cleanup();
 	}
 
