@@ -24,13 +24,13 @@ public class Action {
 		return actionID;
 	}
 
-	// public int getFire() {
-	// return actionID - (getTurnGun() * 18 + getMove() * 2);
-	// }
+//	 public int getFire() {
+//	 return actionID - (getTurnGun() * 18 + getMove() * 2);
+//	 }
 
 	public int getMove() {
-		return actionID;
-		//return (actionID - getTurnGun() * 8);
+//		return actionID;
+		return (actionID - getTurnGun() * 8);
 	}
 
 	public int getTurnGun() {
@@ -86,19 +86,19 @@ public class Action {
 			break;
 		}
 //
-//		int turnGun = getTurnGun();
-//		if (turnGun == 0) { 
-//			moveVector[2] = 1;
-//			moveVector[3] = 0;
-//		} else {
-//			if (turnGun > 2) {
-//				moveVector[2] = 1;
-//				moveVector[3] = -(turnGun - 2) * GUN_TURN_STEP;
-//			} else {
-//				moveVector[2] = 1;
-//				moveVector[3] = turnGun * GUN_TURN_STEP;
-//			}
-//		}
+		int turnGun = getTurnGun();
+		if (turnGun == 0) { 
+			moveVector[2] = 1;
+			moveVector[3] = 0;
+		} else {
+			if (turnGun > 2) {
+				moveVector[2] = 1;
+				moveVector[3] = -(turnGun - 2) * GUN_TURN_STEP;
+			} else {
+				moveVector[2] = 1;
+				moveVector[3] = turnGun * GUN_TURN_STEP;
+			}
+		}
 
 		// Position.printdebug("Gunturn: " + moveVector[3]);
 		return moveVector;
