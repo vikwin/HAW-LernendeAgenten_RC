@@ -23,7 +23,7 @@ public class LARCAgent implements IAgent {
 	public static final double INITIAL_Q_VALUE = 0.0;
 	public static final int LAMBDA_LIST_CAPACITY = 4;
 
-	private static final double EPSILON = 0.05; // Exploration rate
+	private static final double EPSILON = 0.08; // Exploration rate
 	private static final double GAMMA = 0.9; // Time Discount factor
 	private static final double ALPHA = 0.7; // learning rate (importance of new information)
 	private static final double LAMBDA = 0.6; // Abschwächungsfaktor
@@ -290,6 +290,12 @@ public class LARCAgent implements IAgent {
 			outputWriter.close();
 			outputWriter = new PrintWriter(new BufferedWriter(new FileWriter("wallRamCounter.csv", true)));
 			outputWriter.println(Double.toString(RewardRobot.wallRamCounter / this.myRobot.getNumRounds()));
+
+			outputWriter.flush();
+			outputWriter.close();
+			
+			outputWriter = new PrintWriter(new BufferedWriter(new FileWriter("totalScore.csv", true)));
+			outputWriter.println(Double.toString(RewardRobot.wallRamCounter / this.myRobot.BATTLE_SCORE));
 
 			outputWriter.flush();
 			outputWriter.close();
