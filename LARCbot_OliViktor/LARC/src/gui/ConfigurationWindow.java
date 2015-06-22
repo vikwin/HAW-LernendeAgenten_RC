@@ -1506,7 +1506,7 @@ public class ConfigurationWindow {
 				 }
 			 }
 		 }
-//		 classpath.add(new File("").getAbsolutePath());
+		 classpath.add(new File("").getAbsolutePath());
 
 		Config.save();
 

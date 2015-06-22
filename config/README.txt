@@ -1,0 +1,1 @@
+Hier wird die config-Datei für das Configuration-Window gespeichert!

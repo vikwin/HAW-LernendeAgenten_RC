@@ -14,7 +14,7 @@ import java.util.Random;
 
 import robot.LARCRobot;
 import robot.RewardRobot;
-import utils.Config;
+import utility.Config;
 
 public class LARCAgent implements IAgent {
 
