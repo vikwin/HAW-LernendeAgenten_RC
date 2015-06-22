@@ -196,16 +196,16 @@ public class WaveSurfMoveEnvironment implements Environment {
 						(int) circleSize, (int) circleSize, 0, 360);
 		}
 
-		// Zeichne nahe Wände in blau ein
-		g.setColor(new Color(0x00, 0x00, 0xff, 0xff));
+		// Zeichne nahe Wände in grün ein
+		g.setColor(new Color(0x00, 0xff, 0x00, 0xff));
 		if (wallToLeft)
 			g.drawChars("WALL TO LEFT".toCharArray(), 0, 12, 50, 30);
 
 		if (wallToRight)
 			g.drawChars("WALL TO RIGHT".toCharArray(), 0, 13, 200, 30);
 
-		// Zeichne Gefahrenstufen in Rot ein
-		g.setColor(new Color(0xff, 0x00, 0x00, 0xff));
+		// Zeichne Gefahrenstufen in grün ein
+		g.setColor(new Color(0x00, 0xff, 0x00, 0xff));
 		String leftDanger = "DANGER TO LEFT: " + dangerLeft.toString();
 		g.drawChars(leftDanger.toCharArray(), 0, leftDanger.length(), 50, 50);
 		String rightDanger = "DANGER TO RIGHT: " + dangerRight.toString();
