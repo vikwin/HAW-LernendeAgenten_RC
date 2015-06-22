@@ -125,7 +125,7 @@ public class Config {
 		saveFile(values, values.get("RobocodeHome") + File.separator + CONFIG_FILENAME);
 	}
 	
-	public static String createAndSaveBattle() {
+	public static String createAndSaveBattle(boolean botOliVictor, boolean botAlexDaniel, String enemy) {
 		String dirname = values.get("RobocodeHome") + "\\battles\\", filename = "generated_battle.battle";
 		
 		HashMap<String, String> battleValues = new HashMap<String, String>();
@@ -135,7 +135,7 @@ public class Config {
 		battleValues.put("robocode.battle.gunCoolingRate", "0.1");
 		battleValues.put("robocode.battle.rules.inactiveTime", "450");
 		battleValues.put("robocode.battle.hideEnemyNames", "true");
-		battleValues.put("robocode.battle.selectedRobots", "robot.LARCbot*," + values.get("EnemyRobot"));
+		battleValues.put("robocode.battle.selectedRobots", (botOliVictor ? "robot.LARCbot*" : "") + (botAlexDaniel ? ",robot.LARCRobot*" : "") + (enemy == null ? "" : "," + enemy));
 		
 		saveFile(battleValues, dirname + filename);
 		

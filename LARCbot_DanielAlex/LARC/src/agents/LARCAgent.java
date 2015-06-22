@@ -14,28 +14,30 @@ import java.util.Random;
 
 import robot.LARCRobot;
 import robot.RewardRobot;
+import utils.Config;
 
 public class LARCAgent implements IAgent {
 
-	public static final String PATH = "qValues.csv";
+	public static final String PATH = Config.getStringValue("AD_QValueFile", "qValues.csv");
 
 	public static double[][] E_TRACE_FUNCTION;
 	public static final double INITIAL_Q_VALUE = 0.0;
-	public static final int LAMBDA_LIST_CAPACITY = 4;
+	public static final int LAMBDA_LIST_CAPACITY = Config.getIntValue("AD_Agent_ListCapacity");
 
-	private static final double EPSILON = 0.08; // Exploration rate
-	private static final double GAMMA = 0.9; // Time Discount factor
-	private static final double ALPHA = 0.7; // learning rate (importance of new information)
-	private static final double LAMBDA = 0.6; // Abschwächungsfaktor
+	private static final double EPSILON = Config.getIntValue("AD_Agent_ExplorationRate") / 100; // Exploration rate
+	private static final double GAMMA = Config.getIntValue("AD_Agent_DiscountRate") / 100; // Time Discount factor
+	private static final double ALPHA = Config.getIntValue("AD_Agent_LearnRate") / 100; // learning rate (importance of new information)
+	private static final double LAMBDA = Config.getIntValue("AD_Agent_Lambda") / 100; // Abschwï¿½chungsfaktor
 
+	private static boolean POLICY_FROZEN = Config.getBoolValue("AD_PolicyFrozen"); // lernen
+	private static boolean EXPLORING_FROZEN = Config.getBoolValue("AD_ExploingFrozen"); // ausprobieren
+	
 	private Random randGenerator = new Random();
 	private int previousActionInt;
 	private int previousStateInt;
 	private int currentActionInt;
 	private int currentStateInt;
 	private Action action;
-	private boolean policyFrozen = false; // lernen
-	private boolean exploringFrozen = false; // ausprobieren
 	public static boolean DEBUG = false;
 	public static boolean LOG = true;
 	private LARCRobot myRobot;
@@ -82,7 +84,7 @@ public class LARCAgent implements IAgent {
 		currentActionInt = egreedy(stateInt);
 		currentStateInt = stateInt;
 
-		if (!policyFrozen) {
+		if (!POLICY_FROZEN) {
 			this.eisgekuehlterSarsaLambda();
 			// this.SARSA_onPolicy();
 			// this.QLearning();
@@ -102,14 +104,14 @@ public class LARCAgent implements IAgent {
 	@Override
 	public void agent_end() {
 
-		if (!policyFrozen) {
+		if (!POLICY_FROZEN) {
 			this.eisgekuehlterSarsaLambda(); // zuweisen des neu gelernten
 			// q-wertes
 			// this.SARSA_onPolicy();
 			// this.QLearning();
 		}
 
-		if (this.myRobot.getNumRounds() - 1 == this.myRobot.getRoundNum() && !policyFrozen) {
+		if (this.myRobot.getNumRounds() - 1 == this.myRobot.getRoundNum() && !POLICY_FROZEN) {
 			try {
 				this.saveValueFunction(LARCAgent.PATH, LARCRobot.VALUE_FUNCTION);
 			} catch (IOException e) {
@@ -204,7 +206,7 @@ public class LARCAgent implements IAgent {
 	 * @return maxIndex
 	 */
 	private int egreedy(int theState) {
-		if (!exploringFrozen) {
+		if (!EXPLORING_FROZEN) {
 			if (randGenerator.nextDouble() <= EPSILON) { // best option is
 															// selected
 															// 1-epsilon of the
