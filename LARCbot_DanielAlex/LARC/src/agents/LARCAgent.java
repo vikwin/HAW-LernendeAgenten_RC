@@ -24,10 +24,10 @@ public class LARCAgent implements IAgent {
 	public static final double INITIAL_Q_VALUE = 0.0;
 	public static final int LAMBDA_LIST_CAPACITY = Config.getIntValue("AD_Agent_ListCapacity");
 
-	private static final double EPSILON = Config.getIntValue("AD_Agent_ExplorationRate") / 100; // Exploration rate
-	private static final double GAMMA = Config.getIntValue("AD_Agent_DiscountRate") / 100; // Time Discount factor
-	private static final double ALPHA = Config.getIntValue("AD_Agent_LearnRate") / 100; // learning rate (importance of new information)
-	private static final double LAMBDA = Config.getIntValue("AD_Agent_Lambda") / 100; // Abschw�chungsfaktor
+	private static final double EPSILON = Config.getIntValue("AD_Agent_ExplorationRate") / 100.0; // Exploration rate
+	private static final double GAMMA = Config.getIntValue("AD_Agent_DiscountRate") / 100.0; // Time Discount factor
+	private static final double ALPHA = Config.getIntValue("AD_Agent_LearnRate") / 100.0; // learning rate (importance of new information)
+	private static final double LAMBDA = Config.getIntValue("AD_Agent_Lambda") / 100.0; // Abschw�chungsfaktor
 
 	private static boolean POLICY_FROZEN = Config.getBoolValue("AD_PolicyFrozen"); // lernen
 	private static boolean EXPLORING_FROZEN = Config.getBoolValue("AD_ExploingFrozen"); // ausprobieren
@@ -260,44 +260,44 @@ public class LARCAgent implements IAgent {
 		outputWriter.close();
 
 		if (LOG) {
-			outputWriter = new PrintWriter(new BufferedWriter(new FileWriter("bulletwallhitcounter.csv", true)));
+			outputWriter = new PrintWriter(new BufferedWriter(new FileWriter("Z:\\win7\\Repos\\HAW-LernendeAgenten_RC\\LARCbot_DanielAlex\\bulletwallhitcounter.csv", true)));
 			outputWriter.println(Double.toString(RewardRobot.bulletwallhitcounter / this.myRobot.getNumRounds()));
 
 			outputWriter.flush();
 			outputWriter.close();
-			outputWriter = new PrintWriter(new BufferedWriter(new FileWriter("winpercentage.csv", true)));
+			outputWriter = new PrintWriter(new BufferedWriter(new FileWriter("Z:\\win7\\Repos\\HAW-LernendeAgenten_RC\\LARCbot_DanielAlex\\winpercentage.csv", true)));
 			outputWriter.println(Double.toString(RewardRobot.roundsWon / this.myRobot.getNumRounds()));
 
 			outputWriter.flush();
 			outputWriter.close();
-			outputWriter = new PrintWriter(new BufferedWriter(new FileWriter("ramHitCounter.csv", true)));
+			outputWriter = new PrintWriter(new BufferedWriter(new FileWriter("Z:\\win7\\Repos\\HAW-LernendeAgenten_RC\\LARCbot_DanielAlex\\ramHitCounter.csv", true)));
 			outputWriter.println(Double.toString(RewardRobot.ramHitCounter / this.myRobot.getNumRounds()));
 
 			outputWriter.flush();
 			outputWriter.close();
-			outputWriter = new PrintWriter(new BufferedWriter(new FileWriter("rammedCounter.csv", true)));
+			outputWriter = new PrintWriter(new BufferedWriter(new FileWriter("Z:\\win7\\Repos\\HAW-LernendeAgenten_RC\\LARCbot_DanielAlex\\rammedCounter.csv", true)));
 			outputWriter.println(Double.toString(RewardRobot.rammedCounter / this.myRobot.getNumRounds()));
 
 			outputWriter.flush();
 			outputWriter.close();
-			outputWriter = new PrintWriter(new BufferedWriter(new FileWriter("selfHitByBulletcounter.csv", true)));
+			outputWriter = new PrintWriter(new BufferedWriter(new FileWriter("Z:\\win7\\Repos\\HAW-LernendeAgenten_RC\\LARCbot_DanielAlex\\selfHitByBulletcounter.csv", true)));
 			outputWriter.println(Double.toString(RewardRobot.selfHitByBulletcounter / this.myRobot.getNumRounds()));
 
 			outputWriter.flush();
 			outputWriter.close();
-			outputWriter = new PrintWriter(new BufferedWriter(new FileWriter("enemyHitCounter.csv", true)));
+			outputWriter = new PrintWriter(new BufferedWriter(new FileWriter("Z:\\win7\\Repos\\HAW-LernendeAgenten_RC\\LARCbot_DanielAlex\\enemyHitCounter.csv", true)));
 			outputWriter.println(Double.toString(RewardRobot.enemyHitCounter / this.myRobot.getNumRounds()));
 
 			outputWriter.flush();
 			outputWriter.close();
-			outputWriter = new PrintWriter(new BufferedWriter(new FileWriter("wallRamCounter.csv", true)));
+			outputWriter = new PrintWriter(new BufferedWriter(new FileWriter("Z:\\win7\\Repos\\HAW-LernendeAgenten_RC\\LARCbot_DanielAlex\\wallRamCounter.csv", true)));
 			outputWriter.println(Double.toString(RewardRobot.wallRamCounter / this.myRobot.getNumRounds()));
 
 			outputWriter.flush();
 			outputWriter.close();
 			
-			outputWriter = new PrintWriter(new BufferedWriter(new FileWriter("totalScore.csv", true)));
-			outputWriter.println(Double.toString(RewardRobot.wallRamCounter / this.myRobot.BATTLE_SCORE));
+			outputWriter = new PrintWriter(new BufferedWriter(new FileWriter("Z:\\win7\\Repos\\HAW-LernendeAgenten_RC\\LARCbot_DanielAlex\\totalScore.csv", true)));
+			outputWriter.println(Double.toString(RewardRobot.wallRamCounter / LARCRobot.BATTLE_SCORE));
 
 			outputWriter.flush();
 			outputWriter.close();

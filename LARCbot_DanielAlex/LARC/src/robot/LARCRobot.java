@@ -20,11 +20,11 @@ import environment.LARCEnvironment;
 
 public class LARCRobot extends RewardRobot {
 	// (8*5)*(1*8*8*3+4*5*8*3) //Ohne unerreichbare states = 53760 States/Actions
-	public static final int NO_OF_STATES = 9 * 8 * 8 * 3; // my position * enemyErection * enemyPosition * enemyDistance
-	public static final int NO_OF_ACTIONS = 8 * 5; // * DriveDirection * GunOffsetFire
+	public static final int NO_OF_STATES = 9; // * 8 * 8 * 3; // my position * enemyErection * enemyPosition * enemyDistance
+	public static final int NO_OF_ACTIONS = 8;// * 5; // * DriveDirection * GunOffsetFire
 	public static final int BULLETPOWER = 500; //
 	public static final long STEP_TIME = 100;
-	public static final int DRAW_OFFSET = 60;
+	public static final int DRAW_OFFSET = 50;
 	public static double[][] VALUE_FUNCTION = new double[NO_OF_ACTIONS][NO_OF_STATES];
 	public static int BATTLE_SCORE;
 	public static boolean STATE_REPEAT;
@@ -48,9 +48,10 @@ public class LARCRobot extends RewardRobot {
 	private double currentDistance;
 	private double currentEnemyDistance;
 	private double currentHeading;
-	private volatile double gunTurnToEnemy;
 	public int wallHitCounter;
 	private boolean dontAdjustGun;
+	private double gunTurnToEnemy;
+	private static String[] HIMMELSRICHTUNGEN = new String[]{"N","NO","O","SO","S","SW","W","NW"};
 
 	public LARCRobot() {
 		this.enemyX = 0;
@@ -100,9 +101,9 @@ public class LARCRobot extends RewardRobot {
 		this.dontAdjustGun = true;
 		// Gun Zielen:
 		// setTurnGunRight(this.angleToEnemy + instructions[4]);
-		if (getGunTurnRemaining() == 0) {
-			this.setTurnGunRight(instructions[3]);
-		}
+		// if (getGunTurnRemaining() == 0) {
+		// this.setTurnGunRight(instructions[3]);
+		// }
 
 		// Panzer Fahren!:
 		backOrAhead(instructions[1], instructions[0]);
@@ -292,7 +293,7 @@ public class LARCRobot extends RewardRobot {
 		this.agent.agent_cleanup();
 	}
 
-	// MID, LEFTEDGE, RIGHTEDGE, TOPEDGE, BOTTOMEDGE;
+	// MID, LEFTEDGE, RIGHTEDGE, TOPEDGE, BOTTOMEDGE, NEXTLEFTEDGE, NEXTRIGHTEDGE, NEXTTOPEDGE, NEXTBOTTOMEDGE;
 	@Override
 	public void onPaint(Graphics2D g) {
 		// Set the paint color to red
@@ -315,26 +316,47 @@ public class LARCRobot extends RewardRobot {
 		g.setColor(java.awt.Color.GREEN);
 		// MID:
 		for (int j = 0; j < VALUE_FUNCTION.length; j++) {
-			g.drawString("Q: " + round(LARCRobot.VALUE_FUNCTION[j][0]), 350, 80 + DRAW_OFFSET * j);
+			g.drawString(HIMMELSRICHTUNGEN[j] +" " + round(LARCRobot.VALUE_FUNCTION[j][0]), 350, 200 + 30 * j);
 		}
+
 		// LEFT
 		for (int j = 0; j < VALUE_FUNCTION.length; j++) {
-			g.drawString("Q: " + round(LARCRobot.VALUE_FUNCTION[j][1]), 10, DRAW_OFFSET * (j + 1));
+			g.drawString(HIMMELSRICHTUNGEN[j] +" " + round(LARCRobot.VALUE_FUNCTION[j][1]), 10, 70 + DRAW_OFFSET * (j + 1));
 		}
 
 		// RIGHT
 		for (int j = 0; j < VALUE_FUNCTION.length; j++) {
-			g.drawString("Q: " + round(LARCRobot.VALUE_FUNCTION[j][2]), 760, DRAW_OFFSET * (j + 1));
+			g.drawString(HIMMELSRICHTUNGEN[j] +" " + round(LARCRobot.VALUE_FUNCTION[j][2]), 750, 70 + DRAW_OFFSET * (j + 1));
 		}
 
 		// TOP
 		for (int j = 0; j < VALUE_FUNCTION.length; j++) {
-			g.drawString("Q: " + round(LARCRobot.VALUE_FUNCTION[j][3]), DRAW_OFFSET * (j + 1), 590);
+			g.drawString(HIMMELSRICHTUNGEN[j] +" " + round(LARCRobot.VALUE_FUNCTION[j][3]), 150 + DRAW_OFFSET * (j + 1), 590);
 		}
 
 		// BOTTOM
 		for (int j = 0; j < VALUE_FUNCTION.length; j++) {
-			g.drawString("Q: " + round(LARCRobot.VALUE_FUNCTION[j][4]), DRAW_OFFSET * (j + 1), 10);
+			g.drawString(HIMMELSRICHTUNGEN[j] +" " + round(LARCRobot.VALUE_FUNCTION[j][4]), 150 + DRAW_OFFSET * (j + 1), 10);
+		}
+
+		// MIDLEFT
+		for (int j = 0; j < VALUE_FUNCTION.length; j++) {
+			g.drawString(HIMMELSRICHTUNGEN[j] +" " + round(LARCRobot.VALUE_FUNCTION[j][5]), 70, 70 + DRAW_OFFSET * (j + 1));
+		}
+
+		// MIDRIGHT
+		for (int j = 0; j < VALUE_FUNCTION.length; j++) {
+			g.drawString(HIMMELSRICHTUNGEN[j] +" " + round(LARCRobot.VALUE_FUNCTION[j][6]), 690, 70 + DRAW_OFFSET * (j + 1));
+		}
+
+		// MIDTOP
+		for (int j = 0; j < VALUE_FUNCTION.length; j++) {
+			g.drawString(HIMMELSRICHTUNGEN[j] +" " + round(LARCRobot.VALUE_FUNCTION[j][7]), 150 + DRAW_OFFSET * (j + 1), 530);
+		}
+
+		// MIDBOTTOM
+		for (int j = 0; j < VALUE_FUNCTION.length; j++) {
+			g.drawString(HIMMELSRICHTUNGEN[j] +" " + round(LARCRobot.VALUE_FUNCTION[j][8]), 150 + DRAW_OFFSET * (j + 1), 70);
 		}
 
 	}

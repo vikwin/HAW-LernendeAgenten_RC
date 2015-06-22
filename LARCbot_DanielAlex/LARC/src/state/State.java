@@ -36,11 +36,11 @@ public class State {
 	// public int gunPosition;
 
 	public int getStateID() {
-		int state = this.edgeState.ordinal() 
-				+ this.enemyPosition.ordinal() * EdgeState.values().length
-				+ this.enemyDirection.ordinal() * EdgeState.values().length * EnemyPosition.values().length
-				+ this.enemyDistance.ordinal() * EdgeState.values().length * EnemyPosition.values().length
-				* EnemyPosition.values().length;
+		int state = this.edgeState.ordinal(); 
+//				+ this.enemyPosition.ordinal() * EdgeState.values().length
+//				+ this.enemyDirection.ordinal() * EdgeState.values().length * EnemyPosition.values().length
+//				+ this.enemyDistance.ordinal() * EdgeState.values().length * EnemyPosition.values().length
+//				* EnemyPosition.values().length;
 		return state;
 	}
 

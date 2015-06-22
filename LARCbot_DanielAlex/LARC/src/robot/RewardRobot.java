@@ -9,6 +9,7 @@ import robocode.HitByBulletEvent;
 import robocode.HitRobotEvent;
 import robocode.HitWallEvent;
 import robocode.RobotDeathEvent;
+import utility.Config;
 
 /**
  * Der RewardRobot ist eine abstrakte Robot Klasse. Dieser wertet Events aus und erstellt aus ihnen Belohnungen oder Bestrafungen.
@@ -33,24 +34,22 @@ public abstract class RewardRobot extends AdvancedRobot {
 	public static double wallRamCounter;
 	public static double roundsWon;
 
-
 	static {
 		// Kugelevents
-		hitByBullet = -1;
-		bulletHitBullet = 0;
-		bulletHitEnemy = 3;
-		bulletHitWall = -3;
-		multiplyBulletPower = false;
+		hitByBullet = Config.getDoubleValue("AD_Reward_HitByBullet");
+		bulletHitBullet = Config.getDoubleValue("AD_Reward_BulletHitBullet");
+		bulletHitEnemy = Config.getDoubleValue("AD_Reward_BulletHitEnemy");
+		bulletHitWall = Config.getDoubleValue("AD_Reward_BulletHitWall");
+		multiplyBulletPower = Config.getBoolValue("AD_Reward_MultBulletPower");
 
 		// Rammen von Objekten
-		hitByEnemy = -1;
-		hitRobot = 1;
-		hitWall = -3;
-		// Add reward for staying in mid
+		hitByEnemy = Config.getDoubleValue("AD_Reward_HitByEnemy");
+		hitRobot = Config.getDoubleValue("AD_Reward_HitRobot");
+		hitWall = Config.getDoubleValue("AD_Reward_HitWall");
 
-		// Rundenende
-		winning = 1;
-		loosing = -1;
+		// Add reward for staying in mid
+		winning = Config.getDoubleValue("AD_Reward_Winning");
+		loosing = Config.getDoubleValue("AD_Reward_Loosing");
 	}
 
 	private double reward;
