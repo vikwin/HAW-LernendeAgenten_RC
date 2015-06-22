@@ -1494,19 +1494,19 @@ public class ConfigurationWindow {
 		ArrayList<String> classpath = new ArrayList<String>();
 
 		String herePath = new File("").getAbsolutePath();
-		ArrayList<File> eclipseProjects = findEclipseProjectDir(new File(
-				herePath).getParentFile());
+//		ArrayList<File> eclipseProjects = findEclipseProjectDir(new File(
+//				herePath).getParentFile());
 
 		classpath.add(rHome + "\\libs\\robocode.jar");
-		 for (File dir : eclipseProjects) {
-			 File libs = new File(dir.getAbsolutePath() + "\\libs");
+//		for (File dir : eclipseProjects) {
+			 File libs = new File(herePath + "\\libs");
 			 if (libs.exists() && libs.isDirectory()) {
 				 for (File f : libs.listFiles()) {
 					 classpath.add(f.getAbsolutePath());
 				 }
 			 }
-		 }
-		 classpath.add(new File("").getAbsolutePath());
+//		 }
+//		 classpath.add(new File("").getAbsolutePath());
 
 		Config.save();
 
