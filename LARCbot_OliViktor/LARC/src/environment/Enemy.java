@@ -21,7 +21,7 @@ import utils.WaveSurf;
  */
 public class Enemy {
 
-	private static final boolean PAINT = true;
+	private static final boolean PAINT = false;
 	private AdvancedRobot selfBot;
 	private String name;
 	private Vector2D position;
